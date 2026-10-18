@@ -13,7 +13,7 @@
 - Rust owns filesystem access, conflict detection, history, workspace search, persistence and export. TypeScript owns the local editing interface.
 - Keep UTF-8 Markdown the source of truth. Never silently drop unsupported syntax, discard unsaved edits, overwrite a changed disk version, or traverse outside an opened workspace.
 - No telemetry, cloud account, external font CDN, or automatic network upload. Network-backed content requires explicit user action.
-- Bind only to loopback; authenticate filesystem endpoints with a per-run capability token. Reject cross-origin requests. Never log document contents or tokens.
+- Bind only to loopback; authenticate filesystem endpoints with a per-run capability token. Reject cross-origin requests. Never log document contents or persist tokens; the startup console may show the capability URL needed to open the local editor.
 - Use atomic replacement for saves and retain recoverable history. Surface errors visibly.
 - Keep core logic separate from HTTP and UI; extension points must be documented.
 - Meaningful changes require relevant tests. Run cargo fmt, cargo test, cargo clippy -- -D warnings, npm run check, npm test, npm run build before delivery.

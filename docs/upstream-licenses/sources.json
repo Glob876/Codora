@@ -1,0 +1,22 @@
+[
+  {
+    "name": "marked-alert",
+    "version": "2.1.2",
+    "url": "https://raw.githubusercontent.com/bent10/marked-extensions/3024767e0af3e143efce4e22e290eefac37a38b6/license"
+  },
+  {
+    "name": "marked-footnote",
+    "version": "1.4.0",
+    "url": "https://raw.githubusercontent.com/bent10/marked-extensions/faab750f00af4788397948286fb8f7fe0c929a7e/license"
+  },
+  {
+    "name": "remark-math",
+    "version": "6.0.0",
+    "url": "https://raw.githubusercontent.com/remarkjs/remark-math/d5d0660b150810a535bbb07eac6cc96a4510aa24/license"
+  },
+  {
+    "name": "saxes",
+    "version": "6.0.0",
+    "url": "https://raw.githubusercontent.com/lddubeau/saxes/211fa0ebec9b628affc09219199639887174bfc3/LICENSE"
+  }
+]

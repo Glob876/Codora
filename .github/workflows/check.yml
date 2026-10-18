@@ -1,0 +1,17 @@
+name: Checks
+on: [push, pull_request]
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Rust toolchain
+        run: rustup toolchain install nightly-2026-04-11 --profile minimal --component rustfmt --component clippy
+      - run: npm ci --prefix web
+      - run: ./scripts/check.sh
+      - run: cargo build --release --locked
