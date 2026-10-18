@@ -52,7 +52,7 @@ export const defaults: Settings = {
   focus: false,
   typewriter: false,
   hidden: false,
-  allFiles: false,
+  allFiles: true,
   sort: "name",
   customCss: "",
   recent: [],

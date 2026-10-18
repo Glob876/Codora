@@ -1,12 +1,12 @@
+use codora::core::{Draft, Save, Search, Workspace};
 use std::fs;
 use tempfile::tempdir;
-use typoha::core::{Draft, Save, Search, Workspace};
 fn save(
     w: &Workspace,
     path: &str,
     content: &str,
     rev: Option<String>,
-) -> typoha::core::Result<typoha::core::Document> {
+) -> codora::core::Result<codora::core::Document> {
     w.save(Save {
         path: path.into(),
         content: content.into(),
@@ -167,7 +167,7 @@ fn nested_history_symlink_cannot_redirect_snapshot_writes() {
     let outside = tempdir().unwrap();
     let w = Workspace::open(directory.path()).unwrap();
     let d = save(&w, "a.md", "original", None).unwrap();
-    let hash = typoha::core::revision(b"a.md");
+    let hash = codora::core::revision(b"a.md");
     symlink(
         outside.path(),
         directory.path().join(".typoha/history").join(hash),
@@ -176,4 +176,41 @@ fn nested_history_symlink_cannot_redirect_snapshot_writes() {
     assert!(save(&w, "a.md", "changed", Some(d.revision)).is_err());
     assert_eq!(w.read("a.md").unwrap().content, "original");
     assert!(fs::read_dir(outside.path()).unwrap().next().is_none());
+}
+
+#[test]
+fn source_code_is_listed_searched_and_saved_without_normalization() {
+    let root = tempfile::tempdir().unwrap();
+    let workspace = Workspace::open(root.path()).unwrap();
+    let source = "const user = {name: 'Ada'};\n\tconsole.log(user.name);\n";
+    std::fs::write(root.path().join("code.ts"), source).unwrap();
+    std::fs::create_dir(root.path().join("target")).unwrap();
+    std::fs::write(root.path().join("target/generated.rs"), "generated").unwrap();
+    let entries = workspace.list(false, false).unwrap();
+    assert!(entries.iter().any(|e| e.path == "code.ts"));
+    assert!(!entries.iter().any(|e| e.path.starts_with("target")));
+    let document = workspace.read("code.ts").unwrap();
+    assert_eq!(document.content, source);
+    let changed = source.replace("Ada", "Grace");
+    workspace
+        .save(codora::core::Save {
+            path: "code.ts".into(),
+            content: changed.clone(),
+            expected_revision: Some(document.revision),
+        })
+        .unwrap();
+    assert_eq!(
+        std::fs::read_to_string(root.path().join("code.ts")).unwrap(),
+        changed
+    );
+    assert_eq!(workspace.history("code.ts").unwrap().len(), 1);
+    let hits = workspace
+        .search(&codora::core::Search {
+            query: "Grace".into(),
+            regex: false,
+            case_sensitive: false,
+            whole_word: false,
+        })
+        .unwrap();
+    assert_eq!(hits[0].path, "code.ts");
 }

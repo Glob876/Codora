@@ -8,17 +8,17 @@ export class ApiError extends Error {
 }
 const fragment = location.hash.slice(1);
 if (/^[0-9a-f]{64}$/.test(fragment)) {
-  sessionStorage.setItem("typoha-token", fragment);
+  sessionStorage.setItem("codora-token", fragment);
   history.replaceState(null, "", location.pathname);
 }
-export const token = sessionStorage.getItem("typoha-token") || "";
+export const token = sessionStorage.getItem("codora-token") || "";
 export let workspaceScope = "";
 export async function api<T = any>(path: string, data?: unknown): Promise<T> {
   const response = await fetch(`/api/${path}`, {
     method: data === undefined ? "GET" : "POST",
     headers: {
-      "x-typoha-token": token,
-      ...(workspaceScope ? { "x-typoha-workspace": workspaceScope } : {}),
+      "x-codora-token": token,
+      ...(workspaceScope ? { "x-codora-workspace": workspaceScope } : {}),
       ...(data !== undefined ? { "content-type": "application/json" } : {}),
     },
     body: data === undefined ? undefined : JSON.stringify(data),

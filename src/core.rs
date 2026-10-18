@@ -69,6 +69,8 @@ pub fn atomic_write(path: &Path, content: &[u8]) -> Result<()> {
 #[derive(Clone, Debug)]
 pub struct Workspace {
     pub root: PathBuf,
+    session_file: Option<PathBuf>,
+    pub restored: bool,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Entry {
@@ -128,12 +130,30 @@ impl Workspace {
         if !root.is_dir() {
             return Err(bad("Выберите папку"));
         }
-        let workspace = Self { root };
+        let workspace = Self {
+            root,
+            session_file: None,
+            restored: false,
+        };
         // Never follow an attacker-created metadata-directory symlink.
         workspace.internal("history")?;
         workspace.internal("drafts")?;
         workspace.internal("trash")?;
         Ok(workspace)
+    }
+    pub fn with_session(mut self, path: PathBuf) -> Result<Self> {
+        crate::session::remember(&path, &self.root)?;
+        self.session_file = Some(path);
+        Ok(self)
+    }
+    pub fn change_root(&mut self, root: impl AsRef<Path>) -> Result<()> {
+        let mut next = Self::open(root)?;
+        if let Some(path) = &self.session_file {
+            crate::session::remember(path, &next.root)?;
+            next.session_file = Some(path.clone());
+        }
+        *self = next;
+        Ok(())
     }
     fn relative(path: &str) -> Result<&Path> {
         let p = Path::new(path);
@@ -210,6 +230,9 @@ impl Workspace {
                     || (name != ".typoha"
                         && name != ".git"
                         && name != "node_modules"
+                        && name != "target"
+                        && name != "dist"
+                        && name != "__pycache__"
                         && (hidden || !name.starts_with('.')))
             });
         for e in iter {
@@ -218,7 +241,7 @@ impl Workspace {
                 continue;
             }
             let dir = e.file_type().is_dir();
-            if !dir && !all && !is_markdown(e.path()) {
+            if !dir && !all && !is_text_document(e.path()) {
                 continue;
             }
             let m = e.metadata().map_err(|e| Error(500, e.to_string()))?;
@@ -485,4 +508,33 @@ pub fn is_markdown(path: &Path) -> bool {
     path.extension().and_then(|s| s.to_str()).is_some_and(|s| {
         ["md", "markdown", "mdown", "mkd", "txt"].contains(&s.to_lowercase().as_str())
     })
+}
+
+/// Source files shown/searched even when the user hides binary/unsupported assets.
+pub fn is_text_document(path: &Path) -> bool {
+    is_markdown(path)
+        || path.extension().and_then(|s| s.to_str()).is_some_and(|s| {
+            [
+                "rs", "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "py", "pyw", "go",
+                "java", "c", "h", "cc", "cpp", "hpp", "cs", "fs", "html", "htm", "css", "scss",
+                "less", "json", "jsonc", "yaml", "yml", "toml", "xml", "svg", "sh", "bash", "zsh",
+                "sql", "rb", "php", "lua", "swift", "kt", "kts", "dart", "r", "jl", "ex", "exs",
+                "erl", "hs", "clj", "vue", "svelte", "ini", "cfg", "conf",
+            ]
+            .contains(&s.to_lowercase().as_str())
+        })
+        || path
+            .file_name()
+            .and_then(|s| s.to_str())
+            .is_some_and(|name| {
+                [
+                    "Dockerfile",
+                    "Makefile",
+                    "CMakeLists.txt",
+                    "README",
+                    "LICENSE",
+                    ".gitignore",
+                ]
+                .contains(&name)
+            })
 }

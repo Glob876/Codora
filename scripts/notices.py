@@ -24,7 +24,7 @@ missing = []
 manifest_overrides = {'khroma': 'MIT'}
 
 def collect(ecosystem, name, version, license_expression, folder, source, dev=False):
-    if name == 'typoha':
+    if name == 'codora':
         return
     key = re.sub(r'[^a-zA-Z0-9_.-]', '_', f'{ecosystem}-{name}-{version}')
     files = []

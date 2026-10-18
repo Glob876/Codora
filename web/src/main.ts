@@ -34,8 +34,13 @@ import {
 } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { Plugin, Selection } from "@milkdown/kit/prose/state";
-import { markdown } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
+import {
+  codeExtensions,
+  isMarkdown,
+  languageName,
+  copyPath,
+} from "./code-editor";
 import { basicSetup } from "codemirror";
 import { openSearchPanel, searchKeymap } from "@codemirror/search";
 import { undo, redo } from "@codemirror/commands";
@@ -114,7 +119,7 @@ document.body.classList.add("welcome-active", "hide-sidebar");
 $("#welcome").hidden = false;
 setLanguage(settings.language);
 observeUi(app);
-if (window.typohaDesktop) {
+if (window.codoraDesktop) {
   document.body.classList.add("desktop-window");
   $("#window-controls").hidden = false;
   $("#window-controls").addEventListener("click", (event) => {
@@ -122,7 +127,7 @@ if (window.typohaDesktop) {
       "[data-window]",
     )?.dataset.window;
     if (control === "minimize" || control === "maximize" || control === "close")
-      fire(window.typohaDesktop!.windowControl(control));
+      fire(window.codoraDesktop!.windowControl(control));
   });
 }
 
@@ -340,9 +345,9 @@ function setSettings() {
 }
 let nativeLanguage = "";
 function applySettings() {
-  if (window.typohaDesktop && nativeLanguage !== settings.language) {
+  if (window.codoraDesktop && nativeLanguage !== settings.language) {
     nativeLanguage = settings.language;
-    fire(window.typohaDesktop.setLanguage(settings.language));
+    fire(window.codoraDesktop.setLanguage(settings.language));
   }
   setLanguage(settings.language);
   translateUi(app);
@@ -410,7 +415,7 @@ function applySettings() {
   $("#spellcheck-toggle").classList.toggle("active", settings.spellcheck);
   $("#editor")
     .querySelectorAll<HTMLElement>("[contenteditable]")
-    .forEach((e) => (e.spellcheck = settings.spellcheck));
+    .forEach((e) => (e.spellcheck = isMarkdown(path) && settings.spellcheck));
   updateStatus();
 }
 function updateStatus() {
@@ -418,8 +423,8 @@ function updateStatus() {
   const name = path?.split("/").pop() || tr("Без названия");
   $("#document-name").textContent = name;
   $("#document-name").title = path || name;
-  $("#window-title").textContent = `${dirty ? "● " : ""}${name} — Typoha`;
-  document.title = `${dirty ? "● " : ""}${name} — Typoha`;
+  $("#window-title").textContent = `${dirty ? "● " : ""}${name} — Codora`;
+  document.title = `${dirty ? "● " : ""}${name} — Codora`;
   $("#save-indicator").textContent = saving
     ? "Сохранение…"
     : dirty
@@ -428,6 +433,14 @@ function updateStatus() {
         ? "Сохранено"
         : "Новый документ";
   $("#save-indicator").classList.toggle("unsaved", dirty);
+  $("#source-toggle").textContent = languageName(path);
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '[data-mode="rich"], [data-mode="preview"]',
+    )
+    .forEach((button) => {
+      button.disabled = !isMarkdown(path);
+    });
   const st = statistics(content);
   $("#statistics").textContent =
     `${st.words.toLocaleString(settings.language)} ${tr("слов")}`;
@@ -495,7 +508,8 @@ async function mountEditor(nextMode = mode) {
     void holder.offsetWidth;
     holder.classList.add("editor-enter");
     holder.replaceChildren();
-    mode = nextMode;
+    mode = isMarkdown(path) ? nextMode : "source";
+    document.body.classList.toggle("code-document", !isMarkdown(path));
     const reason = richCompatibility(content);
     const hint = $("#compatibility");
     hint.hidden = !(reason && mode === "rich");
@@ -514,14 +528,14 @@ async function mountEditor(nextMode = mode) {
             ...(settings.lineNumbers
               ? []
               : [EditorView.theme({ ".cm-lineNumbers": { display: "none" } })]),
-            markdown({ codeLanguages: languages }),
+            ...(await codeExtensions(path, settings.tabSize)),
             keymap.of(searchKeymap),
             ...(settings.wordWrap ? [EditorView.lineWrapping] : []),
             drawSelection(),
             highlightActiveLine(),
             EditorView.contentAttributes.of({
-              spellcheck: String(settings.spellcheck),
-              "aria-label": tr("Исходный Markdown"),
+              spellcheck: String(isMarkdown(path) && settings.spellcheck),
+              "aria-label": languageName(path),
             }),
             EditorView.updateListener.of((update) => {
               if (update.docChanged) changed(update.state.doc.toString());
@@ -657,9 +671,7 @@ async function save(asNew: boolean) {
     destination = await input(
       "Сохранить документ",
       "Путь относительно открытой папки",
-      asNew && path
-        ? path.replace(/(\.[^.]+)?$/, "-копия.md")
-        : path || "Новая заметка.md",
+      asNew && path ? copyPath(path) : path || "Новая заметка.md",
     );
     if (!destination) return;
   }
@@ -684,6 +696,7 @@ async function save(asNew: boolean) {
       } else await persistDraft();
       remember(path);
     }
+    if (path !== previousPath) await mountEditor();
     await refreshFiles();
   } catch (e) {
     await persistDraft().catch(() => {});
@@ -1052,7 +1065,7 @@ async function exportDialog() {
     `<p>Создайте копию для чтения, публикации или другого редактора.</p><div class="export-grid">${[
       ["md", "Markdown"],
       ["html", "HTML"],
-      ["pdf", window.typohaDesktop ? "PDF" : "PDF / печать"],
+      ["pdf", window.codoraDesktop ? "PDF" : "PDF / печать"],
       ["png", "Изображение PNG"],
       ["docx", "Word · Pandoc"],
       ["odt", "OpenDocument · Pandoc"],
@@ -1068,7 +1081,7 @@ async function exportDialog() {
       )
       .join(
         "",
-      )}</div><p class="dialog-hint">Pandoc — внешний конвертер. ${window.typohaDesktop ? "PDF сохраняется отдельным файлом." : "PDF создаётся через диалог печати браузера."}</p>`,
+      )}</div><p class="dialog-hint">Pandoc — внешний конвертер. ${window.codoraDesktop ? "PDF сохраняется отдельным файлом." : "PDF создаётся через диалог печати браузера."}</p>`,
   );
   d.querySelectorAll<HTMLElement>("[data-export]").forEach(
     (b) =>
@@ -1142,8 +1155,8 @@ async function exportFile(format: string) {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-typoha-token": token,
-      "x-typoha-workspace": workspaceScope,
+      "x-codora-token": token,
+      "x-codora-workspace": workspaceScope,
     },
     body: JSON.stringify({ content, format }),
   });
@@ -1160,15 +1173,15 @@ async function printDocument(pdfName?: string) {
   area.append(article);
   $("#print-area")?.remove();
   document.body.append(area);
-  if (window.typohaDesktop) {
+  if (window.codoraDesktop) {
     if (pdfName) {
-      const bytes = await window.typohaDesktop.pdf();
+      const bytes = await window.codoraDesktop.pdf();
       download(
         new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
         `${pdfName}.pdf`,
       );
     } else {
-      await window.typohaDesktop.print();
+      await window.codoraDesktop.print();
     }
   } else {
     window.print();
@@ -1239,6 +1252,7 @@ async function showDrafts() {
           revision = null;
           lastSaved = "";
           draftId = crypto.randomUUID();
+          mode = "source";
           await setContent(draft.content);
         })(),
       );
@@ -1300,6 +1314,35 @@ async function run(
     ["new", "new-tab", "write", "workspace", "open", "close-tab"].includes(id)
   )
     return;
+  if (
+    !isMarkdown(path) &&
+    [
+      "bold",
+      "italic",
+      "strike",
+      "inline-code",
+      "heading",
+      "paragraph",
+      "bullet",
+      "ordered",
+      "quote",
+      "task",
+      "table",
+      "code",
+      "math",
+      "diagram",
+      "link",
+      "image",
+      "toc",
+      "rule",
+      "highlight",
+      "footnote",
+      "yaml",
+    ].includes(id)
+  ) {
+    toast("Форматирование Markdown доступно в файлах Markdown");
+    return;
+  }
   const target = targetPath || path;
   if (id.startsWith("extension:")) {
     const [, extensionId, commandId] = id.split(":");
@@ -1336,8 +1379,8 @@ async function run(
       break;
     case "workspace":
       {
-        const destination = window.typohaDesktop
-          ? await window.typohaDesktop.chooseFolder()
+        const destination = window.codoraDesktop
+          ? await window.codoraDesktop.chooseFolder()
           : await input("Открыть папку", "Полный путь к папке", root);
         if (destination) {
           if (!(await leaveWorkspace())) return;
@@ -1368,8 +1411,8 @@ async function run(
       }
       break;
     case "open":
-      if (window.typohaDesktop) {
-        const file = await window.typohaDesktop.chooseFile();
+      if (window.codoraDesktop) {
+        const file = await window.codoraDesktop.chooseFile();
         if (!file) return;
         if (file.root !== root) {
           if (!(await leaveWorkspace())) return;
@@ -1423,7 +1466,7 @@ async function run(
         const destination = await input(
           "Создать копию",
           "Новый относительный путь",
-          target.replace(/(\.[^.]+)?$/, "-копия.md"),
+          copyPath(target),
         );
         if (destination) {
           await api("document", {
@@ -1478,7 +1521,7 @@ async function run(
             revision = (
               await api<Document>(`document?path=${encodeURIComponent(path!)}`)
             ).revision;
-            updateStatus();
+            await mountEditor();
           }
           await refreshFiles();
         }
@@ -1751,8 +1794,8 @@ async function run(
       break;
     case "about":
       dialogShell(
-        "Typoha",
-        `<div class="about-brand"><span class="brand-glyph">t</span><h3>Место для ваших мыслей</h3></div><p>Независимый Markdown-редактор. Версия 0.1.0.</p><p>Rust · Milkdown · CodeMirror<br>Локальные файлы. Открытые стандарты. Собственный интерфейс.</p><p>Реализация не связана с разработчиками других редакторов. Полный функциональный паритет ещё не достигнут; перечень ограничений находится в docs/parity.md.</p><p class="dialog-hint">© 2026 Typoha contributors · Glob876. GNU AGPL v3 или более поздняя. Без гарантий. Разрешены изменения и распространение на условиях лицензии. <a href="https://github.com/Glob876/Typoha/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Лицензия</a> · <a href="https://github.com/Glob876/Typoha" target="_blank" rel="noopener noreferrer">Исходный код</a>. Лицензии библиотек: THIRD_PARTY_NOTICES.md.</p>`,
+        "Codora",
+        `<div class="about-brand"><span class="brand-glyph">c</span><h3>Место для ваших мыслей</h3></div><p>Независимый редактор кода и Markdown. Версия 0.1.0.</p><p>Rust · Milkdown · CodeMirror<br>Локальные файлы. Открытые стандарты. Собственный интерфейс.</p><p>Реализация не связана с разработчиками других редакторов. Полный функциональный паритет ещё не достигнут; перечень ограничений находится в docs/parity.md.</p><p class="dialog-hint">© 2026 Codora contributors · Glob876. GNU AGPL v3 или более поздняя. Без гарантий. Разрешены изменения и распространение на условиях лицензии. <a href="https://github.com/Glob876/Codora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Лицензия</a> · <a href="https://github.com/Glob876/Codora" target="_blank" rel="noopener noreferrer">Исходный код</a>. Лицензии библиотек: THIRD_PARTY_NOTICES.md.</p>`,
       );
       break;
     case "help":
@@ -2002,7 +2045,11 @@ setInterval(() => {
 async function boot() {
   applySettings();
   try {
-    const workspace = await api<{ root: string; name: string }>("workspace");
+    const workspace = await api<{
+      root: string;
+      name: string;
+      restored: boolean;
+    }>("workspace");
     root = workspace.root;
     settings = {
       ...settings,
@@ -2015,9 +2062,10 @@ async function boot() {
         ? workspace.name
         : root.split("/").pop() || root;
     $("#workspace-name").title = root;
+    welcome = !workspace.restored;
     activeTab = crypto.randomUUID();
     tabs.push(snapshotTab());
-    document.body.classList.add("hide-sidebar");
+    document.body.classList.toggle("hide-sidebar", !workspace.restored);
     await refreshFiles();
     await mountEditor();
     const drafts = await api<Draft[]>("drafts");
@@ -2032,7 +2080,7 @@ async function boot() {
     renderTabs();
     report(e);
     $("#editor").innerHTML =
-      '<div class="connection-error"><h1>Откройте ссылку из Typoha</h1><p>Запустите приложение и используйте адрес из терминала. Он содержит локальный ключ доступа.</p></div>';
+      '<div class="connection-error"><h1>Откройте ссылку из Codora</h1><p>Запустите приложение и используйте адрес из терминала. Он содержит локальный ключ доступа.</p></div>';
   }
 }
 fire(boot());

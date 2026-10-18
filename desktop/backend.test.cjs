@@ -47,7 +47,7 @@ test("startup failures are visible and do not disclose server output", async () 
   await backend.stop();
 });
 test("missing executable produces a usable startup error", async () => {
-  const backend = startBackend("/nonexistent/typoha-core", []);
-  await assert.rejects(backend.ready, /Пересоберите Typoha/);
+  const backend = startBackend("/nonexistent/codora-core", []);
+  await assert.rejects(backend.ready, /Пересоберите Codora/);
   await backend.stop();
 });

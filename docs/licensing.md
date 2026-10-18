@@ -2,12 +2,12 @@
 
 ## Current license / Текущая лицензия
 
-Original Typoha material is offered under GNU Affero General Public License
+Original Codora material is offered under GNU Affero General Public License
 version 3 or (at your option) any later version: `AGPL-3.0-or-later`.
 The full terms are in [LICENSE](../LICENSE); attribution is in [COPYRIGHT](../COPYRIGHT).
 No additional custom restrictions are added.
 
-Оригинальные материалы Typoha распространяются под GNU AGPL версии 3
+Оригинальные материалы Codora распространяются под GNU AGPL версии 3
 или, на ваш выбор, более поздней. Дополнительных собственных ограничений нет.
 
 Commercial use, modification and redistribution are allowed. Preserve copyright
@@ -79,7 +79,7 @@ every component in that upstream HTML or discharge source/relinking obligations.
 Before public desktop distribution, review those obligations (including shared
 FFmpeg libraries) against the exact Electron release sources:
 https://github.com/electron/electron/releases/tag/v44.9.0 .
-The existing Typoha source archive alone is not the corresponding source for
+The existing Codora source archive alone is not the corresponding source for
 Electron/Chromium or its dictionaries.
 
 Exception: build-time `@electron-internal/extract-zip` 1.0.5 declares BSD-2-Clause

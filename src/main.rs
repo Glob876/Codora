@@ -1,21 +1,33 @@
+use codora::{
+    core::Workspace,
+    server::{AppState, router},
+};
 use std::{
     io::{Read, Write},
     path::PathBuf,
     sync::{Arc, Mutex},
 };
-use typoha::{
-    core::Workspace,
-    server::{AppState, router},
-};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     let mut root = None;
+    let mut session_file = codora::session::default_path();
+    let mut fallback = None;
     let mut port = 0u16;
     let mut open = true;
     let mut desktop = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
+            "--session-file" => {
+                session_file = Some(PathBuf::from(
+                    args.next().ok_or("--session-file требует путь")?,
+                ))
+            }
+            "--fallback-workspace" => {
+                fallback = Some(PathBuf::from(
+                    args.next().ok_or("--fallback-workspace требует путь")?,
+                ))
+            }
             "--port" => port = args.next().ok_or("--port требует номер")?.parse()?,
             "--no-open" => open = false,
             "--desktop" => {
@@ -24,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             "--help" | "-h" => {
                 println!(
-                    "Typoha {}\nИспользование: typoha [папка] [--port 4321] [--no-open]\nСервер доступен только через 127.0.0.1, файлы остаются на компьютере.",
+                    "Codora {}\nИспользование: codora [папка] [--port 4321] [--no-open]\nСервер доступен только через 127.0.0.1, файлы остаются на компьютере.",
                     env!("CARGO_PKG_VERSION")
                 );
                 return Ok(());
@@ -33,8 +45,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             _ => root = Some(PathBuf::from(arg)),
         }
     }
-    let root = root.unwrap_or(std::env::current_dir()?);
-    let workspace = Workspace::open(&root).map_err(|e| e.1)?;
+    let remembered = if root.is_none() {
+        session_file
+            .as_deref()
+            .map(codora::session::restore)
+            .transpose()
+            .map_err(|e| e.1)?
+            .flatten()
+    } else {
+        None
+    };
+    let restored = remembered.is_some();
+    let root = root
+        .or(remembered)
+        .or(fallback)
+        .unwrap_or(std::env::current_dir()?);
+    let mut workspace = Workspace::open(&root).map_err(|e| e.1)?;
+    if let Some(path) = session_file {
+        workspace = workspace.with_session(path).map_err(|e| e.1)?;
+    }
+    workspace.restored = restored;
     let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await?;
     let address = listener.local_addr()?;
     let origin = format!("http://{address}");
@@ -50,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::io::stdout().flush()?;
     } else {
         println!(
-            "Typoha {} — {}\nОткройте локально: {url}\nCtrl+C — остановить. Ссылка даёт доступ к открытой папке: не передавайте её другим.",
+            "Codora {} — {}\nОткройте локально: {url}\nCtrl+C — остановить. Ссылка даёт доступ к открытой папке: не передавайте её другим.",
             env!("CARGO_PKG_VERSION"),
             workspace.root.display()
         );

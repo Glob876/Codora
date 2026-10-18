@@ -71,7 +71,7 @@ async fn guard(State(state): State<AppState>, mut req: Request, next: Next) -> R
         return Error(403, "Межсайтовый запрос отклонён".into()).into_response();
     }
     if req.uri().path().starts_with("/api/") {
-        let supplied = h.get("x-typoha-token").and_then(|s| s.to_str().ok());
+        let supplied = h.get("x-codora-token").and_then(|s| s.to_str().ok());
         // Images cannot set custom headers. Their capability remains local and referrers are disabled.
         let asset_token = if req.uri().path() == "/api/asset" {
             req.uri()
@@ -81,7 +81,7 @@ async fn guard(State(state): State<AppState>, mut req: Request, next: Next) -> R
             None
         };
         if supplied.or(asset_token) != Some(&state.token) {
-            return Error(401, "Откройте ссылку из запущенного Typoha".into()).into_response();
+            return Error(401, "Откройте ссылку из запущенного Codora".into()).into_response();
         }
     }
     if req.uri().path().starts_with("/api/") && req.uri().path() != "/api/workspace" {
@@ -98,7 +98,7 @@ async fn guard(State(state): State<AppState>, mut req: Request, next: Next) -> R
             None
         };
         let supplied = h
-            .get("x-typoha-workspace")
+            .get("x-codora-workspace")
             .and_then(|v| v.to_str().ok())
             .or(asset_scope)
             .unwrap_or(&current);
@@ -146,7 +146,7 @@ pub fn router(state: AppState) -> Router {
 async fn workspace(State(s): State<AppState>) -> core::Result<Json<Value>> {
     let w = lock(&s)?;
     Ok(Json(
-        json!({"root":w.root,"name":w.root.file_name().unwrap_or_default().to_string_lossy(),"id":core::revision(w.root.to_string_lossy().as_bytes()),"version":env!("CARGO_PKG_VERSION")}),
+        json!({"restored":w.restored,"root":w.root,"name":w.root.file_name().unwrap_or_default().to_string_lossy(),"id":core::revision(w.root.to_string_lossy().as_bytes()),"version":env!("CARGO_PKG_VERSION")}),
     ))
 }
 #[derive(Deserialize)]
@@ -157,9 +157,9 @@ async fn change_workspace(
     State(s): State<AppState>,
     Json(q): Json<Root>,
 ) -> core::Result<Json<Value>> {
-    let workspace = Workspace::open(&q.root)?;
+    let mut workspace = lock(&s)?;
+    workspace.change_root(&q.root)?;
     let root = workspace.root.clone();
-    *lock(&s)? = workspace;
     Ok(Json(
         json!({"id":core::revision(root.to_string_lossy().as_bytes()),"root":root}),
     ))

@@ -63,3 +63,27 @@ Source requirements: the owner's follow-up in this chat. The file tree is now an
 Lucide 1.59.0 is pinned from npm, under ISC, with its complete notice retained in `docs/licenses/npm-lucide-1.59.0-LICENSE` and the dependency inventory. Selected SVG nodes are bundled locally; no icon fonts or external assets are loaded. References consulted: https://lucide.dev/ and https://github.com/lucide-icons/lucide/blob/main/LICENSE . No Typora resources were consulted.
 
 Transparency uses original CSS surface colors and Electron's public transparent-window API: https://www.electronjs.org/docs/latest/tutorial/custom-window-styles . The default is fully opaque; user-selected background opacity affects color surfaces, not text/icons. Panels, tabs and popups use a four-percentage-point denser color, capped at 100%. Actual desktop compositing and resize behavior are platform-dependent, as documented by Electron. The frameless shell has original window controls and sender/origin-checked allowlisted IPC.
+
+## Codora and code editing (2026-10-18)
+
+Source requirements: the owner's request to rename the application/repository to Codora,
+add language syntax, automatic intelligent suggestions, and remember the open folder.
+Original changes extend the existing CodeMirror editor, with public documented APIs:
+https://codemirror.net/docs/ref/ and https://codemirror.net/examples/autocompletion/ .
+The TypeScript 5.9.3 language service runs locally against the current JS/TS document
+and its redistributed ES5 declarations; no editor product code or assets were used.
+TypeScript is Apache-2.0; CodeMirror autocomplete/language are MIT. Exact dependencies
+are locked, direct new dependencies pinned, and license notices retained.
+
+Automatic language selection uses CodeMirror's language descriptions; unknown UTF-8
+files remain plain text. Existing language completion providers remain enabled;
+original keyword/snippet/word providers supplement them. JS/TS member completion
+uses inferred types within one document, without project or network access. It is
+bounded to 300,000 characters to limit synchronous analysis. No LSP, debugger,
+terminal, marketplace or VS Code compatibility is claimed.
+
+Rust persists only the canonical workspace path in a separate application session
+file, using atomic replacement. Explicit startup paths take precedence; unavailable
+or corrupt remembered workspaces fail visibly rather than silently substituting a
+folder. Existing `.typoha` metadata is deliberately retained so history and drafts
+survive the rename. The new C icon is original SVG geometry.

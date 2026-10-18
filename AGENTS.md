@@ -1,4 +1,4 @@
-# Typoha development rules
+# Codora development rules
 
 ## Independent implementation
 - Implement publicly described behavior and open standards, not proprietary implementation details.
@@ -7,7 +7,7 @@
 - Public feature descriptions are input for behavioral requirements only. Write original code, UI copy, styling, fixtures, and documentation.
 - Preserve a source/provenance log in docs/clean-room.md. This is an independent implementation protocol, not a certification of legal immunity or a formal two-team clean room.
 - Use dependencies with explicit redistribution licenses. Pin versions and retain notices. Record exceptions and unresolved licensing before distribution.
-- Own name and visual identity: Typoha. Never imply affiliation with another editor.
+- Own name and visual identity: Codora. Never imply affiliation with another editor.
 
 ## Engineering
 - Rust owns filesystem access, conflict detection, history, workspace search, persistence and export. TypeScript owns the local editing interface.

@@ -1,8 +1,8 @@
 [package]
-name = "typoha"
+name = "codora"
 version = "0.1.0"
 edition = "2024"
-description = "Independent local Markdown editor"
+description = "Independent local code and Markdown editor"
 license = "AGPL-3.0-or-later"
 rust-version = "1.90"
 

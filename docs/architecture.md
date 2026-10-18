@@ -71,3 +71,23 @@ Russian/English dictionaries are fetched at build time from a pinned Electron ar
 `icons.ts` serializes only explicitly imported Lucide SVG nodes into decorative non-focusable SVG. New icons must be added to this local allowlist. `i18n.ts` owns the four-language interface catalog and reversible chrome translation. A mutation observer handles newly generated application controls, skips editor-only mutations, and excludes document editors, file paths, outline titles, search hits, draft/history lists and input values. Add new interface strings to the catalog; explicitly translate parameterized messages with `tr`. Locale selection and background opacity use the same draft/commit/cancel preferences transaction. Rust error messages are still returned verbatim.
 
 `appearance.ts` clamps opacity and derives the panel value (+4 p.p., capped at 100%). CSS surfaces use color-mix with transparent; no whole-window opacity is applied, so text stays sharp. The desktop shell enables an alpha background at construction; renderer window-control IPC accepts only minimize/maximize/close from the trusted main frame. Native file/folder pickers and unsaved-close messages follow the selected language. Transparent resizable windows depend on platform composition; default opacity is 100% and export/print remain opaque.
+
+## Code editing and application session
+
+`web/src/code-editor.ts` resolves local CodeMirror language packages by filename,
+adds completion providers without replacing language-specific providers, and configures
+indentation. `web/src/intelligence.ts` uses TypeScript's language service with an
+in-memory host and local ES5 library; no filesystem or network access is exposed.
+To add a snippet/keyword family, extend the tables in code-editor.ts. For whole-project
+language tooling, introduce an explicitly designed Rust-controlled transport; the
+current service intentionally supports one document only.
+
+`src/session.rs` owns session reads/atomic writes. `Workspace::change_root` writes the
+new canonical root before committing the workspace switch, so a persistence failure
+is surfaced and leaves the active workspace unchanged. Desktop passes `--session-file`
+in Electron's userData directory and `--fallback-workspace` for first launch; browser
+mode uses XDG_CONFIG_HOME/Codora/session.json (HOME/.config fallback), or APPDATA on
+Windows. Explicit positional roots override remembered state. Missing/deleted folders
+and invalid session files cause a visible startup error; supplying a valid explicit
+folder repairs the session. Tokens and document contents never enter session.json.
+The `.typoha` workspace metadata namespace and legacy preference keys are retained.

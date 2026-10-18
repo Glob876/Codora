@@ -201,7 +201,7 @@ HTML скопирован|HTML copied|HTML скопійовано|HTML kopiert
 Восстановить черновик…|Restore draft…|Відновити чернетку…|Entwurf wiederherstellen…
 Настройки…|Settings…|Налаштування…|Einstellungen…
 Markdown: краткая справка|Markdown: quick reference|Markdown: коротка довідка|Markdown: Kurzreferenz
-О Typoha|About Typoha|Про Typoha|Über Typoha
+О Codora|About Codora|Про Codora|Über Codora
 Краткая справка Markdown|Markdown reference|Довідка Markdown|Markdown-Referenz
 Место для ваших мыслей|A place for your thoughts|Місце для ваших думок|Ein Ort für deine Gedanken
 Быстро открыть|Quick open|Швидко відкрити|Schnell öffnen

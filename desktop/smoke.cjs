@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "typoha-desktop-smoke-"));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), "codora-desktop-smoke-"));
 fs.writeFileSync(
   path.join(root, "test.md"),
   "# Desktop test\n\nOriginal text.\n",
@@ -80,7 +80,7 @@ app.on("browser-window-created", (_event, win) => {
       );
       await pause(350);
       fs.writeFileSync(
-        "/tmp/typoha-welcome.png",
+        "/tmp/codora-welcome.png",
         (await win.webContents.capturePage()).toPNG(),
       );
       await js(
@@ -131,7 +131,7 @@ app.on("browser-window-created", (_event, win) => {
       );
       await until("document.querySelectorAll('.document-tab').length === 1");
       assert.equal(
-        await js("typeof window.typohaDesktop.chooseFolder"),
+        await js("typeof window.codoraDesktop.chooseFolder"),
         "function",
       );
       assert.equal(await js("typeof require"), "undefined");
@@ -205,7 +205,7 @@ app.on("browser-window-created", (_event, win) => {
       );
       await pause(250);
       fs.writeFileSync(
-        "/tmp/typoha-refinement-settings.png",
+        "/tmp/codora-refinement-settings.png",
         (await win.webContents.capturePage()).toPNG(),
       );
       await js(
@@ -282,7 +282,7 @@ app.on("browser-window-created", (_event, win) => {
         assert.equal(pdfText.status, 0);
         assert.match(pdfText.stdout, /Desktop test/);
       }
-      await js("navigator.clipboard.writeText('Typoha clipboard')");
+      await js("navigator.clipboard.writeText('Codora clipboard')");
       for (let i = 0; i < 100 && dictionaries.size < 2; i++) await pause(100);
       assert.ok(dictionaries.has("ru"), "Russian dictionary initialized");
       assert.ok(dictionaries.has("en-US"), "English dictionary initialized");

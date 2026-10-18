@@ -43,7 +43,7 @@ function startBackend(binary, args, options = {}) {
     }
     child.once("error", () =>
       fail(
-        new Error("Не удалось запустить файловое ядро. Пересоберите Typoha."),
+        new Error("Не удалось запустить файловое ядро. Пересоберите Codora."),
       ),
     );
     child.once("exit", () =>

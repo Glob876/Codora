@@ -51,8 +51,8 @@ const nt = (source) =>
     ? source
     : nativeTranslations[source]?.[["en", "uk", "de"].indexOf(language)] ||
       source;
-app.setName("Typoha");
-if (process.platform === "linux") app.setDesktopName("typoha.desktop");
+app.setName("Codora");
+if (process.platform === "linux") app.setDesktopName("codora.desktop");
 // Avoid Chromium background services; document network policy remains in Rust CSP.
 app.commandLine.appendSwitch("disable-background-networking");
 app.commandLine.appendSwitch("disable-component-update");
@@ -103,30 +103,29 @@ app
       ? path.join(
           __dirname,
           "bin",
-          process.platform === "win32" ? "typoha-core.exe" : "typoha-core",
+          process.platform === "win32" ? "codora-core.exe" : "codora-core",
         )
       : path.join(
           __dirname,
           "..",
           "target",
           "release",
-          process.platform === "win32" ? "typoha.exe" : "typoha",
+          process.platform === "win32" ? "codora.exe" : "codora",
         );
     const args = process.argv.slice(app.isPackaged ? 1 : 2);
-    backend = startBackend(
-      binary,
-      args.length
-        ? args
-        : [
-            app.isPackaged
-              ? app.getPath("home")
-              : path.join(__dirname, "..", "examples"),
-          ],
-    );
+    backend = startBackend(binary, [
+      ...args,
+      "--session-file",
+      path.join(app.getPath("userData"), "session.json"),
+      "--fallback-workspace",
+      app.isPackaged
+        ? app.getPath("home")
+        : path.join(__dirname, "..", "examples"),
+    ]);
     const url = await backend.ready;
     origin = new URL(url).origin;
     // No persistent Chromium profile: capability tokens and documents stay in memory.
-    const localSession = session.fromPartition(`typoha-${process.pid}`, {
+    const localSession = session.fromPartition(`codora-${process.pid}`, {
       cache: false,
     });
     const permitted = (contents, permission) =>
@@ -159,7 +158,7 @@ app
       });
     });
     window = new BrowserWindow({
-      title: "Typoha",
+      title: "Codora",
       icon: path.join(__dirname, "icon.png"),
       width: 1280,
       height: 860,
@@ -238,18 +237,18 @@ app
     window.webContents.on("render-process-gone", () => {
       dialog.showErrorBox(
         "Редактор остановился",
-        "Перезапустите Typoha. Сохранённые документы и черновики остаются в рабочей папке.",
+        "Перезапустите Codora. Сохранённые документы и черновики остаются в рабочей папке.",
       );
     });
     backend.child.once("exit", () => {
       if (!backend.stopping && window && !window.isDestroyed()) {
         dialog.showErrorBox(
           "Файловое ядро остановилось",
-          "Сохранение недоступно. Скопируйте несохранённый текст и перезапустите Typoha.",
+          "Сохранение недоступно. Скопируйте несохранённый текст и перезапустите Codora.",
         );
       }
     });
-    ipcMain.handle("typoha:folder", async (event) => {
+    ipcMain.handle("codora:folder", async (event) => {
       if (!trusted(event)) throw new Error("Недоступно");
       const result = await dialog.showOpenDialog(window, {
         title: nt("Открыть папку"),
@@ -257,12 +256,12 @@ app
       });
       return result.canceled ? null : result.filePaths[0];
     });
-    ipcMain.handle("typoha:language", (event, value) => {
+    ipcMain.handle("codora:language", (event, value) => {
       if (!trusted(event) || !["ru", "en", "uk", "de"].includes(value))
         throw new Error("Недоступно");
       language = value;
     });
-    ipcMain.handle("typoha:window", (event, action) => {
+    ipcMain.handle("codora:window", (event, action) => {
       if (!trusted(event)) throw new Error("Недоступно");
       if (action === "minimize") window.minimize();
       else if (action === "maximize") {
@@ -271,7 +270,7 @@ app
       } else if (action === "close") window.close();
       else throw new Error("Неизвестная команда окна");
     });
-    ipcMain.handle("typoha:file", async (event) => {
+    ipcMain.handle("codora:file", async (event) => {
       if (!trusted(event)) throw new Error("Недоступно");
       const result = await dialog.showOpenDialog(window, {
         title: nt("Открыть файл"),
@@ -279,8 +278,29 @@ app
         filters: [
           {
             name: nt("Markdown и текст"),
-            extensions: ["md", "markdown", "txt"],
+            extensions: [
+              "md",
+              "markdown",
+              "txt",
+              "rs",
+              "ts",
+              "tsx",
+              "js",
+              "jsx",
+              "py",
+              "json",
+              "html",
+              "css",
+              "go",
+              "java",
+              "c",
+              "cpp",
+              "yaml",
+              "toml",
+              "sh",
+            ],
           },
+          { name: "Все файлы", extensions: ["*"] },
         ],
       });
       if (result.canceled) return null;
@@ -289,7 +309,7 @@ app
         path: path.basename(result.filePaths[0]),
       };
     });
-    ipcMain.handle("typoha:print", (event) => {
+    ipcMain.handle("codora:print", (event) => {
       if (!trusted(event)) throw new Error("Недоступно");
       return new Promise((resolve, reject) =>
         window.webContents.print({ printBackground: true }, (ok, reason) => {
@@ -298,7 +318,7 @@ app
         }),
       );
     });
-    ipcMain.handle("typoha:pdf", (event) => {
+    ipcMain.handle("codora:pdf", (event) => {
       if (!trusted(event)) throw new Error("Недоступно");
       return window.webContents.printToPDF({
         printBackground: true,
@@ -310,7 +330,7 @@ app
   })
   .catch(async () => {
     dialog.showErrorBox(
-      "Не удалось запустить Typoha",
+      "Не удалось запустить Codora",
       "Проверьте путь к папке, права доступа и сборку приложения.",
     );
     if (backend) await backend.stop();

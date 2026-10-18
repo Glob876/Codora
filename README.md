@@ -1,16 +1,20 @@
-# Typoha
+# Codora
+
+Codora now edits UTF-8 code alongside Markdown: automatic language detection, local syntax highlighting, indentation and automatic completion. JavaScript/TypeScript suggestions include inferred object members and ES5 methods in the current file; other languages use language providers, keywords and document words. Ctrl+Space opens suggestions. This is an evolving editor, with no full VS Code feature parity: project LSP, debugging, terminal and extension compatibility are planned.
+
+The last workspace folder is restored after restart. An explicit launch path overrides it; tabs are not restored yet. Existing history/drafts remain in `.typoha`.
 
 **English** | [Русский](README.ru.md)
 
-An independent local Markdown editor with a **Rust** filesystem core and a **TypeScript** interface built with Milkdown and CodeMirror. Styles, copy, and sample documents are original; no Typora code or assets are used.
+An independent local code and Markdown editor with a **Rust** filesystem core and a **TypeScript** interface built with Milkdown and CodeMirror. Styles, copy, and sample documents are original; no Typora code or assets are used.
 
-Typoha is inspired by Typora’s focus on distraction-free Markdown writing and is developing in its own direction, with an original interface and independent implementation. Typoha is not affiliated with Typora.
+Codora is inspired by Typora’s focus on distraction-free Markdown writing and is developing in its own direction, with an original interface and independent implementation. Codora is not affiliated with Typora.
 
 **Version 0.1.0 is a working initial implementation, not a complete 1:1 clone.** The [feature coverage table](docs/parity.md) lists implemented features, differences, and remaining work. The independent implementation process is documented in [clean-room.md](docs/clean-room.md). These detailed documents are currently available in Russian and English respectively.
 
 **Vibe-coded:** this project was created with AI coding agents (Codex), guided by the project owner.
 
-![Typoha editor interface](docs/screenshots/typoha.jpg)
+![Previous Typoha interface](docs/screenshots/typoha.jpg)
 
 ## Getting started
 
@@ -20,7 +24,7 @@ From the project directory:
 ./run.sh
 ```
 
-If a release build is available, the editor opens on a minimal new tab; no folder picker opens automatically. Otherwise, the script builds it first; you need Node.js 24+, npm, rustup, and a C/C++ linker. The Rust toolchain is pinned in `rust-toolchain.toml`. The first build downloads open-source dependencies from npm and crates.io.
+If a release build is available, the editor restores the last workspace, or opens a minimal new tab on first launch; no folder picker opens automatically. Otherwise, the script builds it first; you need Node.js 24+, npm, rustup, and a C/C++ linker. The Rust toolchain is pinned in `rust-toolchain.toml`. The first build downloads open-source dependencies from npm and crates.io.
 
 To open your own folder:
 
@@ -28,7 +32,7 @@ To open your own folder:
 ./run.sh /absolute/path/to/notes
 ```
 
-Normal launch opens a **Typoha desktop window** with bundled Electron/Chromium. An installed browser is not required. Folder selection and export downloads use system dialogs; PDF is generated directly. Closing the window stops the Rust server, and unsaved changes prompt before closing. Russian and English spelling dictionaries are bundled locally without runtime Internet downloads.
+Normal launch opens a **Codora desktop window** with bundled Electron/Chromium. An installed browser is not required. Folder selection and export downloads use system dialogs; PDF is generated directly. Closing the window stops the Rust server, and unsaved changes prompt before closing. Russian and English spelling dictionaries are bundled locally without runtime Internet downloads.
 
 For an explicit browser session, use `./run.sh --browser /path/to/notes`. For development server mode:
 
@@ -38,7 +42,7 @@ For an explicit browser session, use `./run.sh --browser /path/to/notes`. For de
 
 The server listens only on `127.0.0.1`. Its terminal URL contains a temporary access key; do not share it. Ctrl+C stops server mode; closing a browser tab does not.
 
-The Linux desktop distribution is built under `artifacts/typoha-0.1.0-linux-x86_64-desktop/`. Run `./typoha`, then use Open File or Open Folder on the new tab. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Typoha to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
+The Linux desktop distribution is built under `artifacts/codora-0.1.0-linux-x86_64-desktop/`. Run `./codora`, then use Open File or Open Folder on the new tab. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Codora to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
 
 Choose Russian, English, Ukrainian or German in Settings → Interface. Core error messages and some help/dynamic text may still appear in Russian. The bundled spelling dictionaries remain Russian/English. This README describes the current version.
 
@@ -94,4 +98,4 @@ Original project code is licensed under **[GNU AGPL v3 or later](LICENSE)** (`AG
 
 See [COPYRIGHT](COPYRIGHT) for attribution and [licensing details](docs/licensing.md) for the transition from earlier MIT revisions. Dependencies retain their own licenses: [complete notices](THIRD_PARTY_NOTICES.md) and [machine-readable inventory](docs/dependencies.json).
 
-Source code and commit history are available in the [GitHub repository](https://github.com/Glob876/Typoha). Development rules are in [AGENTS.md](AGENTS.md).
+Source code and commit history are available in the [GitHub repository](https://github.com/Glob876/Codora). Development rules are in [AGENTS.md](AGENTS.md).

@@ -99,7 +99,7 @@ export async function diagram(source: string): Promise<HTMLElement> {
       flowchart: { htmlLabels: false },
     });
     const { svg } = await mermaid.render(
-      `typoha-diagram-${++diagramId}`,
+      `codora-diagram-${++diagramId}`,
       source,
     );
     element.innerHTML = DOMPurify.sanitize(svg, {

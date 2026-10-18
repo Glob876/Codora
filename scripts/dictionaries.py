@@ -9,13 +9,13 @@ import zipfile
 root = Path(__file__).resolve().parents[1]
 url = 'https://github.com/electron/electron/releases/download/v44.9.0/hunspell_dictionaries.zip'
 expected = '41fc02332fc7cc2ea7230409de1bbe5d0a44b3a45b85f6d3acdaddd2b2047d8f'
-cache = root / 'desktop/node_modules/.cache/typoha-dictionaries.zip'
+cache = root / 'desktop/node_modules/.cache/codora-dictionaries.zip'
 cache.parent.mkdir(parents=True, exist_ok=True)
 if not cache.exists():
     cache.write_bytes(urllib.request.urlopen(url, timeout=60).read())
 data = cache.read_bytes()
 if hashlib.sha256(data).hexdigest() != expected:
-    raise SystemExit('Dictionary checksum mismatch; remove desktop/node_modules/.cache/typoha-dictionaries.zip and retry.')
+    raise SystemExit('Dictionary checksum mismatch; remove desktop/node_modules/.cache/codora-dictionaries.zip and retry.')
 destination = root / 'web/public/dictionaries'
 destination.mkdir(parents=True, exist_ok=True)
 notices = root / 'docs/dictionary-notices'

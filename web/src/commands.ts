@@ -71,5 +71,5 @@ export const actions: Action[] = [
   { id: "theme-system", label: "Системная", group: "Темы" },
   { id: "settings", label: "Настройки…", key: "Ctrl+,", group: "Темы" },
   { id: "help", label: "Markdown: краткая справка", group: "Справка" },
-  { id: "about", label: "О Typoha", group: "Справка" },
+  { id: "about", label: "О Codora", group: "Справка" },
 ];

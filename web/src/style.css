@@ -1175,7 +1175,7 @@ dialog p {
   color: #9bc5e6;
 }
 
-/* Original Typoha motion and preferences surfaces. */
+/* Original Codora motion and preferences surfaces. */
 button,
 input,
 select,
@@ -1691,4 +1691,38 @@ dialog {
   text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
+}
+
+/* Code files use the full editor width; completion UI follows the app palette. */
+.code-document #editor {
+  max-width: none;
+  width: 100%;
+}
+.code-document .cm-editor {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.cm-tooltip {
+  z-index: 100;
+}
+.view-switch button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.code-document #editor > .cm-editor {
+  max-width: none;
+  margin: 0;
+  line-height: 1.6;
+}
+.code-document .format-bar {
+  display: none;
+}
+.code-document #editor {
+  padding: 16px 20px 80px;
+}
+.code-document .cm-tooltip {
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--border);
 }

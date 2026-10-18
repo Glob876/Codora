@@ -2,13 +2,13 @@ use axum::{
     body::Body,
     http::{Request, StatusCode},
 };
-use std::sync::{Arc, Mutex};
-use tempfile::tempdir;
-use tower::ServiceExt;
-use typoha::{
+use codora::{
     core::Workspace,
     server::{AppState, response_bytes, router},
 };
+use std::sync::{Arc, Mutex};
+use tempfile::tempdir;
+use tower::ServiceExt;
 #[tokio::test]
 async fn authentication_and_origin_checks_guard_filesystem() {
     let t = tempdir().unwrap();
@@ -35,7 +35,7 @@ async fn authentication_and_origin_checks_guard_filesystem() {
         app.clone()
             .oneshot(
                 req("/api/files")
-                    .header("x-typoha-token", "test-secret")
+                    .header("x-codora-token", "test-secret")
                     .header("origin", "https://other.invalid")
                     .body(Body::empty())
                     .unwrap()
@@ -51,7 +51,7 @@ async fn authentication_and_origin_checks_guard_filesystem() {
                 Request::builder()
                     .uri("/api/files")
                     .header("host", "rebinding.invalid:4321")
-                    .header("x-typoha-token", "test-secret")
+                    .header("x-codora-token", "test-secret")
                     .body(Body::empty())
                     .unwrap()
             )
@@ -64,7 +64,7 @@ async fn authentication_and_origin_checks_guard_filesystem() {
         .clone()
         .oneshot(
             req("/api/files")
-                .header("x-typoha-token", "test-secret")
+                .header("x-codora-token", "test-secret")
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -101,7 +101,7 @@ async fn api_saves_raw_markdown_and_surfaces_conflict() {
             .method("POST")
             .uri("/api/document")
             .header("host", "127.0.0.1:1")
-            .header("x-typoha-token", "t")
+            .header("x-codora-token", "t")
             .header("content-type", "application/json")
             .body(Body::from(body.clone()))
             .unwrap()
@@ -124,7 +124,7 @@ async fn api_saves_raw_markdown_and_surfaces_conflict() {
 async fn stale_window_cannot_save_into_another_workspace() {
     let first = tempdir().unwrap();
     let second = tempdir().unwrap();
-    let old_scope = typoha::core::revision(first.path().to_string_lossy().as_bytes());
+    let old_scope = codora::core::revision(first.path().to_string_lossy().as_bytes());
     let app = router(AppState {
         workspace: Arc::new(Mutex::new(Workspace::open(first.path()).unwrap())),
         token: "t".into(),
@@ -135,8 +135,8 @@ async fn stale_window_cannot_save_into_another_workspace() {
             .method("POST")
             .uri(route)
             .header("host", "127.0.0.1:1")
-            .header("x-typoha-token", "t")
-            .header("x-typoha-workspace", &old_scope)
+            .header("x-codora-token", "t")
+            .header("x-codora-workspace", &old_scope)
             .header("content-type", "application/json")
             .body(Body::from(data.to_string()))
             .unwrap()
@@ -172,7 +172,7 @@ async fn preferences_survive_server_state_recreation() {
                 .method("POST")
                 .uri("/api/preferences")
                 .header("host", "127.0.0.1:1")
-                .header("x-typoha-token", "t")
+                .header("x-codora-token", "t")
                 .header("content-type", "application/json")
                 .body(Body::from(r#"{"theme":"night","fontSize":20}"#))
                 .unwrap(),
@@ -185,7 +185,7 @@ async fn preferences_survive_server_state_recreation() {
             Request::builder()
                 .uri("/api/preferences")
                 .header("host", "127.0.0.1:1")
-                .header("x-typoha-token", "t")
+                .header("x-codora-token", "t")
                 .body(Body::empty())
                 .unwrap(),
         )

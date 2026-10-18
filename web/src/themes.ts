@@ -1,4 +1,4 @@
-// Original palettes, independently selected for Typoha. No theme assets are imported.
+// Original palettes, independently selected for Codora. No theme assets are imported.
 export const themes = [
   {
     id: "paper",
@@ -29,7 +29,7 @@ export const themes = [
   },
   {
     id: "catppuccin",
-    name: "Catppuccin · Typoha",
+    name: "Catppuccin · Codora",
     bg: "#242335",
     panel: "#1d1c2c",
     text: "#ddd8f0",
@@ -38,7 +38,7 @@ export const themes = [
   },
   {
     id: "gruvbox",
-    name: "Gruvbox · Typoha",
+    name: "Gruvbox · Codora",
     bg: "#2c2926",
     panel: "#24221f",
     text: "#e6d7ac",
@@ -56,7 +56,7 @@ export const themes = [
   },
   {
     id: "ayu",
-    name: "Ayu · Typoha",
+    name: "Ayu · Codora",
     bg: "#111a24",
     panel: "#0c141e",
     text: "#c9d0da",
@@ -65,7 +65,7 @@ export const themes = [
   },
   {
     id: "nord",
-    name: "Nord · Typoha",
+    name: "Nord · Codora",
     bg: "#2c3545",
     panel: "#252e3d",
     text: "#dbe4ee",

@@ -11,15 +11,15 @@ if [[ -n "$(git status --porcelain)" ]]; then
   echo "Build updated tracked files; commit them before packaging." >&2
   exit 1
 fi
-package_name="typoha-0.1.0-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+package_name="codora-0.1.0-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
 package_dir="artifacts/$package_name"
 mkdir -p "$package_dir/docs"
-cp target/release/typoha LICENSE COPYRIGHT README.md README.ru.md AGENTS.md THIRD_PARTY_NOTICES.md "$package_dir/"
+cp target/release/codora LICENSE COPYRIGHT README.md README.ru.md AGENTS.md THIRD_PARTY_NOTICES.md "$package_dir/"
 cp -R docs/licenses docs/screenshots docs/dictionary-notices "$package_dir/docs/"
 cp docs/parity.md docs/clean-room.md docs/architecture.md docs/verification.md docs/dependencies.json docs/licensing.md docs/legacy-MIT.txt "$package_dir/docs/"
 # Ship committed sample documents only, never local drafts or private notes.
 git archive HEAD examples | tar -x -C "$package_dir"
-source_dir="$(mktemp -d "$PWD/artifacts/typoha-source.XXXXXX")"
+source_dir="$(mktemp -d "$PWD/artifacts/codora-source.XXXXXX")"
 trap 'rm -rf -- "$source_dir"' EXIT
 git archive HEAD | tar -x -C "$source_dir"
 mkdir -p "$source_dir/.cargo"
@@ -33,7 +33,7 @@ mkdir -p "$source_dir/web/public"
 cp -a web/public/dictionaries "$source_dir/web/public/"
 git rev-parse HEAD > "$source_dir/SOURCE-COMMIT"
 cat > "$source_dir/SOURCE-BUILD.md" <<'BUILD'
-# Rebuild Typoha from this source archive
+# Rebuild Codora from this source archive
 
 The exact project revision is in SOURCE-COMMIT. Rust crates and npm dependencies
 are included. On the same platform as the binary, with the Rust toolchain from
@@ -42,7 +42,7 @@ rust-toolchain.toml, Node.js 24+, and a C/C++ linker installed, run:
 ```sh
 npm run build --prefix web
 cargo build --release --locked --offline
-./target/release/typoha ./examples --no-open
+./target/release/codora ./examples --no-open
 ./desktop/node_modules/.bin/electron ./desktop ./examples
 ```
 
