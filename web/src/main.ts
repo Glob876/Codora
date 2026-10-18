@@ -1536,7 +1536,7 @@ async function run(
     case "about":
       dialogShell(
         "Typoha",
-        `<div class="about-brand"><span class="brand-glyph">t</span><h3>Место для ваших мыслей</h3></div><p>Независимый Markdown-редактор. Версия 0.1.0.</p><p>Rust · Milkdown · CodeMirror<br>Локальные файлы. Открытые стандарты. Собственный интерфейс.</p><p>Реализация не связана с разработчиками других редакторов. Полный функциональный паритет ещё не достигнут; перечень ограничений находится в docs/parity.md.</p><p class="dialog-hint">Оригинальная реализация: MIT. Лицензии библиотек перечислены в THIRD_PARTY_NOTICES.md.</p>`,
+        `<div class="about-brand"><span class="brand-glyph">t</span><h3>Место для ваших мыслей</h3></div><p>Независимый Markdown-редактор. Версия 0.1.0.</p><p>Rust · Milkdown · CodeMirror<br>Локальные файлы. Открытые стандарты. Собственный интерфейс.</p><p>Реализация не связана с разработчиками других редакторов. Полный функциональный паритет ещё не достигнут; перечень ограничений находится в docs/parity.md.</p><p class="dialog-hint">© 2026 Typoha contributors · Glob876. GNU AGPL v3 или более поздняя. Без гарантий. Разрешены изменения и распространение на условиях лицензии. <a href="https://github.com/Glob876/Typoha/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Лицензия</a> · <a href="https://github.com/Glob876/Typoha" target="_blank" rel="noopener noreferrer">Исходный код</a>. Лицензии библиотек: THIRD_PARTY_NOTICES.md.</p>`,
       );
       break;
     case "help":

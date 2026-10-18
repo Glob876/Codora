@@ -4,7 +4,9 @@
 
 An independent local Markdown editor with a **Rust** filesystem core and a **TypeScript** interface built with Milkdown and CodeMirror. Styles, copy, and sample documents are original; no Typora code or assets are used.
 
-**Version 0.1.0 is a working initial implementation, not a complete 1:1 clone.** The [feature coverage table](docs/parity.md) lists implemented features, differences, and remaining work. The independent implementation process is documented in [clean-room.md](docs/clean-room.md); it does not guarantee the absence of all legal risks. These detailed documents are currently available in Russian and English respectively.
+**Version 0.1.0 is a working initial implementation, not a complete 1:1 clone.** The [feature coverage table](docs/parity.md) lists implemented features, differences, and remaining work. The independent implementation process is documented in [clean-room.md](docs/clean-room.md). These detailed documents are currently available in Russian and English respectively.
+
+**Vibe-coded:** this project was created with AI coding agents (Codex), guided by the project owner.
 
 ![Typoha editor interface](docs/screenshots/typoha.jpg)
 
@@ -70,12 +72,14 @@ npm ci --prefix web
 ./scripts/package.sh
 ```
 
-`check.sh` runs TypeScript checks, formatting checks, client tests, the frontend build, Rust tests, Clippy, npm audit, and license checks. `package.sh` creates a Linux archive in `artifacts/` with the executable, sample documents, both READMEs, documentation, and complete third-party license notices. Windows and macOS builds have not been verified yet.
+`check.sh` runs TypeScript checks, formatting checks, client tests, the frontend build, Rust tests, Clippy, npm audit, and license checks. `package.sh` creates a Linux archive in `artifacts/` with the executable, sample documents, both READMEs, documentation, complete third-party license notices, and a source archive with vendored dependencies. Windows and macOS builds have not been verified yet.
 
 Workspace data is stored in `.typoha` inside the open folder. Avoid deleting history, drafts, or trash unless intended. Symbolic links outside the workspace are not supported. Documents are currently limited to 16 MB; folder search skips files larger than 2 MB and returns at most 500 matching lines.
 
 ## Licensing and provenance
 
-Original project code is licensed under [MIT](LICENSE). Dependencies retain their own licenses: see the [complete notices](THIRD_PARTY_NOTICES.md) and [machine-readable inventory](docs/dependencies.json). License choices and the independent implementation boundary are documented explicitly. Public feature descriptions serve as requirements, not as source code or assets to include in the product.
+Original project code is licensed under **[GNU AGPL v3 or later](LICENSE)** (`AGPL-3.0-or-later`). You may use, modify, redistribute, and sell it. Keep copyright and license notices, identify your changes, and provide the corresponding source under the same license when distributing modified versions. Modified versions used over a network must also offer their source to interacting users. Private changes without distribution or remote user interaction do not have to be published.
+
+See [COPYRIGHT](COPYRIGHT) for attribution and [licensing details](docs/licensing.md) for the transition from earlier MIT revisions. Dependencies retain their own licenses: [complete notices](THIRD_PARTY_NOTICES.md) and [machine-readable inventory](docs/dependencies.json).
 
 Source code and commit history are available in the [GitHub repository](https://github.com/Glob876/Typoha). Development rules are in [AGENTS.md](AGENTS.md).

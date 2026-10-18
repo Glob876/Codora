@@ -1,0 +1,18 @@
+Typoha
+Copyright (c) 2026 Typoha contributors
+Project maintainer: Glob876 (https://github.com/Glob876)
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Typoha is free software: you can redistribute it and/or modify it under the
+terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version.
+
+Typoha is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See LICENSE for the full license text.
+
+This notice applies to original project material unless otherwise indicated.
+Third-party components retain their own licenses and notices; see
+THIRD_PARTY_NOTICES.md and docs/licenses/.
+Earlier MIT-licensed revisions retain their original terms; see docs/licensing.md.
