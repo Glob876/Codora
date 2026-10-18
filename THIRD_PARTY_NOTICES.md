@@ -10,6 +10,8 @@ License texts are preserved without modification under docs/licenses/. Developme
 - The frontend runtime dependencies otherwise use permissive MIT/ISC/BSD/Apache/Unlicense terms. No vendor assets are distributed.
 - MPL-2.0 packages in the build toolchain (Lightning CSS) are not bundled into the app. Their license notices and exact package source URLs are nevertheless retained.
 - Mermaid 11.17.2 is selected instead of the 12.x ELK-containing distribution, avoiding the EPL-licensed optional runtime in this build.
+- Electron runtime includes Chromium, Node and FFmpeg under their individual licenses; the complete bundled LICENSES.chromium.html is retained. See docs/licensing.md for distribution limitations.
+- The build-only @electron-internal/extract-zip 1.0.5 omits the full BSD grant upstream; its README declaration is retained. This documented exception needs resolution before public source-archive distribution (docs/licensing.md).
 - khroma omits its manifest license field; its distributed license file explicitly grants MIT.
 
 | Ecosystem | Package | License | Scope | Notices |
@@ -118,6 +120,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | cargo | windows-link 0.2.1 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [license-apache-2.0](docs/licenses/cargo-windows-link-0.2.1-license-apache-2.0), [license-mit](docs/licenses/cargo-windows-link-0.2.1-license-mit) |
 | cargo | windows-sys 0.61.2 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [license-apache-2.0](docs/licenses/cargo-windows-sys-0.61.2-license-apache-2.0), [license-mit](docs/licenses/cargo-windows-sys-0.61.2-license-mit) |
 | cargo | zmij 1.0.23 | MIT | runtime/platform or Rust test dependency | [LICENSE-MIT](docs/licenses/cargo-zmij-1.0.23-LICENSE-MIT) |
+| electron-runtime | electron 44.9.0 | MIT AND LicenseRef-Chromium-ThirdParty | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/electron-runtime-electron-44.9.0-LICENSE), [LICENSES.chromium.html](docs/licenses/electron-runtime-electron-44.9.0-LICENSES.chromium.html) |
 | npm | @antfu/install-pkg 2.1.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-_antfu_install-pkg-2.1.0-LICENSE) |
 | npm | @asamuzakjp/css-color 7.1.7 | MIT | build/test | [LICENSE](docs/licenses/npm-_asamuzakjp_css-color-7.1.7-LICENSE) |
 | npm | @asamuzakjp/dom-selector 10.0.4 | MIT | build/test | [LICENSE](docs/licenses/npm-_asamuzakjp_dom-selector-10.0.4-LICENSE) |
@@ -166,6 +169,8 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | @csstools/css-parser-algorithms 4.0.2 | MIT | build/test | [LICENSE.md](docs/licenses/npm-_csstools_css-parser-algorithms-4.0.2-LICENSE.md) |
 | npm | @csstools/css-syntax-patches-for-csstree 1.1.15 | MIT-0 | build/test | [LICENSE.md](docs/licenses/npm-_csstools_css-syntax-patches-for-csstree-1.1.15-LICENSE.md) |
 | npm | @csstools/css-tokenizer 4.0.2 | MIT | build/test | [LICENSE.md](docs/licenses/npm-_csstools_css-tokenizer-4.0.2-LICENSE.md) |
+| npm | @electron-internal/extract-zip 1.0.5 | BSD-2-Clause | build/test | [README.md](docs/licenses/npm-_electron-internal_extract-zip-1.0.5-README.md) |
+| npm | @electron/get 5.1.0 | MIT | build/test | [LICENSE](docs/licenses/npm-_electron_get-5.1.0-LICENSE) |
 | npm | @exodus/bytes 1.16.0 | MIT | build/test | [LICENSE](docs/licenses/npm-_exodus_bytes-1.16.0-LICENSE) |
 | npm | @floating-ui/core 1.8.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-_floating-ui_core-1.8.0-LICENSE) |
 | npm | @floating-ui/dom 1.8.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-_floating-ui_dom-1.8.0-LICENSE) |
@@ -346,19 +351,21 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | detect-libc 2.1.2 | Apache-2.0 | build/test | [LICENSE](docs/licenses/npm-detect-libc-2.1.2-LICENSE) |
 | npm | devlop 1.1.0 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-devlop-1.1.0-license) |
 | npm | dompurify 3.4.17 | (MPL-2.0 OR Apache-2.0) | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-dompurify-3.4.17-LICENSE), [LICENSE-MPL](docs/licenses/npm-dompurify-3.4.17-LICENSE-MPL) |
+| npm | electron 44.9.0 | MIT | build/test | [LICENSE](docs/licenses/npm-electron-44.9.0-LICENSE) |
 | npm | emojilib 2.4.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-emojilib-2.4.0-LICENSE) |
 | npm | entities 7.0.1 | BSD-2-Clause | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-entities-7.0.1-LICENSE) |
 | npm | entities 8.1.0 | BSD-2-Clause | build/test | [LICENSE](docs/licenses/npm-entities-8.1.0-LICENSE) |
+| npm | env-paths 3.0.0 | MIT | build/test | [license](docs/licenses/npm-env-paths-3.0.0-license) |
 | npm | es-module-lexer 2.3.2 | MIT | build/test | [LICENSE](docs/licenses/npm-es-module-lexer-2.3.2-LICENSE) |
 | npm | es-toolkit 1.52.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-es-toolkit-1.52.0-LICENSE), [NOTICE](docs/licenses/npm-es-toolkit-1.52.0-NOTICE) |
 | npm | escape-string-regexp 5.0.0 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-escape-string-regexp-5.0.0-license) |
-| npm | estree-walker 2.0.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-estree-walker-2.0.2-LICENSE) |
 | npm | estree-walker 2.0.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-estree-walker-2.0.2-LICENSE) |
 | npm | estree-walker 3.0.3 | MIT | build/test | [LICENSE](docs/licenses/npm-estree-walker-3.0.3-LICENSE) |
 | npm | expect-type 1.4.0 | Apache-2.0 | build/test | [LICENSE](docs/licenses/npm-expect-type-1.4.0-LICENSE) |
 | npm | extend 3.0.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-extend-3.0.2-LICENSE) |
 | npm | fastdom 1.0.12 | MIT | runtime/platform or Rust test dependency | [README.md](docs/licenses/npm-fastdom-1.0.12-README.md) |
 | npm | fdir 6.5.0 | MIT | build/test | [LICENSE](docs/licenses/npm-fdir-6.5.0-LICENSE) |
+| npm | graceful-fs 4.2.11 | ISC | build/test | [LICENSE](docs/licenses/npm-graceful-fs-4.2.11-LICENSE) |
 | npm | hachure-fill 0.5.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-hachure-fill-0.5.2-LICENSE) |
 | npm | highlight.js 11.12.0 | BSD-3-Clause | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-highlight.js-11.12.0-LICENSE) |
 | npm | html-encoding-sniffer 7.0.0 | MIT | build/test | [LICENSE.txt](docs/licenses/npm-html-encoding-sniffer-7.0.0-LICENSE.txt) |
@@ -380,7 +387,6 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | longest-streak 3.1.0 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-longest-streak-3.1.0-license) |
 | npm | lru-cache 11.5.3 | BlueOak-1.0.0 | build/test | [LICENSE.md](docs/licenses/npm-lru-cache-11.5.3-LICENSE.md) |
 | npm | magic-string 0.30.21 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-magic-string-0.30.21-LICENSE) |
-| npm | magic-string 1.4.3 | MIT | build/test | [LICENSE](docs/licenses/npm-magic-string-1.4.3-LICENSE) |
 | npm | magic-string 1.4.3 | MIT | build/test | [LICENSE](docs/licenses/npm-magic-string-1.4.3-LICENSE) |
 | npm | markdown-table 3.0.4 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-markdown-table-3.0.4-license) |
 | npm | marked 16.4.2 | MIT | runtime/platform or Rust test dependency | [LICENSE.md](docs/licenses/npm-marked-16.4.2-LICENSE.md) |
@@ -447,6 +453,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | points-on-path 0.2.1 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-points-on-path-0.2.1-LICENSE) |
 | npm | postcss 8.5.30 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-postcss-8.5.30-LICENSE) |
 | npm | prettier 3.9.10 | MIT | build/test | [LICENSE](docs/licenses/npm-prettier-3.9.10-LICENSE) |
+| npm | progress 2.0.3 | MIT | build/test | [LICENSE](docs/licenses/npm-progress-2.0.3-LICENSE) |
 | npm | prosemirror-changeset 2.4.4 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-prosemirror-changeset-2.4.4-LICENSE) |
 | npm | prosemirror-commands 1.7.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-prosemirror-commands-1.7.2-LICENSE) |
 | npm | prosemirror-drop-indicator 0.1.4 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-prosemirror-drop-indicator-0.1.4-LICENSE) |
@@ -478,12 +485,14 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | rw 1.3.3 | BSD-3-Clause | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-rw-1.3.3-LICENSE) |
 | npm | safer-buffer 2.1.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-safer-buffer-2.1.2-LICENSE) |
 | npm | saxes 6.0.0 | ISC | build/test | [saxes-6.0.0-LICENSE](docs/licenses/npm-saxes-6.0.0-saxes-6.0.0-LICENSE) |
+| npm | semver 7.8.5 | ISC | build/test | [LICENSE](docs/licenses/npm-semver-7.8.5-LICENSE) |
 | npm | skin-tone 2.0.0 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-skin-tone-2.0.0-license) |
 | npm | source-map-js 1.2.2 | BSD-3-Clause | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-source-map-js-1.2.2-LICENSE) |
 | npm | std-env 4.3.0 | MIT | build/test | [LICENCE](docs/licenses/npm-std-env-4.3.0-LICENCE) |
 | npm | strictdom 1.0.1 | MIT | runtime/platform or Rust test dependency | [README.md](docs/licenses/npm-strictdom-1.0.1-README.md) |
 | npm | style-mod 4.1.4 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-style-mod-4.1.4-LICENSE) |
 | npm | stylis 4.4.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-stylis-4.4.0-LICENSE) |
+| npm | sumchecker 3.0.1 | Apache-2.0 | build/test | [LICENSE](docs/licenses/npm-sumchecker-3.0.1-LICENSE) |
 | npm | tinybench 6.2.2 | MIT | build/test | [LICENSE](docs/licenses/npm-tinybench-6.2.2-LICENSE) |
 | npm | tinyexec 1.3.1 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-tinyexec-1.3.1-LICENSE) |
 | npm | tinyglobby 0.2.17 | MIT | build/test | [LICENSE](docs/licenses/npm-tinyglobby-0.2.17-LICENSE) |
@@ -494,6 +503,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | trough 2.2.0 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-trough-2.2.0-license) |
 | npm | ts-dedent 2.3.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-ts-dedent-2.3.0-LICENSE) |
 | npm | typescript 5.9.3 | Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE.txt](docs/licenses/npm-typescript-5.9.3-LICENSE.txt) |
+| npm | undici 7.30.1 | MIT | build/test | [LICENSE](docs/licenses/npm-undici-7.30.1-LICENSE) |
 | npm | undici 8.12.2 | MIT | build/test | [LICENSE](docs/licenses/npm-undici-8.12.2-LICENSE) |
 | npm | undici-types 7.24.6 | MIT | build/test | [LICENSE](docs/licenses/npm-undici-types-7.24.6-LICENSE) |
 | npm | undici-types 8.12.2 | MIT | build/test | [LICENSE](docs/licenses/npm-undici-types-8.12.2-LICENSE) |

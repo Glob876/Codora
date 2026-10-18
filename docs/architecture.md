@@ -16,7 +16,8 @@ The compare-and-replace protocol protects ordinary editor/external modification 
 
 - `src/core.rs`: synchronous filesystem operations, revisions, history, trash, draft persistence, search, workspace boundary.
 - `src/server.rs`: loopback authentication/origin policy, workspace scope, HTTP adapters, sandboxed Pandoc process adapter and bundled static files.
-- `src/main.rs`: CLI, listener lifecycle and optional existing-browser app window.
+- `src/main.rs`: CLI, listener lifecycle, private desktop handshake/parent-pipe watchdog and explicit browser/server mode.
+- `desktop/main.cjs`, `preload.cjs`, `backend.cjs`: sandboxed Electron window, narrowly scoped native dialogs/printing IPC and Rust child lifecycle. No Node API is exposed to document content.
 - `web/src/model.ts`: pure headings, statistics, fuzzy matching, syntax compatibility and asset paths.
 - `web/src/render.ts`: Markdown/KaTeX/Mermaid/footnotes/alerts rendering and sanitation.
 - `web/src/api.ts`: authenticated transport, per-run token and workspace identity.
@@ -49,4 +50,10 @@ A workspace contains `.typoha/history`, `.typoha/trash`, `.typoha/drafts`, `.typ
 
 ## Runtime and packaging
 
-Release builds embed the built `web/dist` assets. `build.rs` invalidates the Rust build when these assets change, so a UI-only edit cannot silently leave a stale embedded release. Node and Rust are build dependencies; end users need the release executable and an existing modern browser. No WebKit development packages are required. Windows/macOS are not validated yet.
+Release builds embed the built `web/dist` assets. `build.rs` invalidates the Rust build when these assets change, so a UI-only edit cannot silently leave a stale embedded release. Node and Rust are build dependencies. Normal `run.sh` launches the pinned Electron shell; server-only and browser modes remain explicit options. Desktop packaging includes Chromium, so no existing browser or WebKit development packages are required. Windows/macOS are not validated yet.
+
+The Rust `--desktop` protocol sends one JSON capability URL over a private stdout pipe. Closing the parent's stdin pipe gracefully stops the server, including after a shell crash. The shell never prints or persists this URL. Chromium uses a nonpersistent, cache-disabled session; token/sessionStorage remains in memory. Workspace settings and drafts continue through the Rust API. Window size and position are not persisted yet.
+
+The preload exposes only folder selection, print and PDF generation. IPC checks the sender window, main frame and local origin. The renderer has sandbox/context isolation, no Node integration or webviews. Permissions are denied except local editor clipboard writes and fullscreen. Navigation cannot replace the editor with an external page. Explicit external links open in the system browser. Export downloads display a save dialog. Closing a dirty window can be canceled through the native dialog; choosing to discard is explicit. Application-menu quit follows the same beforeunload path.
+
+Russian/English dictionaries are fetched at build time from a pinned Electron archive with verified SHA-256 and embedded as static assets. The spellchecker fetches those assets from the local Rust server, never the Chromium CDN. Other dictionary languages are not currently bundled. Context-menu suggestions and standard edit actions are available. No updater, telemetry or remote dictionary service is enabled.

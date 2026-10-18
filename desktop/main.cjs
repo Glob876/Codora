@@ -1,0 +1,268 @@
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  dialog,
+  ipcMain,
+  shell,
+  session,
+} = require("electron");
+const path = require("node:path");
+const { startBackend, externalUrl } = require("./backend.cjs");
+let backend;
+let window;
+let origin;
+let stopped = false;
+app.setName("Typoha");
+if (process.platform === "linux") app.setDesktopName("typoha.desktop");
+// Avoid Chromium background services; document network policy remains in Rust CSP.
+app.commandLine.appendSwitch("disable-background-networking");
+app.commandLine.appendSwitch("disable-component-update");
+app.commandLine.appendSwitch("disable-sync");
+app.enableSandbox();
+
+async function openExternal(url) {
+  if (!externalUrl(url)) return;
+  await shell.openExternal(url);
+}
+function trusted(event) {
+  return (
+    window &&
+    event.sender === window.webContents &&
+    event.senderFrame === window.webContents.mainFrame &&
+    new URL(event.senderFrame.url).origin === origin
+  );
+}
+app
+  .whenReady()
+  .then(async () => {
+    Menu.setApplicationMenu(
+      Menu.buildFromTemplate([
+        ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
+        {
+          label: "Правка",
+          submenu: [
+            { role: "undo" },
+            { role: "redo" },
+            { type: "separator" },
+            { role: "cut" },
+            { role: "copy" },
+            { role: "paste" },
+            { role: "selectAll" },
+          ],
+        },
+        {
+          label: "Окно",
+          submenu: [
+            { role: "togglefullscreen", accelerator: "F11" },
+            { role: "minimize" },
+            { role: "close" },
+          ],
+        },
+      ]),
+    );
+    const binary = app.isPackaged
+      ? path.join(
+          __dirname,
+          "bin",
+          process.platform === "win32" ? "typoha-core.exe" : "typoha-core",
+        )
+      : path.join(
+          __dirname,
+          "..",
+          "target",
+          "release",
+          process.platform === "win32" ? "typoha.exe" : "typoha",
+        );
+    const args = process.argv.slice(app.isPackaged ? 1 : 2);
+    if (app.isPackaged && !args.length) {
+      const chosen = await dialog.showOpenDialog({
+        title: "Выберите папку заметок",
+        properties: ["openDirectory", "createDirectory"],
+      });
+      if (chosen.canceled) {
+        app.quit();
+        return;
+      }
+      args.push(chosen.filePaths[0]);
+    }
+    backend = startBackend(
+      binary,
+      args.length
+        ? args
+        : [
+            app.isPackaged
+              ? process.cwd()
+              : path.join(__dirname, "..", "examples"),
+          ],
+    );
+    const url = await backend.ready;
+    origin = new URL(url).origin;
+    // No persistent Chromium profile: capability tokens and documents stay in memory.
+    const localSession = session.fromPartition(`typoha-${process.pid}`, {
+      cache: false,
+    });
+    const permitted = (contents, permission) =>
+      contents === window?.webContents &&
+      ["clipboard-sanitized-write", "clipboard-write", "fullscreen"].includes(
+        permission,
+      );
+    localSession.setPermissionRequestHandler((contents, permission, callback) =>
+      callback(permitted(contents, permission)),
+    );
+    localSession.setSpellCheckerDictionaryDownloadURL(
+      `${origin}/dictionaries/`,
+    );
+    if (process.platform !== "darwin")
+      localSession.setSpellCheckerLanguages(["ru-RU", "en-US"]);
+    localSession.setPermissionCheckHandler((contents, permission) =>
+      permitted(contents, permission),
+    );
+    localSession.on("will-download", (_event, item) => {
+      item.setSaveDialogOptions({
+        title: "Сохранить экспорт",
+        defaultPath: item.getFilename(),
+      });
+      item.once("done", (_e, state) => {
+        if (state === "interrupted" && window && !window.isDestroyed())
+          dialog.showErrorBox(
+            "Экспорт не сохранён",
+            "Проверьте свободное место и права доступа к выбранной папке.",
+          );
+      });
+    });
+    window = new BrowserWindow({
+      title: "Typoha",
+      icon: path.join(__dirname, "icon.png"),
+      width: 1280,
+      height: 860,
+      minWidth: 760,
+      minHeight: 540,
+      show: false,
+      backgroundColor: "#f8f7f4",
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: path.join(__dirname, "preload.cjs"),
+        session: localSession,
+        sandbox: true,
+        contextIsolation: true,
+        nodeIntegration: false,
+        webSecurity: true,
+        spellcheck: true,
+      },
+    });
+    window.webContents.setWindowOpenHandler(({ url }) => {
+      void openExternal(url).catch(() =>
+        dialog.showErrorBox(
+          "Не удалось открыть ссылку",
+          "Проверьте системный браузер.",
+        ),
+      );
+      return { action: "deny" };
+    });
+    window.webContents.on("will-navigate", (event, url) => {
+      // Keep the editor alive even when a document contains links.
+      if (new URL(url).origin !== origin || new URL(url).pathname !== "/") {
+        event.preventDefault();
+        void openExternal(url).catch(() => {});
+      }
+    });
+    window.webContents.on("will-redirect", (event, url) => {
+      if (new URL(url).origin !== origin) event.preventDefault();
+    });
+    window.webContents.on("context-menu", (_event, params) => {
+      const items = params.dictionarySuggestions.map((label) => ({
+        label,
+        click: () => window.webContents.replaceMisspelling(label),
+      }));
+      if (items.length) items.push({ type: "separator" });
+      if (params.isEditable)
+        items.push(
+          { role: "undo" },
+          { role: "redo" },
+          { type: "separator" },
+          { role: "cut" },
+          { role: "copy" },
+          { role: "paste" },
+          { role: "selectAll" },
+        );
+      else if (params.selectionText) items.push({ role: "copy" });
+      if (items.length) Menu.buildFromTemplate(items).popup({ window });
+    });
+    window.webContents.on("will-attach-webview", (event) =>
+      event.preventDefault(),
+    );
+    window.webContents.on("will-prevent-unload", (event) => {
+      const choice = dialog.showMessageBoxSync(window, {
+        type: "warning",
+        title: "Несохранённые изменения",
+        message: "Закрыть редактор без сохранения изменений?",
+        detail:
+          "Нажмите «Вернуться», чтобы сохранить документ. Восстановление черновика зависит от успешной записи на диск.",
+        buttons: ["Вернуться", "Закрыть без сохранения"],
+        defaultId: 0,
+        cancelId: 0,
+      });
+      if (choice === 1) event.preventDefault();
+    });
+    window.webContents.on("render-process-gone", () => {
+      dialog.showErrorBox(
+        "Редактор остановился",
+        "Перезапустите Typoha. Сохранённые документы и черновики остаются в рабочей папке.",
+      );
+    });
+    backend.child.once("exit", () => {
+      if (!backend.stopping && window && !window.isDestroyed()) {
+        dialog.showErrorBox(
+          "Файловое ядро остановилось",
+          "Сохранение недоступно. Скопируйте несохранённый текст и перезапустите Typoha.",
+        );
+      }
+    });
+    ipcMain.handle("typoha:folder", async (event) => {
+      if (!trusted(event)) throw new Error("Недоступно");
+      const result = await dialog.showOpenDialog(window, {
+        title: "Открыть папку",
+        properties: ["openDirectory", "createDirectory"],
+      });
+      return result.canceled ? null : result.filePaths[0];
+    });
+    ipcMain.handle("typoha:print", (event) => {
+      if (!trusted(event)) throw new Error("Недоступно");
+      return new Promise((resolve, reject) =>
+        window.webContents.print({ printBackground: true }, (ok, reason) => {
+          if (ok || reason === "cancelled") resolve();
+          else reject(new Error(reason));
+        }),
+      );
+    });
+    ipcMain.handle("typoha:pdf", (event) => {
+      if (!trusted(event)) throw new Error("Недоступно");
+      return window.webContents.printToPDF({
+        printBackground: true,
+        preferCSSPageSize: true,
+      });
+    });
+    await window.loadURL(url);
+    window.show();
+  })
+  .catch(async () => {
+    dialog.showErrorBox(
+      "Не удалось запустить Typoha",
+      "Проверьте путь к папке, права доступа и сборку приложения.",
+    );
+    if (backend) await backend.stop();
+    app.exit(1);
+  });
+app.on("window-all-closed", () => app.quit());
+app.on("will-quit", (event) => {
+  if (backend && !stopped) {
+    event.preventDefault();
+    void backend.stop().finally(() => {
+      stopped = true;
+      app.quit();
+    });
+  }
+});
+for (const signal of ["SIGINT", "SIGTERM"])
+  process.on(signal, () => app.quit());

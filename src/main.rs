@@ -1,4 +1,5 @@
 use std::{
+    io::{Read, Write},
     path::PathBuf,
     sync::{Arc, Mutex},
 };
@@ -12,10 +13,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut root = None;
     let mut port = 0u16;
     let mut open = true;
+    let mut desktop = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--port" => port = args.next().ok_or("--port требует номер")?.parse()?,
             "--no-open" => open = false,
+            "--desktop" => {
+                desktop = true;
+                open = false;
+            }
             "--help" | "-h" => {
                 println!(
                     "Typoha {}\nИспользование: typoha [папка] [--port 4321] [--no-open]\nСервер доступен только через 127.0.0.1, файлы остаются на компьютере.",
@@ -38,11 +44,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         uuid::Uuid::new_v4().simple()
     );
     let url = format!("{origin}/#{token}");
-    println!(
-        "Typoha {} — {}\nОткройте локально: {url}\nCtrl+C — остановить. Ссылка даёт доступ к открытой папке: не передавайте её другим.",
-        env!("CARGO_PKG_VERSION"),
-        workspace.root.display()
-    );
+    if desktop {
+        // Private pipe to the desktop parent; never persisted in a browser profile.
+        println!("{}", serde_json::json!({ "url": url }));
+        std::io::stdout().flush()?;
+    } else {
+        println!(
+            "Typoha {} — {}\nОткройте локально: {url}\nCtrl+C — остановить. Ссылка даёт доступ к открытой папке: не передавайте её другим.",
+            env!("CARGO_PKG_VERSION"),
+            workspace.root.display()
+        );
+    }
     if open {
         open_window(&url);
     }
@@ -51,9 +63,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         token,
         origin,
     };
+    let (parent_closed, parent_gone) = tokio::sync::oneshot::channel::<()>();
+    if desktop {
+        std::thread::spawn(move || {
+            let mut byte = [0u8; 1];
+            while matches!(std::io::stdin().read(&mut byte), Ok(n) if n > 0) {}
+            let _ = parent_closed.send(());
+        });
+    }
     axum::serve(listener, router(state))
-        .with_graceful_shutdown(async {
-            let _ = tokio::signal::ctrl_c().await;
+        .with_graceful_shutdown(async move {
+            if desktop {
+                tokio::select! {
+                    _ = tokio::signal::ctrl_c() => {},
+                    _ = parent_gone => {},
+                }
+            } else {
+                let _ = tokio::signal::ctrl_c().await;
+            }
         })
         .await?;
     Ok(())

@@ -67,3 +67,33 @@ in the About dialog to their own corresponding source and preserve notices.
 - [AGPL v3 text, SPDX](https://spdx.org/licenses/AGPL-3.0-or-later.html), sections 4–6 and 13.
 - [GNU licensing FAQ](https://www.gnu.org/licenses/gpl-faq.en.html).
 - [MIT text, OSI](https://opensource.org/license/mit).
+
+## Desktop runtime inventory and remaining distribution review
+
+Electron 44.9.0 is MIT, but its complete Chromium/Node/FFmpeg runtime contains
+additional licenses. The unmodified LICENSE and LICENSES.chromium.html are kept
+in docs/licenses and copied alongside the runtime. The aggregate inventory entry
+`MIT AND LicenseRef-Chromium-ThirdParty` deliberately does not label all bundled
+code MIT. The automated license check verifies retained notices; it does not audit
+every component in that upstream HTML or discharge source/relinking obligations.
+Before public desktop distribution, review those obligations (including shared
+FFmpeg libraries) against the exact Electron release sources:
+https://github.com/electron/electron/releases/tag/v44.9.0 .
+The existing Typoha source archive alone is not the corresponding source for
+Electron/Chromium or its dictionaries.
+
+Exception: build-time `@electron-internal/extract-zip` 1.0.5 declares BSD-2-Clause
+in both its npm manifest and README, but omits the complete license grant from
+its npm package and release commit b83e459fd04c53b0a1c8438a6792df8f64be47fc.
+The exact distributed README is retained as its notice. Obtain the full upstream
+grant or replace this build dependency before public redistribution of the
+vendored build-tool source archive. The extractor is not used by the shipped
+application at runtime. This exception is recorded, not silently treated as a
+complete license-text audit.
+
+The two shipped .bdic dictionaries are unmodified build dependencies from the
+pinned Electron dictionary archive. Its complete LICENSE/COPYING files are
+retained under docs/dictionary-notices and included in both distributions. That
+archive aggregates several dictionary licenses; per-language provenance and any
+corresponding-source requirements remain part of the public distribution review.
+No package is uploaded or published by building a local desktop archive.

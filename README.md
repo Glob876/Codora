@@ -26,13 +26,17 @@ To open your own folder:
 ./run.sh /absolute/path/to/notes
 ```
 
-If a browser does not open automatically, use the URL printed in the terminal. In Codex, you can open it in the in-app browser. An installed Chromium, Chrome, or Edge is used for a separate app window; otherwise, the system browser is used. The server listens only on `127.0.0.1`. The URL contains a temporary access key for the open folder; do not share it.
+Normal launch opens a **Typoha desktop window** with bundled Electron/Chromium. An installed browser is not required. Folder selection and export downloads use system dialogs; PDF is generated directly. Closing the window stops the Rust server, and unsaved changes prompt before closing. Russian and English spelling dictionaries are bundled locally without runtime Internet downloads.
+
+For an explicit browser session, use `./run.sh --browser /path/to/notes`. For development server mode:
 
 ```bash
-./target/release/typoha ./examples --no-open --port 43217
+./run.sh ./examples --no-open --port 43217
 ```
 
-Press Ctrl+C in the terminal to stop the server. Closing the browser tab does not stop it. With a packaged build, run `./typoha ./examples` without installing Node or Rust.
+The server listens only on `127.0.0.1`. Its terminal URL contains a temporary access key; do not share it. Ctrl+C stops server mode; closing a browser tab does not.
+
+The Linux desktop distribution is built under `artifacts/typoha-0.1.0-linux-x86_64-desktop/`. Run `./typoha` and select a folder. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Typoha to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
 
 The application interface is currently in Russian. This README describes the current version.
 
@@ -43,7 +47,7 @@ The application interface is currently in Russian. This README describes the cur
 - A file tree, document outline, find and replace, regex search across a folder, and quick open.
 - Revision-checked saves, autosave, version history, drafts, and recoverable trash.
 - Light, dark, sepia, and system themes; custom CSS, writing width and font settings, and focus mode.
-- HTML and PNG export; PDF through browser printing. Other formats use an **external Pandoc** installation in PATH, which is not bundled with the app.
+- HTML, PNG and direct PDF export in desktop mode; system printing. Other formats use an **external Pandoc** installation in PATH, which is not bundled with the app.
 - A command palette and an [API for custom extensions](docs/architecture.md).
 
 Documents containing constructs unsupported by the visual editor open in source mode with an explanation. This preserves their text; visual editing may normalize Markdown syntax. Active HTML embeds and automatic network downloads are disabled.
@@ -72,7 +76,7 @@ npm ci --prefix web
 ./scripts/package.sh
 ```
 
-`check.sh` runs TypeScript checks, formatting checks, client tests, the frontend build, Rust tests, Clippy, npm audit, and license checks. `package.sh` creates a Linux archive in `artifacts/` with the executable, sample documents, both READMEs, documentation, complete third-party license notices, and a source archive with vendored dependencies. Windows and macOS builds have not been verified yet.
+`check.sh` runs TypeScript checks, formatting checks, client tests, the frontend build, Rust tests, Clippy, npm audit, and license checks. `package.sh` creates Linux server and desktop archives in `artifacts/` with the executable, sample documents, both READMEs, documentation, complete third-party license notices, and a source archive with vendored dependencies. The desktop archive also includes Electron and its full Chromium notices. See docs/licensing.md for known license-review limitations. Windows and macOS builds have not been verified yet.
 
 Workspace data is stored in `.typoha` inside the open folder. Avoid deleting history, drafts, or trash unless intended. Symbolic links outside the workspace are not supported. Documents are currently limited to 16 MB; folder search skips files larger than 2 MB and returns at most 500 matching lines.
 

@@ -1231,6 +1231,18 @@
     ]
   },
   {
+    "ecosystem": "electron-runtime",
+    "name": "electron",
+    "version": "44.9.0",
+    "license": "MIT AND LicenseRef-Chromium-ThirdParty",
+    "development_only": false,
+    "source": "https://github.com/electron/electron/releases/tag/v44.9.0",
+    "notices": [
+      "docs/licenses/electron-runtime-electron-44.9.0-LICENSE",
+      "docs/licenses/electron-runtime-electron-44.9.0-LICENSES.chromium.html"
+    ]
+  },
+  {
     "ecosystem": "npm",
     "name": "@antfu/install-pkg",
     "version": "2.1.0",
@@ -1756,6 +1768,28 @@
     "source": "https://registry.npmjs.org/@csstools/css-tokenizer/-/css-tokenizer-4.0.2.tgz",
     "notices": [
       "docs/licenses/npm-_csstools_css-tokenizer-4.0.2-LICENSE.md"
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "name": "@electron-internal/extract-zip",
+    "version": "1.0.5",
+    "license": "BSD-2-Clause",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/@electron-internal/extract-zip/-/extract-zip-1.0.5.tgz",
+    "notices": [
+      "docs/licenses/npm-_electron-internal_extract-zip-1.0.5-README.md"
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "name": "@electron/get",
+    "version": "5.1.0",
+    "license": "MIT",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/@electron/get/-/get-5.1.0.tgz",
+    "notices": [
+      "docs/licenses/npm-_electron_get-5.1.0-LICENSE"
     ]
   },
   {
@@ -3742,6 +3776,17 @@
   },
   {
     "ecosystem": "npm",
+    "name": "electron",
+    "version": "44.9.0",
+    "license": "MIT",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/electron/-/electron-44.9.0.tgz",
+    "notices": [
+      "docs/licenses/npm-electron-44.9.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
     "name": "emojilib",
     "version": "2.4.0",
     "license": "MIT",
@@ -3771,6 +3816,17 @@
     "source": "https://registry.npmjs.org/entities/-/entities-8.1.0.tgz",
     "notices": [
       "docs/licenses/npm-entities-8.1.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "name": "env-paths",
+    "version": "3.0.0",
+    "license": "MIT",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/env-paths/-/env-paths-3.0.0.tgz",
+    "notices": [
+      "docs/licenses/npm-env-paths-3.0.0-license"
     ]
   },
   {
@@ -3805,17 +3861,6 @@
     "source": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-5.0.0.tgz",
     "notices": [
       "docs/licenses/npm-escape-string-regexp-5.0.0-license"
-    ]
-  },
-  {
-    "ecosystem": "npm",
-    "name": "estree-walker",
-    "version": "2.0.2",
-    "license": "MIT",
-    "development_only": false,
-    "source": "https://registry.npmjs.org/estree-walker/-/estree-walker-2.0.2.tgz",
-    "notices": [
-      "docs/licenses/npm-estree-walker-2.0.2-LICENSE"
     ]
   },
   {
@@ -3882,6 +3927,17 @@
     "source": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz",
     "notices": [
       "docs/licenses/npm-fdir-6.5.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "name": "graceful-fs",
+    "version": "4.2.11",
+    "license": "ISC",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.11.tgz",
+    "notices": [
+      "docs/licenses/npm-graceful-fs-4.2.11-LICENSE"
     ]
   },
   {
@@ -4113,17 +4169,6 @@
     "source": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.21.tgz",
     "notices": [
       "docs/licenses/npm-magic-string-0.30.21-LICENSE"
-    ]
-  },
-  {
-    "ecosystem": "npm",
-    "name": "magic-string",
-    "version": "1.4.3",
-    "license": "MIT",
-    "development_only": true,
-    "source": "https://registry.npmjs.org/magic-string/-/magic-string-1.4.3.tgz",
-    "notices": [
-      "docs/licenses/npm-magic-string-1.4.3-LICENSE"
     ]
   },
   {
@@ -4854,6 +4899,17 @@
   },
   {
     "ecosystem": "npm",
+    "name": "progress",
+    "version": "2.0.3",
+    "license": "MIT",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/progress/-/progress-2.0.3.tgz",
+    "notices": [
+      "docs/licenses/npm-progress-2.0.3-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
     "name": "prosemirror-changeset",
     "version": "2.4.4",
     "license": "MIT",
@@ -5195,6 +5251,17 @@
   },
   {
     "ecosystem": "npm",
+    "name": "semver",
+    "version": "7.8.5",
+    "license": "ISC",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/semver/-/semver-7.8.5.tgz",
+    "notices": [
+      "docs/licenses/npm-semver-7.8.5-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
     "name": "skin-tone",
     "version": "2.0.0",
     "license": "MIT",
@@ -5257,6 +5324,17 @@
     "source": "https://registry.npmjs.org/stylis/-/stylis-4.4.0.tgz",
     "notices": [
       "docs/licenses/npm-stylis-4.4.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "name": "sumchecker",
+    "version": "3.0.1",
+    "license": "Apache-2.0",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/sumchecker/-/sumchecker-3.0.1.tgz",
+    "notices": [
+      "docs/licenses/npm-sumchecker-3.0.1-LICENSE"
     ]
   },
   {
@@ -5367,6 +5445,17 @@
     "source": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
     "notices": [
       "docs/licenses/npm-typescript-5.9.3-LICENSE.txt"
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "name": "undici",
+    "version": "7.30.1",
+    "license": "MIT",
+    "development_only": true,
+    "source": "https://registry.npmjs.org/undici/-/undici-7.30.1.tgz",
+    "notices": [
+      "docs/licenses/npm-undici-7.30.1-LICENSE"
     ]
   },
   {

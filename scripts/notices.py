@@ -14,10 +14,9 @@ OUTPUT = ROOT / 'docs' / 'licenses'
 OUTPUT.mkdir(parents=True, exist_ok=True)
 # This directory contains generated notices only, never hand-authored files.
 for previous in OUTPUT.iterdir():
-    if previous.is_file() and previous.name.startswith(('cargo-', 'npm-')):
+    if previous.is_file() and previous.name.startswith(('cargo-', 'npm-', 'electron-runtime-')):
         previous.unlink()
 metadata = json.loads(subprocess.check_output(['cargo', 'metadata', '--format-version', '1'], cwd=ROOT))
-lock = json.loads((ROOT / 'web/package-lock.json').read_text())
 records = []
 missing = []
 # khroma's distributed manifest omits the license field; the package's license
@@ -38,6 +37,10 @@ def collect(ecosystem, name, version, license_expression, folder, source, dev=Fa
         fallback = []
         if ecosystem == 'cargo' and name == 'r-efi':
             fallback = [folder / 'AUTHORS']
+        elif ecosystem == 'npm' and name == '@electron-internal/extract-zip':
+            # Upstream 1.0.5 declares BSD-2-Clause but omits the grant text even
+            # from its release commit. Retain its README; exception in licensing.md.
+            fallback = [folder / 'README.md']
         elif ecosystem == 'npm' and name in ('fastdom', 'strictdom'):
             # These exact distributed README files contain the complete MIT grant.
             fallback = [folder / 'README.md']
@@ -59,17 +62,27 @@ def collect(ecosystem, name, version, license_expression, folder, source, dev=Fa
 for p in metadata['packages']:
     collect('cargo', p['name'], p['version'], p['license'] or 'UNKNOWN',
             Path(p['manifest_path']).parent, p.get('repository') or p.get('source'), False)
-for location, entry in lock['packages'].items():
-    if not location:
-        continue
-    folder = ROOT / 'web' / location
-    manifest = folder / 'package.json'
-    if not manifest.is_file():  # optional dependency for a different platform
-        continue
-    p = json.loads(manifest.read_text())
-    name = p.get('name', location.split('node_modules/')[-1])
-    collect('npm', name, entry['version'], p.get('license') or manifest_overrides.get(name, 'UNKNOWN'),
-            folder, entry.get('resolved') or p.get('homepage'), entry.get('dev', False))
+for npm_root in ('web', 'desktop'):
+    lock = json.loads((ROOT / npm_root / 'package-lock.json').read_text())
+    for location, entry in lock['packages'].items():
+        if not location:
+            continue
+        folder = ROOT / npm_root / location
+        manifest = folder / 'package.json'
+        if not manifest.is_file():
+            continue
+        p = json.loads(manifest.read_text())
+        name = p.get('name', location.split('node_modules/')[-1])
+        if any(r['ecosystem'] == 'npm' and r['name'] == name and r['version'] == entry['version'] for r in records):
+            continue
+        collect('npm', name, entry['version'], p.get('license') or manifest_overrides.get(name, 'UNKNOWN'),
+                folder, entry.get('resolved') or p.get('homepage'), entry.get('dev', False))
+# Electron's MIT wrapper is not the whole runtime. Preserve the complete bundled
+# Chromium/Node/FFmpeg notice inventory without changing its license texts.
+electron = ROOT / 'desktop/node_modules/electron'
+version = json.loads((electron / 'package.json').read_text())['version']
+collect('electron-runtime', 'electron', version, 'MIT AND LicenseRef-Chromium-ThirdParty',
+        electron / 'dist', f'https://github.com/electron/electron/releases/tag/v{version}')
 records.sort(key=lambda p:(p['ecosystem'],p['name'],p['version']))
 (ROOT / 'docs/dependencies.json').write_text(json.dumps(records, ensure_ascii=False, indent=2)+'\n')
 lines = ['# Third-party notices', '',
@@ -81,6 +94,8 @@ lines = ['# Third-party notices', '',
          '- The frontend runtime dependencies otherwise use permissive MIT/ISC/BSD/Apache/Unlicense terms. No vendor assets are distributed.',
          '- MPL-2.0 packages in the build toolchain (Lightning CSS) are not bundled into the app. Their license notices and exact package source URLs are nevertheless retained.',
          '- Mermaid 11.17.2 is selected instead of the 12.x ELK-containing distribution, avoiding the EPL-licensed optional runtime in this build.',
+         '- Electron runtime includes Chromium, Node and FFmpeg under their individual licenses; the complete bundled LICENSES.chromium.html is retained. See docs/licensing.md for distribution limitations.',
+         '- The build-only @electron-internal/extract-zip 1.0.5 omits the full BSD grant upstream; its README declaration is retained. This documented exception needs resolution before public source-archive distribution (docs/licensing.md).',
          '- khroma omits its manifest license field; its distributed license file explicitly grants MIT.',
          '', '| Ecosystem | Package | License | Scope | Notices |', '| --- | --- | --- | --- | --- |']
 for p in records:

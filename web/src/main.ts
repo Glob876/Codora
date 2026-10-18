@@ -823,7 +823,7 @@ async function exportDialog() {
     `<p>Создайте копию для чтения, публикации или другого редактора.</p><div class="export-grid">${[
       ["md", "Markdown"],
       ["html", "HTML"],
-      ["pdf", "PDF / печать"],
+      ["pdf", window.typohaDesktop ? "PDF" : "PDF / печать"],
       ["png", "Изображение PNG"],
       ["docx", "Word · Pandoc"],
       ["odt", "OpenDocument · Pandoc"],
@@ -839,7 +839,7 @@ async function exportDialog() {
       )
       .join(
         "",
-      )}</div><p class="dialog-hint">Pandoc — внешний конвертер. PDF создаётся через диалог печати браузера.</p>`,
+      )}</div><p class="dialog-hint">Pandoc — внешний конвертер. ${window.typohaDesktop ? "PDF сохраняется отдельным файлом." : "PDF создаётся через диалог печати браузера."}</p>`,
   );
   d.querySelectorAll<HTMLElement>("[data-export]").forEach(
     (b) =>
@@ -888,7 +888,7 @@ async function exportFile(format: string) {
     return;
   }
   if (format === "pdf") {
-    await printDocument();
+    await printDocument(name);
     return;
   }
   if (format === "png") {
@@ -924,14 +924,26 @@ async function exportFile(format: string) {
     `${name}.${format === "latex" ? "tex" : format === "revealjs" ? "html" : format}`,
   );
 }
-async function printDocument() {
+async function printDocument(pdfName?: string) {
   const article = await exportArticle();
   const area = document.createElement("div");
   area.id = "print-area";
   area.append(article);
   $("#print-area")?.remove();
   document.body.append(area);
-  window.print();
+  if (window.typohaDesktop) {
+    if (pdfName) {
+      const bytes = await window.typohaDesktop.pdf();
+      download(
+        new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
+        `${pdfName}.pdf`,
+      );
+    } else {
+      await window.typohaDesktop.print();
+    }
+  } else {
+    window.print();
+  }
 }
 async function showHistory() {
   if (!path) {
@@ -1138,11 +1150,9 @@ async function run(
     case "workspace":
       {
         if (!(await canLeave())) return;
-        const destination = await input(
-          "Открыть папку",
-          "Полный путь к папке",
-          root,
-        );
+        const destination = window.typohaDesktop
+          ? await window.typohaDesktop.chooseFolder()
+          : await input("Открыть папку", "Полный путь к папке", root);
         if (destination) {
           await api("workspace", { root: destination });
           root = (await api("workspace")).root;

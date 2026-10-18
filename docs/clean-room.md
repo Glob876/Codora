@@ -31,3 +31,21 @@ No documentation prose or product assets are copied into the implementation. The
 ## Legal context, not legal clearance
 
 https://www.copyright.gov/register/tx-programs.html distinguishes program expression from ideas, logic, algorithms, systems, methods, concepts and layouts. https://www.copyright.gov/circs/circ61.pdf also discusses screen displays and manuals. Applicable law and other rights can differ by jurisdiction. This record documents implementation provenance, not a legal opinion.
+
+## Desktop shell (2026-10-18)
+
+Original green square/t-path app icon in desktop/icon.svg; icon.png is its raster asset.
+
+Original Electron main/preload/process-lifecycle code, using public Electron APIs:
+- https://www.electronjs.org/docs/latest/tutorial/security/
+- https://www.electronjs.org/docs/latest/api/browser-window
+- https://www.electronjs.org/docs/latest/api/web-contents
+- https://www.electronjs.org/docs/latest/api/session
+- https://www.electronjs.org/docs/latest/tutorial/spellchecker
+
+Electron 44.9.0 is pinned in desktop/package-lock.json. Its release runtime and
+bundled Chromium notices are retained; no other editor's implementation or assets
+were consulted. Russian/English dictionaries come from the same Electron release's
+hunspell_dictionaries.zip, SHA-256 41fc02332fc7cc2ea7230409de1bbe5d0a44b3a45b85f6d3acdaddd2b2047d8f,
+verified against the upstream SHASUMS256.txt. Dictionary notices are retained in
+docs/dictionary-notices. License inventory exceptions are recorded in licensing.md.
