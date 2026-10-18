@@ -18,6 +18,8 @@ This is a single-author independent implementation using a clean-room-style sour
 - https://spec.commonmark.org/ — Markdown standard.
 - https://github.github.com/gfm/ — table/task-list/strike extensions.
 
+Screenshots under `docs/screenshots/` were captured from Typoha itself with its original sample documents; they are not reference-product images.
+
 No documentation prose or product assets are copied into the implementation. The previous Russian feature inventory remains outside the repository.
 
 ## Dependency references

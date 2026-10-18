@@ -6,7 +6,7 @@ package_name="typoha-0.1.0-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
 package_dir="artifacts/$package_name"
 mkdir -p "$package_dir/docs"
 cp target/release/typoha LICENSE README.md AGENTS.md THIRD_PARTY_NOTICES.md "$package_dir/"
-cp -R docs/licenses "$package_dir/docs/"
+cp -R docs/licenses docs/screenshots "$package_dir/docs/"
 cp docs/parity.md docs/clean-room.md docs/architecture.md docs/verification.md docs/dependencies.json "$package_dir/docs/"
 # Ship committed sample documents only, never local drafts or private notes.
 git archive HEAD examples | tar -x -C "$package_dir"
