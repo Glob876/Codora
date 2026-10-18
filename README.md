@@ -2,6 +2,8 @@
 
 Codora now edits UTF-8 code alongside Markdown: automatic language detection, local syntax highlighting, indentation and automatic completion. JavaScript/TypeScript suggestions include inferred object members and ES5 methods in the current file; other languages use language providers, keywords and document words. Ctrl+Space opens suggestions. This is an evolving editor, with no full VS Code feature parity: project LSP, debugging, terminal and extension compatibility are planned.
 
+Start writing and New document ask for a file format before editing; Save suggests the matching extension.
+
 The last workspace folder is restored after restart. An explicit launch path overrides it; tabs are not restored yet. Existing history/drafts remain in `.typoha`.
 
 **English** | [Русский](README.ru.md)

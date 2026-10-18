@@ -87,3 +87,12 @@ file, using atomic replacement. Explicit startup paths take precedence; unavaila
 or corrupt remembered workspaces fail visibly rather than silently substituting a
 folder. Existing `.typoha` metadata is deliberately retained so history and drafts
 survive the rename. The new C icon is original SVG geometry.
+
+## New document formats (2026-10-18)
+
+Implemented from the owner's request to choose a format after Start writing.
+The original local dialog offers Markdown, plain text and common source formats.
+An untitled document retains its extension per tab, independently of its disk path;
+that extension selects the existing language support and default Save filename.
+Cancellation preserves the welcome screen, and selecting a format does not create
+an empty file on disk. No new dependencies or external references were needed.

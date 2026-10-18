@@ -1,3 +1,4 @@
+import { chooseDocumentFormat, newDocumentName } from "./new-document";
 import { observeUi, setLanguage, tr, translateUi } from "./i18n";
 import { surfaceOpacity } from "./appearance";
 import { treeRows } from "./file-tree";
@@ -90,6 +91,10 @@ interface Draft {
 let settings: Settings = loadLocalSettings();
 let preferencesReady = false;
 const sample = "";
+let untitledExtension = "md";
+function editorPath() {
+  return path || `untitled.${untitledExtension}`;
+}
 let content = sample,
   path: string | null = null,
   revision: string | null = null,
@@ -142,6 +147,7 @@ interface TabState {
   mode: "rich" | "source" | "preview";
   welcome: boolean;
   scroll: number;
+  untitledExtension: string;
   sourceState?: EditorState;
   richSelection?: ReturnType<Selection["toJSON"]>;
 }
@@ -161,6 +167,7 @@ function snapshotTab(): TabState {
     mode,
     welcome,
     scroll: $("#editor-scroll").scrollTop,
+    untitledExtension,
     sourceState: cm?.state,
     richSelection: crepe?.editor.ctx
       .get(editorViewCtx)
@@ -199,7 +206,7 @@ function renderTabs() {
     const item = box.children[i];
     const b = item.firstElementChild!;
     item.lastElementChild!.setAttribute("aria-label", tr("Закрыть вкладку"));
-    b.textContent = `${t.dirty ? "● " : ""}${t.path?.split("/").pop() || tr(t.welcome ? "Новая вкладка" : "Без названия")}`;
+    b.textContent = `${t.dirty ? "● " : ""}${t.path?.split("/").pop() || (t.welcome ? tr("Новая вкладка") : `${tr("Без названия")}.${t.untitledExtension}`)}`;
     b.setAttribute("aria-selected", String(t.id === activeTab));
     item.classList.toggle("active", t.id === activeTab);
   });
@@ -217,7 +224,17 @@ async function activateTab(id: string) {
     const t = tabs.find((t) => t.id === id);
     if (!t) return;
     activeTab = t.id;
-    ({ content, path, revision, dirty, lastSaved, draftId, mode, welcome } = t);
+    ({
+      content,
+      path,
+      revision,
+      dirty,
+      lastSaved,
+      draftId,
+      mode,
+      welcome,
+      untitledExtension,
+    } = t);
     await mountEditor();
     if (cm && t.sourceState && mode === "source") cm.setState(t.sourceState);
     if (crepe && t.richSelection && mode === "rich") {
@@ -235,7 +252,7 @@ async function activateTab(id: string) {
     navigating = false;
   }
 }
-async function newTab(isWelcome = true) {
+async function newTab(isWelcome = true, extension?: string) {
   if (loading || saving || navigating) return;
   navigating = true;
   try {
@@ -244,6 +261,8 @@ async function newTab(isWelcome = true) {
     activeTab = crypto.randomUUID();
     content = "";
     path = null;
+    untitledExtension = extension || "md";
+    if (extension) mode = extension === "md" ? "rich" : "source";
     revision = null;
     dirty = false;
     lastSaved = "";
@@ -415,12 +434,15 @@ function applySettings() {
   $("#spellcheck-toggle").classList.toggle("active", settings.spellcheck);
   $("#editor")
     .querySelectorAll<HTMLElement>("[contenteditable]")
-    .forEach((e) => (e.spellcheck = isMarkdown(path) && settings.spellcheck));
+    .forEach(
+      (e) => (e.spellcheck = isMarkdown(editorPath()) && settings.spellcheck),
+    );
   updateStatus();
 }
 function updateStatus() {
   renderTabs();
-  const name = path?.split("/").pop() || tr("Без названия");
+  const name =
+    path?.split("/").pop() || `${tr("Без названия")}.${untitledExtension}`;
   $("#document-name").textContent = name;
   $("#document-name").title = path || name;
   $("#window-title").textContent = `${dirty ? "● " : ""}${name} — Codora`;
@@ -433,13 +455,13 @@ function updateStatus() {
         ? "Сохранено"
         : "Новый документ";
   $("#save-indicator").classList.toggle("unsaved", dirty);
-  $("#source-toggle").textContent = languageName(path);
+  $("#source-toggle").textContent = languageName(editorPath());
   document
     .querySelectorAll<HTMLButtonElement>(
       '[data-mode="rich"], [data-mode="preview"]',
     )
     .forEach((button) => {
-      button.disabled = !isMarkdown(path);
+      button.disabled = !isMarkdown(editorPath());
     });
   const st = statistics(content);
   $("#statistics").textContent =
@@ -508,8 +530,8 @@ async function mountEditor(nextMode = mode) {
     void holder.offsetWidth;
     holder.classList.add("editor-enter");
     holder.replaceChildren();
-    mode = isMarkdown(path) ? nextMode : "source";
-    document.body.classList.toggle("code-document", !isMarkdown(path));
+    mode = isMarkdown(editorPath()) ? nextMode : "source";
+    document.body.classList.toggle("code-document", !isMarkdown(editorPath()));
     const reason = richCompatibility(content);
     const hint = $("#compatibility");
     hint.hidden = !(reason && mode === "rich");
@@ -528,14 +550,16 @@ async function mountEditor(nextMode = mode) {
             ...(settings.lineNumbers
               ? []
               : [EditorView.theme({ ".cm-lineNumbers": { display: "none" } })]),
-            ...(await codeExtensions(path, settings.tabSize)),
+            ...(await codeExtensions(editorPath(), settings.tabSize)),
             keymap.of(searchKeymap),
             ...(settings.wordWrap ? [EditorView.lineWrapping] : []),
             drawSelection(),
             highlightActiveLine(),
             EditorView.contentAttributes.of({
-              spellcheck: String(isMarkdown(path) && settings.spellcheck),
-              "aria-label": languageName(path),
+              spellcheck: String(
+                isMarkdown(editorPath()) && settings.spellcheck,
+              ),
+              "aria-label": languageName(editorPath()),
             }),
             EditorView.updateListener.of((update) => {
               if (update.docChanged) changed(update.state.doc.toString());
@@ -671,7 +695,9 @@ async function save(asNew: boolean) {
     destination = await input(
       "Сохранить документ",
       "Путь относительно открытой папки",
-      asNew && path ? copyPath(path) : path || "Новая заметка.md",
+      asNew && path
+        ? copyPath(path)
+        : path || newDocumentName(untitledExtension),
     );
     if (!destination) return;
   }
@@ -1315,7 +1341,7 @@ async function run(
   )
     return;
   if (
-    !isMarkdown(path) &&
+    !isMarkdown(editorPath()) &&
     [
       "bold",
       "italic",
@@ -1371,12 +1397,19 @@ async function run(
       await closeTab(activeTab);
       break;
     case "write":
+    case "new": {
+      const extension = await chooseDocumentFormat(dialogShell);
+      if (!extension) break;
+      if (id === "new") {
+        await newTab(false, extension);
+        break;
+      }
+      untitledExtension = extension;
       welcome = false;
+      mode = extension === "md" ? "rich" : "source";
       await mountEditor();
       break;
-    case "new":
-      await newTab(false);
-      break;
+    }
     case "workspace":
       {
         const destination = window.codoraDesktop

@@ -57,7 +57,12 @@ app.on("browser-window-created", (_event, win) => {
   win.webContents.once("did-finish-load", async () => {
     try {
       async function js(code) {
-        return win.webContents.executeJavaScript(code, true);
+        try {
+          return await win.webContents.executeJavaScript(code, true);
+        } catch (error) {
+          console.error("Failed UI script:", code);
+          throw error;
+        }
       }
       async function until(code) {
         for (let i = 0; i < 100; i++) {
@@ -292,8 +297,10 @@ app.on("browser-window-created", (_event, win) => {
           JSON.stringify(other),
       );
       await js("document.querySelector('[data-action=new]').click()");
+      await until("!!document.querySelector('#document-format')");
+      await js("document.querySelector('#dialog button[value=ok]').click()");
       await until(
-        "document.querySelector('#document-name').textContent === 'Без названия'",
+        "document.querySelector('#document-name').textContent === 'Без названия.md' && document.querySelectorAll('.document-tab').length === 2 && !!document.querySelector('.ProseMirror')",
       );
       await js("document.querySelector('[data-mode=source]').click()");
       await until("document.querySelector('.cm-content')");

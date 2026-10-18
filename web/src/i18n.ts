@@ -2,7 +2,11 @@ export const languages = ["ru", "en", "uk", "de"] as const;
 export type Language = (typeof languages)[number];
 let language: Language = "ru";
 // Authored interface translations. Document text and user paths never enter this catalog.
-const rows = `Файл|File|Файл|Datei
+const rows = `Новый файл|New file|Новий файл|Neue Datei
+Формат файла|File format|Формат файлу|Dateiformat
+Обычный текст|Plain text|Звичайний текст|Klartext
+Создать|Create|Створити|Erstellen
+Файл|File|Файл|Datei
 Правка|Edit|Редагування|Bearbeiten
 Абзац|Paragraph|Абзац|Absatz
 Формат|Format|Формат|Format

@@ -116,12 +116,58 @@ app.on("browser-window-created", (_event, win) => {
         await js("document.querySelector('[data-mode=rich]').disabled"),
         false,
       );
+      await js("document.querySelector('[data-action=new-tab]').click()");
+      await until("!document.querySelector('#welcome').hidden");
+      await js("document.querySelector('[data-action=write]').click()");
+      await until(
+        "document.querySelector('#document-format') && document.querySelector('#dialog').open",
+      );
+      await js(
+        "document.querySelector('#dialog button[value=cancel]').click()",
+      );
+      await until("!document.querySelector('#dialog').open");
+      assert.equal(
+        await js("document.querySelector('#welcome').hidden"),
+        false,
+      );
+      await js("document.querySelector('[data-action=write]').click()");
+      await until(
+        "document.querySelector('#document-format') && document.querySelector('#dialog').open",
+      );
+      await js(
+        "document.querySelector('#document-format').value = 'py'; document.querySelector('#dialog button[value=ok]').click()",
+      );
+      await until(
+        "document.querySelector('#document-name').textContent === 'Без названия.py' && document.querySelector('.cm-content')",
+      );
+      assert.equal(
+        await js("document.querySelector('#source-toggle').textContent"),
+        "Python",
+      );
+      await js("document.querySelector('.cm-content').focus()");
+      win.webContents.insertText("print('new file')");
+      key("s", ["control"]);
+      await until(
+        "document.querySelector('#dialog-input') && document.querySelector('#dialog').open",
+      );
+      assert.equal(
+        await js("document.querySelector('#dialog-input').value"),
+        "Новый файл.py",
+      );
+      await js("document.querySelector('#dialog button[value=ok]').click()");
+      await until(
+        "document.querySelector('#document-name').textContent === 'Новый файл.py'",
+      );
+      assert.equal(
+        fs.readFileSync(path.join(root, "Новый файл.py"), "utf8"),
+        "print('new file')",
+      );
       const saved = JSON.parse(
         fs.readFileSync(path.join(profile, "session.json"), "utf8"),
       );
       assert.deepEqual(saved, { root });
       console.log(
-        "Code smoke passed: restored workspace/sidebar, TS/Python language modes, actual syntax highlighting, automatic inferred member completions, accept/save, Markdown switching, path-only session.",
+        "Code smoke passed: restored workspace/sidebar, TS/Python language modes, actual syntax highlighting, automatic inferred member completions, accept/save, Markdown switching, format picker/cancellation and Python file creation, path-only session.",
       );
       clearTimeout(timeout);
       win.close();
