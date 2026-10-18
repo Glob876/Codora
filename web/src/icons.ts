@@ -32,6 +32,7 @@ import {
   SlidersHorizontal,
   Minus,
   Square,
+  Play,
   type IconNode,
 } from "lucide";
 import { escapeHtml } from "./escape";
@@ -69,6 +70,7 @@ const icons: Record<string, IconNode> = {
   sliders: SlidersHorizontal,
   minimize: Minus,
   maximize: Square,
+  play: Play,
 };
 /** Lucide's pinned SVG nodes, bundled locally, decorative and never focusable. */
 export function icon(name: string): string {

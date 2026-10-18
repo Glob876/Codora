@@ -125,6 +125,7 @@ dependencies = [
  "base64",
  "hex",
  "http-body-util",
+ "libc",
  "mime_guess",
  "regex",
  "rust-embed",

@@ -91,3 +91,30 @@ Windows. Explicit positional roots override remembered state. Missing/deleted fo
 and invalid session files cause a visible startup error; supplying a valid explicit
 folder repairs the session. Tokens and document contents never enter session.json.
 The `.typoha` workspace metadata namespace and legacy preference keys are retained.
+
+## Python execution
+
+`src/runner.rs` owns one explicit Python process at a time, independently of HTTP.
+`POST /api/run` accepts a workspace-relative `.py` path and expected saved revision.
+It resolves the path through Workspace, checks the revision and launches the file
+without a shell, using its parent directory as cwd. Root `.venv/bin/python`
+(`.venv/Scripts/python.exe` on Windows) is preferred; otherwise the host's Python
+is used (`python3`/`python` on Unix, `py -3`/`python` on Windows). No packages or
+interpreters are installed automatically. Scripts run with the user's permissions;
+the subprocess is not a filesystem/network sandbox.
+
+`GET /api/run?id=...` returns bounded in-memory stdout/stderr, completion and exit
+status. `POST /api/run/control` takes the run id and optional `input` string;
+input is forwarded as a line, while an absent input requests Stop. All endpoints
+use the existing capability/origin/workspace checks. Output is capped at 256 KiB,
+then drained without retaining more bytes; input lines are limited to 8 KiB.
+There is no runtime deadline. A workspace switch is refused while its script runs.
+On Unix, each run has a dedicated process group, killed on Stop/completion or task
+shutdown. The direct child is reaped and stdin/output tasks are closed. Other
+platforms currently kill the direct child only; descendant cleanup is unverified.
+
+`web/src/run-panel.ts` owns panel rendering/polling/control. The editor saves dirty
+or untitled Python files before launching, and cancels launch if Save is cancelled,
+conflicted, or further edits remain unsaved. Hiding the panel does not stop the run.
+F5 runs Python or shows the current run. This is a script runner, not a terminal
+emulator, debugger, REPL, environment/package manager or general shell execution API.

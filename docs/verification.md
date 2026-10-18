@@ -68,3 +68,10 @@
 
 - `scripts/check.sh` passed: all required Rust/frontend checks, 25 Vitest tests, 19 Rust integration tests, 5 desktop Node tests, production build, formatting, npm audits and license policy.
 - Release build and both Electron smoke scripts passed. The code smoke cancels Start writing, verifies the welcome screen is preserved, then chooses Python, checks Python mode and the `.py` untitled name, types source, checks the suggested Save name and verifies exact UTF-8 contents in the saved `.py` file. The existing desktop smoke confirms New document with the default Markdown format and retains its close/draft/export checks.
+
+## Explicit Python execution (2026-10-18)
+
+- `scripts/check.sh` passed: Rust formatting/tests/clippy with warnings denied, TypeScript, Prettier, 28 Vitest tests, production frontend build, 5 desktop Node tests, audits (zero vulnerabilities), and license policy (514 records). There are now 24 Rust integration tests, including 4 runner tests and an HTTP execution authorization/scope test.
+- Runner tests verify live UTF-8 stdout/stderr and stdin, a filename containing spaces, script-relative file access, tracebacks/nonzero exit, bounded output and draining, revision/traversal/extension rejection, one-run exclusion, workspace isolation, Stop, and termination of a spawned descendant on Linux.
+- Release build and both Electron smoke scripts passed. The code smoke starts an untitled Python document through the Run button, completes the Save dialog, verifies printed output, edits/runs an input() script and submits Cyrillic stdin, checks that edited source was saved, runs a traceback via F5, and stops a sleeping process. Existing editor/format-picker/session and PDF/clipboard/draft/preferences checks also pass.
+- `/tmp/codora-python.png` was visually inspected: the Python Run button, bounded bottom panel, red traceback, file path, exit code and disabled completed-run controls are readable. No process output enters application logs or persistence. Linux is verified; Windows/macOS interpreter discovery, descendant cleanup and interactive terminal-style programs are unverified. Python itself remains an external runtime.

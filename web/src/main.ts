@@ -1,3 +1,4 @@
+import { RunPanel, isPython } from "./run-panel";
 import { chooseDocumentFormat, newDocumentName } from "./new-document";
 import { observeUi, setLanguage, tr, translateUi } from "./i18n";
 import { surfaceOpacity } from "./appearance";
@@ -120,6 +121,7 @@ const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!;
 const app = $("#app");
 app.innerHTML = appMarkup;
+const runPanel = new RunPanel($("#run-panel"), () => updateStatus());
 document.body.classList.add("welcome-active", "hide-sidebar");
 $("#welcome").hidden = false;
 setLanguage(settings.language);
@@ -463,6 +465,10 @@ function updateStatus() {
     .forEach((button) => {
       button.disabled = !isMarkdown(editorPath());
     });
+  const runButton = $<HTMLButtonElement>("#run-python");
+  runButton.hidden = welcome || !isPython(editorPath());
+  runButton.disabled = loading || saving;
+  runButton.innerHTML = `${icon("play")} ${tr(runPanel.busy ? "Показать вывод" : "Запустить")}`;
   const st = statistics(content);
   $("#statistics").textContent =
     `${st.words.toLocaleString(settings.language)} ${tr("слов")}`;
@@ -632,6 +638,7 @@ async function mountEditor(nextMode = mode) {
   } finally {
     loading = false;
     ready = true;
+    updateStatus();
     if (pendingOpen) {
       const queued = pendingOpen;
       pendingOpen = null;
@@ -1390,6 +1397,16 @@ async function run(
     return;
   }
   switch (id) {
+    case "run-python":
+      if (runPanel.busy) {
+        runPanel.show();
+        break;
+      }
+      if (loading || saving || !isPython(editorPath())) break;
+      if (dirty || !path) await save(false);
+      if (path && revision && !dirty && isPython(path))
+        await runPanel.start(path, revision);
+      break;
     case "new-tab":
       await newTab();
       break;
@@ -1914,7 +1931,8 @@ document.addEventListener("keydown", (e) => {
                                 : key === "i" && mode !== "rich"
                                   ? "italic"
                                   : undefined;
-  } else if (e.key === "F8") action = "focus";
+  } else if (e.key === "F5") action = "run-python";
+  else if (e.key === "F8") action = "focus";
   else if (e.key === "F9") action = "typewriter";
   if (action) {
     e.preventDefault();

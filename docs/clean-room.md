@@ -96,3 +96,17 @@ An untitled document retains its extension per tab, independently of its disk pa
 that extension selects the existing language support and default Save filename.
 Cancellation preserves the welcome screen, and selecting a format does not create
 an empty file on disk. No new dependencies or external references were needed.
+
+## Explicit Python run action (2026-10-18)
+
+Implemented from the owner's request for a quick Python Run button. Original Rust
+process management in `src/runner.rs` uses the existing Tokio process/I/O APIs; the
+local dependency source was inspected for process-group and kill-on-drop behavior.
+No editor product implementation or resources were consulted. Unix process-group
+cleanup uses libc 0.2.191 (already locked transitively), now an explicitly pinned
+Unix dependency; its existing MIT/Apache-2.0 notices are retained.
+
+The TypeScript panel polls authenticated loopback endpoints, renders stdout/stderr
+as text, forwards explicitly submitted stdin and offers Stop. A run is never
+triggered by opening a file. Saving uses the existing revision/conflict checks.
+The system/workspace Python interpreter is external and is not redistributed.

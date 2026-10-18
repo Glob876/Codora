@@ -2,7 +2,21 @@ export const languages = ["ru", "en", "uk", "de"] as const;
 export type Language = (typeof languages)[number];
 let language: Language = "ru";
 // Authored interface translations. Document text and user paths never enter this catalog.
-const rows = `Новый файл|New file|Новий файл|Neue Datei
+const rows = `Запустить|Run|Запустити|Ausführen
+Показать вывод|Show output|Показати вивід|Ausgabe anzeigen
+Запустить Python|Run Python|Запустити Python|Python ausführen
+Вывод Python|Python output|Вивід Python|Python-Ausgabe
+Остановить|Stop|Зупинити|Stoppen
+Скрыть вывод|Hide output|Сховати вивід|Ausgabe ausblenden
+Запуск…|Starting…|Запуск…|Startet…
+Выполняется…|Running…|Виконується…|Wird ausgeführt…
+Остановлено|Stopped|Зупинено|Gestoppt
+Код выхода|Exit code|Код виходу|Exit-Code
+Ввод для Python|Python input|Введення для Python|Python-Eingabe
+Ввод для input() · Enter|Input for input() · Enter|Введення для input() · Enter|Eingabe für input() · Enter
+Отправить|Send|Надіслати|Senden
+Вывод ограничен 256 КБ|Output limited to 256 KB|Вивід обмежено 256 КБ|Ausgabe auf 256 KB begrenzt
+Новый файл|New file|Новий файл|Neue Datei
 Формат файла|File format|Формат файлу|Dateiformat
 Обычный текст|Plain text|Звичайний текст|Klartext
 Создать|Create|Створити|Erstellen

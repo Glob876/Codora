@@ -146,7 +146,7 @@ app.on("browser-window-created", (_event, win) => {
       );
       await js("document.querySelector('.cm-content').focus()");
       win.webContents.insertText("print('new file')");
-      key("s", ["control"]);
+      await js("document.querySelector('#run-python').click()");
       await until(
         "document.querySelector('#dialog-input') && document.querySelector('#dialog').open",
       );
@@ -162,12 +162,60 @@ app.on("browser-window-created", (_event, win) => {
         fs.readFileSync(path.join(root, "Новый файл.py"), "utf8"),
         "print('new file')",
       );
+      assert.equal(
+        await js("document.querySelector('#run-python').hidden"),
+        false,
+      );
+      await until(
+        "document.querySelector('#run-stdout').textContent.includes('new file') && document.querySelector('#run-status').textContent.includes(': 0')",
+      );
+      async function replacePython(source) {
+        await js("document.querySelector('.cm-content').focus()");
+        key("a", ["control"]);
+        win.webContents.insertText(source);
+        await until(
+          "document.querySelector('#window-title').textContent.includes('●')",
+        );
+      }
+      await replacePython("name = input('Name: ')\nprint('Hello ' + name)\n");
+      await js("document.querySelector('#run-python').click()");
+      await until(
+        "document.querySelector('#run-stdout').textContent.includes('Name: ')",
+      );
+      await js(
+        "document.querySelector('#run-input').value = 'Мир'; document.querySelector('#run-input-form').requestSubmit()",
+      );
+      await until(
+        "document.querySelector('#run-stdout').textContent.includes('Hello Мир') && document.querySelector('#run-status').textContent.includes(': 0')",
+      );
+      assert.match(
+        fs.readFileSync(path.join(root, "Новый файл.py"), "utf8"),
+        /input/,
+      );
+      await replacePython("raise RuntimeError('ui-runner-error')\n");
+      key("F5");
+      await until(
+        "document.querySelector('#run-stderr').textContent.includes('RuntimeError: ui-runner-error') && document.querySelector('#run-status').textContent.includes(': 1')",
+      );
+      fs.writeFileSync(
+        "/tmp/codora-python.png",
+        (await win.webContents.capturePage()).toPNG(),
+      );
+      await replacePython("import time\nprint('waiting')\ntime.sleep(60)\n");
+      await js("document.querySelector('#run-python').click()");
+      await until(
+        "document.querySelector('#run-stdout').textContent.includes('waiting')",
+      );
+      await js("document.querySelector('#stop-run').click()");
+      await until(
+        "document.querySelector('#run-status').textContent === 'Остановлено'",
+      );
       const saved = JSON.parse(
         fs.readFileSync(path.join(profile, "session.json"), "utf8"),
       );
       assert.deepEqual(saved, { root });
       console.log(
-        "Code smoke passed: restored workspace/sidebar, TS/Python language modes, actual syntax highlighting, automatic inferred member completions, accept/save, Markdown switching, format picker/cancellation and Python file creation, path-only session.",
+        "Code smoke passed: restored workspace/sidebar, TS/Python language modes, actual syntax highlighting, automatic inferred member completions, accept/save, Markdown switching, format picker/cancellation and Python file creation, Python run/autosave/stdin/traceback/F5/Stop, path-only session.",
       );
       clearTimeout(timeout);
       win.close();

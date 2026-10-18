@@ -1726,3 +1726,68 @@ dialog {
   color: var(--text);
   border-color: var(--border);
 }
+#run-python {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--accent);
+  white-space: nowrap;
+}
+#run-python[hidden],
+.run-panel[hidden] {
+  display: none;
+}
+.run-panel {
+  flex: 0 0 auto;
+  min-height: 130px;
+  max-height: 45vh;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+}
+.run-panel header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 14px;
+  font-size: 12px;
+}
+#run-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#run-status {
+  color: var(--muted);
+}
+.run-output {
+  overflow: auto;
+  min-height: 60px;
+  max-height: 28vh;
+  padding: 8px 16px;
+  user-select: text;
+}
+.run-output pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    13px/1.5 ui-monospace,
+    monospace;
+}
+#run-stderr {
+  color: #c53d43;
+}
+#run-input-form {
+  display: flex;
+  gap: 8px;
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+}
+#run-input {
+  flex: 1;
+  min-width: 0;
+}

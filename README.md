@@ -1,5 +1,7 @@
 # Codora
 
+For Python files, click **Run** or press **F5**. Codora saves the script first, then shows output/errors, exit status, an input field for `input()` and a Stop button. Install Python 3 or create a `.venv` in the workspace; Python is not bundled. Scripts run locally with your user permissions.
+
 Codora now edits UTF-8 code alongside Markdown: automatic language detection, local syntax highlighting, indentation and automatic completion. JavaScript/TypeScript suggestions include inferred object members and ES5 methods in the current file; other languages use language providers, keywords and document words. Ctrl+Space opens suggestions. This is an evolving editor, with no full VS Code feature parity: project LSP, debugging, terminal and extension compatibility are planned.
 
 Start writing and New document ask for a file format before editing; Save suggests the matching extension.

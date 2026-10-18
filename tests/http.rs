@@ -195,3 +195,84 @@ async fn preferences_survive_server_state_recreation() {
     assert_eq!(data["theme"], "night");
     assert_eq!(data["fontSize"], 20);
 }
+
+#[tokio::test]
+async fn python_execution_requires_authorization_scope_and_explicit_post() {
+    let root = tempdir().unwrap();
+    let other = tempdir().unwrap();
+    std::fs::write(root.path().join("wait.py"), "print('ready')\ninput()\n").unwrap();
+    let workspace = Workspace::open(root.path()).unwrap();
+    let revision = workspace.read("wait.py").unwrap().revision;
+    let app = router(AppState {
+        workspace: Arc::new(Mutex::new(workspace)),
+        token: "secret".into(),
+        origin: "http://127.0.0.1:1".into(),
+    });
+    let request = |uri: &str, method: &str, body: serde_json::Value| {
+        Request::builder()
+            .uri(uri)
+            .method(method)
+            .header("host", "127.0.0.1:1")
+            .header("content-type", "application/json")
+            .body(Body::from(body.to_string()))
+            .unwrap()
+    };
+    let payload = serde_json::json!({"path":"wait.py", "expected_revision": revision});
+    assert_eq!(
+        app.clone()
+            .oneshot(request("/api/run", "POST", payload.clone()))
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::UNAUTHORIZED
+    );
+    let mut cross_origin = request("/api/run", "POST", payload.clone());
+    cross_origin
+        .headers_mut()
+        .insert("x-codora-token", "secret".parse().unwrap());
+    cross_origin
+        .headers_mut()
+        .insert("origin", "https://other.invalid".parse().unwrap());
+    assert_eq!(
+        app.clone().oneshot(cross_origin).await.unwrap().status(),
+        StatusCode::FORBIDDEN
+    );
+    let authorized = |uri: &str, body: serde_json::Value| {
+        let mut req = request(uri, "POST", body);
+        req.headers_mut()
+            .insert("x-codora-token", "secret".parse().unwrap());
+        req
+    };
+    let mut stale = authorized("/api/run", payload.clone());
+    stale
+        .headers_mut()
+        .insert("x-codora-workspace", "stale".parse().unwrap());
+    assert_eq!(
+        app.clone().oneshot(stale).await.unwrap().status(),
+        StatusCode::CONFLICT
+    );
+    let response = app
+        .clone()
+        .oneshot(authorized("/api/run", payload))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let run: serde_json::Value = serde_json::from_slice(&response_bytes(response).await).unwrap();
+    let switch = app
+        .clone()
+        .oneshot(authorized(
+            "/api/workspace",
+            serde_json::json!({"root": other.path()}),
+        ))
+        .await
+        .unwrap();
+    assert_eq!(switch.status(), StatusCode::BAD_REQUEST);
+    let stop = app
+        .oneshot(authorized(
+            "/api/run/control",
+            serde_json::json!({"id": run["id"]}),
+        ))
+        .await
+        .unwrap();
+    assert_eq!(stop.status(), StatusCode::OK);
+}

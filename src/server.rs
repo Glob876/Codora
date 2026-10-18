@@ -120,7 +120,10 @@ async fn guard(State(state): State<AppState>, mut req: Request, next: Next) -> R
     response
 }
 pub fn router(state: AppState) -> Router {
+    let runner = Arc::new(crate::runner::Runner::default());
     Router::new()
+        .route("/api/run", post(start_run).get(run_status))
+        .route("/api/run/control", post(control_run))
         .route("/api/workspace", get(workspace).post(change_workspace))
         .route("/api/preferences", get(preferences).post(save_preferences))
         .route("/api/files", get(files))
@@ -139,6 +142,7 @@ pub fn router(state: AppState) -> Router {
         .route("/api/export", post(export))
         .route("/api/import", post(import))
         .fallback(static_asset)
+        .layer(Extension(runner))
         .layer(DefaultBodyLimit::max(30 * 1024 * 1024))
         .layer(middleware::from_fn_with_state(state.clone(), guard))
         .with_state(state)
@@ -155,9 +159,13 @@ struct Root {
 }
 async fn change_workspace(
     State(s): State<AppState>,
+    Extension(runner): Extension<Arc<crate::runner::Runner>>,
     Json(q): Json<Root>,
 ) -> core::Result<Json<Value>> {
     let mut workspace = lock(&s)?;
+    if runner.is_running()? {
+        return Err(core::bad("Остановите скрипт перед сменой папки"));
+    }
     workspace.change_root(&q.root)?;
     let root = workspace.root.clone();
     Ok(Json(
@@ -507,4 +515,51 @@ pub async fn response_bytes(response: Response) -> Vec<u8> {
 }
 pub fn initial_workspace(path: PathBuf) -> core::Result<Workspace> {
     Workspace::open(path)
+}
+
+#[derive(Deserialize)]
+struct RunRequest {
+    path: String,
+    expected_revision: String,
+}
+#[derive(Deserialize)]
+struct RunId {
+    id: String,
+}
+#[derive(Deserialize)]
+struct RunControl {
+    id: String,
+    input: Option<String>,
+}
+async fn start_run(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Extension(runner): Extension<Arc<crate::runner::Runner>>,
+    Json(q): Json<RunRequest>,
+) -> core::Result<Json<crate::runner::RunReport>> {
+    let workspace = scoped(&s, &scope)?;
+    Ok(Json(runner.start(
+        &workspace,
+        &q.path,
+        &q.expected_revision,
+    )?))
+}
+async fn run_status(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Extension(runner): Extension<Arc<crate::runner::Runner>>,
+    Query(q): Query<RunId>,
+) -> core::Result<Json<crate::runner::RunReport>> {
+    let workspace = scoped(&s, &scope)?;
+    Ok(Json(runner.report(&workspace, &q.id)?))
+}
+async fn control_run(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Extension(runner): Extension<Arc<crate::runner::Runner>>,
+    Json(q): Json<RunControl>,
+) -> core::Result<Json<Value>> {
+    let workspace = scoped(&s, &scope)?;
+    runner.send(&workspace, &q.id, q.input)?;
+    Ok(Json(json!({"ok":true})))
 }
