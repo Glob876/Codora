@@ -4,6 +4,8 @@
 
 An independent local Markdown editor with a **Rust** filesystem core and a **TypeScript** interface built with Milkdown and CodeMirror. Styles, copy, and sample documents are original; no Typora code or assets are used.
 
+Typoha is inspired by Typora’s focus on distraction-free Markdown writing and is developing in its own direction, with an original interface and independent implementation. Typoha is not affiliated with Typora.
+
 **Version 0.1.0 is a working initial implementation, not a complete 1:1 clone.** The [feature coverage table](docs/parity.md) lists implemented features, differences, and remaining work. The independent implementation process is documented in [clean-room.md](docs/clean-room.md). These detailed documents are currently available in Russian and English respectively.
 
 **Vibe-coded:** this project was created with AI coding agents (Codex), guided by the project owner.
@@ -18,7 +20,7 @@ From the project directory:
 ./run.sh
 ```
 
-If a release build is available, the editor opens with sample documents. Otherwise, the script builds it first; you need Node.js 24+, npm, rustup, and a C/C++ linker. The Rust toolchain is pinned in `rust-toolchain.toml`. The first build downloads open-source dependencies from npm and crates.io.
+If a release build is available, the editor opens on a minimal new tab; no folder picker opens automatically. Otherwise, the script builds it first; you need Node.js 24+, npm, rustup, and a C/C++ linker. The Rust toolchain is pinned in `rust-toolchain.toml`. The first build downloads open-source dependencies from npm and crates.io.
 
 To open your own folder:
 
@@ -36,11 +38,15 @@ For an explicit browser session, use `./run.sh --browser /path/to/notes`. For de
 
 The server listens only on `127.0.0.1`. Its terminal URL contains a temporary access key; do not share it. Ctrl+C stops server mode; closing a browser tab does not.
 
-The Linux desktop distribution is built under `artifacts/typoha-0.1.0-linux-x86_64-desktop/`. Run `./typoha` and select a folder. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Typoha to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
+The Linux desktop distribution is built under `artifacts/typoha-0.1.0-linux-x86_64-desktop/`. Run `./typoha`, then use Open File or Open Folder on the new tab. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Typoha to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
 
 The application interface is currently in Russian. This README describes the current version.
 
 ## Implemented features
+
+- Document tabs with unsaved markers, draft protection, and Ctrl+T / Ctrl+W shortcuts.
+- Categorized preferences, live theme preview, custom accent/panel/text colors, and nine original palettes including Catppuccin-, Gruvbox-, Ayu-, and Nord-inspired variants.
+- Subtle interface animations with an accessibility-aware motion switch.
 
 - Live Markdown editing, source mode, and preview; tables and task lists.
 - KaTeX formulas, Mermaid diagrams, and syntax highlighting; footnotes, alerts, emoji, subscripts, superscripts, and highlights in preview.

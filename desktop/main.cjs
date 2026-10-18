@@ -75,24 +75,13 @@ app
           process.platform === "win32" ? "typoha.exe" : "typoha",
         );
     const args = process.argv.slice(app.isPackaged ? 1 : 2);
-    if (app.isPackaged && !args.length) {
-      const chosen = await dialog.showOpenDialog({
-        title: "Выберите папку заметок",
-        properties: ["openDirectory", "createDirectory"],
-      });
-      if (chosen.canceled) {
-        app.quit();
-        return;
-      }
-      args.push(chosen.filePaths[0]);
-    }
     backend = startBackend(
       binary,
       args.length
         ? args
         : [
             app.isPackaged
-              ? process.cwd()
+              ? app.getPath("home")
               : path.join(__dirname, "..", "examples"),
           ],
     );
@@ -226,6 +215,21 @@ app
         properties: ["openDirectory", "createDirectory"],
       });
       return result.canceled ? null : result.filePaths[0];
+    });
+    ipcMain.handle("typoha:file", async (event) => {
+      if (!trusted(event)) throw new Error("Недоступно");
+      const result = await dialog.showOpenDialog(window, {
+        title: "Открыть файл",
+        properties: ["openFile"],
+        filters: [
+          { name: "Markdown и текст", extensions: ["md", "markdown", "txt"] },
+        ],
+      });
+      if (result.canceled) return null;
+      return {
+        root: path.dirname(result.filePaths[0]),
+        path: path.basename(result.filePaths[0]),
+      };
     });
     ipcMain.handle("typoha:print", (event) => {
       if (!trusted(event)) throw new Error("Недоступно");

@@ -16,6 +16,7 @@ fs.writeFileSync(path.join(other, "other.md"), "# Other workspace\n");
 process.argv = [process.argv[0], __dirname, root];
 let failed = false;
 let closePrompts = 0;
+let pickerCalls = 0;
 const dictionaries = new Set();
 app.on("session-created", (ses) => {
   ses.on("spellcheck-dictionary-initialized", (_event, language) =>
@@ -31,7 +32,17 @@ dialog.showMessageBoxSync = () => {
   closePrompts++;
   return 0;
 };
-dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [other] });
+dialog.showOpenDialog = async (_window, options) => {
+  pickerCalls++;
+  return {
+    canceled: false,
+    filePaths: [
+      options.properties.includes("openFile")
+        ? path.join(root, "test.md")
+        : other,
+    ],
+  };
+};
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const deadline = setTimeout(() => {
   console.error("Smoke test timed out");
@@ -50,7 +61,70 @@ app.on("browser-window-created", (_event, win) => {
         }
         throw new Error("UI condition timed out: " + code);
       }
-      await until("document.querySelector('.file-entry')");
+      await until(
+        "document.querySelector('.file-entry') && document.querySelector('#document-tabs button')",
+      );
+      assert.equal(pickerCalls, 0, "No picker at startup");
+      assert.equal(
+        await js("document.querySelector('#welcome').hidden"),
+        false,
+      );
+      assert.equal(
+        await js("getComputedStyle(document.querySelector('#sidebar')).width"),
+        "0px",
+      );
+      await pause(350);
+      fs.writeFileSync(
+        "/tmp/typoha-welcome.png",
+        (await win.webContents.capturePage()).toPNG(),
+      );
+      await js(
+        "document.querySelector('#welcome [data-action=settings]').click()",
+      );
+      await until("document.querySelector('.theme-gallery')");
+      await js("document.querySelector('[data-theme-choice=matrix]').click()");
+      assert.equal(
+        await js(
+          "getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()",
+        ),
+        "#55d987",
+      );
+      await pause(250);
+      fs.writeFileSync(
+        "/tmp/typoha-settings.png",
+        (await win.webContents.capturePage()).toPNG(),
+      );
+      await js(
+        "document.querySelector('#dialog button[value=cancel]').click()",
+      );
+      await until(
+        "!document.querySelector('#dialog').open && getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() === '#34756a'",
+      );
+      assert.equal(
+        await js(
+          "getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()",
+        ),
+        "#34756a",
+      );
+      await js("document.querySelector('#welcome [data-action=open]').click()");
+      await until(
+        "document.querySelector('#document-name').textContent === 'test.md'",
+      );
+      assert.equal(pickerCalls, 1);
+      await js("document.querySelector('[data-action=new-tab]').click()");
+      await until(
+        "document.querySelectorAll('.document-tab').length === 2 && !document.querySelector('#welcome').hidden",
+      );
+      await js(
+        "document.querySelectorAll('#document-tabs [role=tab]')[0].click()",
+      );
+      await until(
+        "document.querySelector('#welcome').hidden && document.querySelector('#document-name').textContent === 'test.md'",
+      );
+      await js(
+        "document.querySelectorAll('.document-tab')[1].lastElementChild.click()",
+      );
+      await until("document.querySelectorAll('.document-tab').length === 1");
       assert.equal(
         await js("typeof window.typohaDesktop.chooseFolder"),
         "function",
@@ -62,6 +136,38 @@ app.on("browser-window-created", (_event, win) => {
       );
       await until(
         "document.querySelector('#document-name').textContent === 'test.md'",
+      );
+      // Saving preferences writes through Rust and survives reopening the panel.
+      await js("document.querySelector('[data-action=settings]').click()");
+      await until("document.querySelector('.theme-gallery')");
+      await js(
+        "document.querySelector('[data-category=workspace]').click(); document.querySelector('[name=animations]').click(); document.querySelector('#dialog button[value=ok]').click()",
+      );
+      await until(
+        "!document.querySelector('#dialog').open && document.body.classList.contains('reduce-motion')",
+      );
+      await until("document.querySelector('.milkdown')");
+      for (
+        let i = 0;
+        i < 50 &&
+        (!fs.existsSync(path.join(root, ".typoha/config/preferences.json")) ||
+          JSON.parse(
+            fs.readFileSync(
+              path.join(root, ".typoha/config/preferences.json"),
+              "utf8",
+            ),
+          ).animations !== false);
+        i++
+      )
+        await pause(50);
+      assert.equal(
+        JSON.parse(
+          fs.readFileSync(
+            path.join(root, ".typoha/config/preferences.json"),
+            "utf8",
+          ),
+        ).animations,
+        false,
       );
       // Actual UI export, Chromium PDF generation and blob download to disk.
       const downloaded = new Promise((resolve, reject) => {
@@ -113,6 +219,32 @@ app.on("browser-window-created", (_event, win) => {
       await until(
         "document.querySelector('#window-title').textContent.includes('●')",
       );
+      await js("document.querySelector('[data-action=new-tab]').click()");
+      await until("!document.querySelector('#welcome').hidden");
+      await js(
+        "document.querySelectorAll('#document-tabs [role=tab]')[1].click()",
+      );
+      await until(
+        "document.querySelector('.cm-content')?.textContent.includes('Unsaved desktop text')",
+      );
+      // Closing an edited tab must allow cancellation.
+      await js(
+        "document.querySelectorAll('.document-tab')[1].lastElementChild.click()",
+      );
+      await until("document.querySelector('#dialog').open");
+      await js(
+        "document.querySelector('#dialog button[value=cancel]').click()",
+      );
+      await until("!document.querySelector('#dialog').open");
+      assert.equal(
+        await js("document.querySelectorAll('.document-tab').length"),
+        3,
+      );
+      // The native close guard also covers dirty inactive tabs.
+      await js(
+        "document.querySelectorAll('#document-tabs [role=tab]')[2].click()",
+      );
+      await until("!document.querySelector('#welcome').hidden");
       win.close();
       await pause(500);
       assert.equal(win.isDestroyed(), false);

@@ -49,3 +49,9 @@ were consulted. Russian/English dictionaries come from the same Electron release
 hunspell_dictionaries.zip, SHA-256 41fc02332fc7cc2ea7230409de1bbe5d0a44b3a45b85f6d3acdaddd2b2047d8f,
 verified against the upstream SHASUMS256.txt. Dictionary notices are retained in
 docs/dictionary-notices. License inventory exceptions are recorded in licensing.md.
+
+## Tabs, preferences and motion (2026-10-18)
+
+Implemented from the owner's written requirements in this chat and existing Typoha code. The README now explicitly acknowledges Typora as inspiration while stating Typoha's independent direction and lack of affiliation. No Typora source, application, screenshots, theme files, fonts or assets were fetched or inspected.
+
+The new welcome screen, tab strip, five-category preferences dialog, transitions and theme swatches are original TypeScript/CSS. Catppuccin, Gruvbox, Ayu and Nord names describe independently selected mood palettes, not imported upstream theme packages or exact color compatibility. Matrix and Rose palettes are also original. No new dependencies or external resources were added. Filesystem writes, preferences and recoverable drafts continue through the existing authenticated Rust API. Electron only returns explicitly selected paths.

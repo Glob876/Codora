@@ -2,7 +2,10 @@ export type Action = { id: string; label: string; key?: string; group: string };
 export const actions: Action[] = [
   { id: "reload", label: "Перечитать с диска", group: "Файл" },
   { id: "new", label: "Новый документ", key: "Ctrl+N", group: "Файл" },
-  { id: "open", label: "Быстро открыть…", key: "Ctrl+P", group: "Файл" },
+  { id: "new-tab", label: "Новая вкладка", key: "Ctrl+T", group: "Файл" },
+  { id: "close-tab", label: "Закрыть вкладку", key: "Ctrl+W", group: "Файл" },
+  { id: "open", label: "Открыть файл…", key: "Ctrl+O", group: "Файл" },
+  { id: "quick-open", label: "Быстро открыть…", key: "Ctrl+P", group: "Файл" },
   { id: "workspace", label: "Открыть папку…", group: "Файл" },
   { id: "save", label: "Сохранить", key: "Ctrl+S", group: "Файл" },
   {

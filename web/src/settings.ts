@@ -1,5 +1,16 @@
 export interface Settings {
-  theme: "paper" | "night" | "sepia" | "system";
+  theme: string;
+  primaryColor: string;
+  secondaryColor: string;
+  textColor: string;
+  animations: boolean;
+  toolbar: boolean;
+  statusbar: boolean;
+  sidebarWidth: number;
+  tabSize: number;
+  lineNumbers: boolean;
+  wordWrap: boolean;
+  autosaveDelay: number;
   font: string;
   fontSize: number;
   width: number;
@@ -17,6 +28,17 @@ export interface Settings {
 }
 export const defaults: Settings = {
   theme: "paper",
+  primaryColor: "",
+  secondaryColor: "",
+  textColor: "",
+  animations: true,
+  toolbar: true,
+  statusbar: true,
+  sidebarWidth: 250,
+  tabSize: 2,
+  lineNumbers: true,
+  wordWrap: true,
+  autosaveDelay: 1600,
   font: "serif",
   fontSize: 18,
   width: 820,

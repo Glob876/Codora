@@ -1,3 +1,5 @@
+import { themeVariables } from "./themes";
+import { settingsPanel } from "./settings-panel";
 import { appMarkup } from "./shell";
 import { defaults, loadLocalSettings, type Settings } from "./settings";
 import { extensions } from "./extensions";
@@ -27,7 +29,7 @@ import {
   drawSelection,
 } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-import { Plugin } from "@milkdown/kit/prose/state";
+import { Plugin, Selection } from "@milkdown/kit/prose/state";
 import { markdown } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { basicSetup } from "codemirror";
@@ -78,7 +80,7 @@ interface Draft {
 }
 let settings: Settings = loadLocalSettings();
 let preferencesReady = false;
-const sample = `# Пространство для мысли\n\nПишите, не отвлекаясь на разметку. **Typoha** превращает Markdown в оформленный документ прямо во время ввода.\n\n## Начните с простого\n\nОткройте папку с заметками или сохраните этот документ под своим именем. Все файлы остаются на вашем компьютере.\n\n- [x] Обычные файлы Markdown\n- [x] Таблицы, формулы и блоки кода\n- [ ] Ваша следующая идея\n\n> Хорошая заметка начинается с одной строки.\n\n## Небольшой пример\n\n| Возможность | Как использовать |\n| --- | --- |\n| Заголовок | Введите решётку и пробел |\n| Список | Начните строку с дефиса |\n| Исходник | Нажмите Ctrl+/ |\n\n### Формула\n\n$$\nE = mc^2\n$$\n\n### Код\n\n\`\`\`rust\nfn main() {\n    println!("Привет, Typoha!");\n}\n\`\`\`\n\n### Диаграмма\n\n\`\`\`mermaid\nflowchart LR\n    A[Идея] --> B[Заметка]\n    B --> C[Готовый текст]\n\`\`\`\n`;
+const sample = "";
 let content = sample,
   path: string | null = null,
   revision: string | null = null,
@@ -104,6 +106,153 @@ const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!;
 const app = $("#app");
 app.innerHTML = appMarkup;
+document.body.classList.add("welcome-active", "hide-sidebar");
+$("#welcome").hidden = false;
+
+interface TabState {
+  id: string;
+  content: string;
+  path: string | null;
+  revision: string | null;
+  dirty: boolean;
+  lastSaved: string;
+  draftId: string;
+  mode: "rich" | "source" | "preview";
+  welcome: boolean;
+  scroll: number;
+  sourceState?: EditorState;
+  richSelection?: ReturnType<Selection["toJSON"]>;
+}
+let tabs: TabState[] = [];
+let activeTab = "";
+let welcome = true;
+let navigating = false;
+function snapshotTab(): TabState {
+  return {
+    id: activeTab,
+    content,
+    path,
+    revision,
+    dirty,
+    lastSaved,
+    draftId,
+    mode,
+    welcome,
+    scroll: $("#editor-scroll").scrollTop,
+    sourceState: cm?.state,
+    richSelection: crepe?.editor.ctx
+      .get(editorViewCtx)
+      .state.selection.toJSON(),
+  };
+}
+function captureTab() {
+  const index = tabs.findIndex((t) => t.id === activeTab);
+  if (index >= 0) tabs[index] = snapshotTab();
+}
+function renderTabs() {
+  captureTab();
+  const box = $("#document-tabs");
+  // Keep focused tab buttons stable while typing.
+  if (
+    box.children.length !== tabs.length ||
+    tabs.some((t, i) => (box.children[i] as HTMLElement)?.dataset.id !== t.id)
+  ) {
+    box.replaceChildren();
+    for (const tab of tabs) {
+      const item = document.createElement("div");
+      item.className = "document-tab";
+      item.dataset.id = tab.id;
+      const button = document.createElement("button");
+      button.setAttribute("role", "tab");
+      button.onclick = () => fire(activateTab(tab.id));
+      const close = document.createElement("button");
+      close.textContent = "×";
+      close.setAttribute("aria-label", "Закрыть вкладку");
+      close.onclick = () => fire(closeTab(tab.id));
+      item.append(button, close);
+      box.append(item);
+    }
+  }
+  tabs.forEach((t, i) => {
+    const item = box.children[i];
+    const b = item.firstElementChild!;
+    b.textContent = `${t.dirty ? "● " : ""}${t.path?.split("/").pop() || (t.welcome ? "Новая вкладка" : "Без названия")}`;
+    b.setAttribute("aria-selected", String(t.id === activeTab));
+    item.classList.toggle("active", t.id === activeTab);
+  });
+  document.body.classList.toggle("welcome-active", welcome);
+  $("#welcome").hidden = !welcome;
+}
+async function activateTab(id: string) {
+  if (loading || saving || navigating || id === activeTab) return;
+  navigating = true;
+  try {
+    clearTimeout(saveTimer);
+    clearTimeout(draftTimer);
+    await persistDraft();
+    captureTab();
+    const t = tabs.find((t) => t.id === id);
+    if (!t) return;
+    activeTab = t.id;
+    ({ content, path, revision, dirty, lastSaved, draftId, mode, welcome } = t);
+    await mountEditor();
+    if (cm && t.sourceState && mode === "source") cm.setState(t.sourceState);
+    if (crepe && t.richSelection && mode === "rich") {
+      const view = crepe.editor.ctx.get(editorViewCtx);
+      view.dispatch(
+        view.state.tr.setSelection(
+          Selection.fromJSON(view.state.doc, t.richSelection),
+        ),
+      );
+    }
+    $("#editor-scroll").scrollTop = t.scroll;
+    renderTabs();
+    renderSidebar();
+  } finally {
+    navigating = false;
+  }
+}
+async function newTab(isWelcome = true) {
+  if (loading || saving || navigating) return;
+  navigating = true;
+  try {
+    await persistDraft();
+    captureTab();
+    activeTab = crypto.randomUUID();
+    content = "";
+    path = null;
+    revision = null;
+    dirty = false;
+    lastSaved = "";
+    draftId = crypto.randomUUID();
+    welcome = isWelcome;
+    tabs.push(snapshotTab());
+    await mountEditor();
+    renderTabs();
+  } finally {
+    navigating = false;
+  }
+}
+async function closeTab(id: string) {
+  await activateTab(id);
+  if (activeTab !== id || loading || !(await canLeave())) return;
+  const index = tabs.findIndex((t) => t.id === id);
+  tabs.splice(index, 1);
+  activeTab = "";
+  dirty = false;
+  if (tabs.length) await activateTab(tabs[Math.min(index, tabs.length - 1)].id);
+  else await newTab();
+  renderTabs();
+}
+async function leaveWorkspace() {
+  if (loading || saving) return false;
+  captureTab();
+  for (const t of tabs.filter((t) => t.dirty)) {
+    await activateTab(t.id);
+    if (!(await canLeave())) return false;
+  }
+  return true;
+}
 
 import { actions, type Action } from "./commands";
 for (const extension of extensions)
@@ -172,12 +321,32 @@ function setSettings() {
   applySettings();
 }
 function applySettings() {
-  let theme = settings.theme;
-  if (theme === "system")
-    theme = matchMedia("(prefers-color-scheme: dark)").matches
-      ? "night"
-      : "paper";
-  document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.theme = settings.theme;
+  document.documentElement.dataset.appearance = themeVariables(
+    settings.theme,
+    matchMedia("(prefers-color-scheme: dark)").matches,
+  )["color-scheme"];
+  for (const [key, value] of Object.entries(
+    themeVariables(
+      settings.theme,
+      matchMedia("(prefers-color-scheme: dark)").matches,
+    ),
+  ))
+    document.documentElement.style.setProperty(key, value);
+  for (const [key, value] of [
+    ["--accent", settings.primaryColor],
+    ["--panel", settings.secondaryColor],
+    ["--text", settings.textColor],
+  ])
+    if (/^#[0-9a-f]{6}$/i.test(value))
+      document.documentElement.style.setProperty(key, value);
+  document.body.classList.toggle("reduce-motion", !settings.animations);
+  document.body.classList.toggle("hide-toolbar", !settings.toolbar);
+  document.body.classList.toggle("hide-statusbar", !settings.statusbar);
+  document.documentElement.style.setProperty(
+    "--sidebar-width",
+    `${settings.sidebarWidth}px`,
+  );
   document.documentElement.style.setProperty(
     "--writing-width",
     `${settings.width}px`,
@@ -208,6 +377,7 @@ function applySettings() {
     .forEach((e) => (e.spellcheck = settings.spellcheck));
 }
 function updateStatus() {
+  renderTabs();
   const name = path?.split("/").pop() || "Без названия";
   $("#document-name").textContent = name;
   $("#document-name").title = path || name;
@@ -232,6 +402,7 @@ function updateStatus() {
 function changed(next: string) {
   if (!ready || loading || next === content) return;
   content = next;
+  welcome = false;
   try {
     sessionStorage.setItem(
       "typoha-emergency-draft",
@@ -256,7 +427,7 @@ function changed(next: string) {
   if (settings.autosave && path)
     saveTimer = setTimeout(() => {
       if (settings.autosave && dirty && path) fire(save(false));
-    }, 1600);
+    }, settings.autosaveDelay);
   outlineTimer = setTimeout(() => {
     if (sidebar === "outline") renderSidebar();
   }, 350);
@@ -282,6 +453,9 @@ async function mountEditor(nextMode = mode) {
     cm?.destroy();
     cm = null;
     const holder = $("#editor");
+    holder.classList.remove("editor-enter");
+    void holder.offsetWidth;
+    holder.classList.add("editor-enter");
     holder.replaceChildren();
     mode = nextMode;
     const reason = richCompatibility(content);
@@ -298,9 +472,13 @@ async function mountEditor(nextMode = mode) {
           doc: content,
           extensions: [
             basicSetup,
+            EditorState.tabSize.of(settings.tabSize),
+            ...(settings.lineNumbers
+              ? []
+              : [EditorView.theme({ ".cm-lineNumbers": { display: "none" } })]),
             markdown({ codeLanguages: languages }),
             keymap.of(searchKeymap),
-            EditorView.lineWrapping,
+            ...(settings.wordWrap ? [EditorView.lineWrapping] : []),
             drawSelection(),
             highlightActiveLine(),
             EditorView.contentAttributes.of({
@@ -386,10 +564,11 @@ async function mountEditor(nextMode = mode) {
     if (dirty && settings.autosave && path)
       saveTimer = setTimeout(() => {
         if (dirty && path && settings.autosave) fire(save(false));
-      }, 1600);
+      }, settings.autosaveDelay);
   }
 }
 async function setContent(next: string, markDirty = true) {
+  welcome = false;
   content = next;
   dirty = markDirty && content !== lastSaved;
   await mountEditor();
@@ -478,7 +657,7 @@ async function save(asNew: boolean) {
   if (dirty && settings.autosave && path)
     saveTimer = setTimeout(() => {
       if (settings.autosave && dirty && path) fire(save(false));
-    }, 1600);
+    }, settings.autosaveDelay);
 }
 async function canLeave() {
   if (saving) {
@@ -502,31 +681,56 @@ async function canLeave() {
   }
   return answer === "draft";
 }
+let openingDocument = false;
 async function openDocument(target: string, line?: number) {
+  if (openingDocument || navigating) return;
   if (loading) {
     pendingOpen = { target, line };
     return;
   }
-  if (!(await canLeave())) return;
-  const doc = await api<Document>(
-    `document?path=${encodeURIComponent(target)}`,
-  );
-  path = doc.path;
-  content = doc.content;
-  lastSaved = content;
-  revision = doc.revision;
-  dirty = false;
-  draftId = crypto.randomUUID();
-  remember(path);
-  await mountEditor(line ? "source" : mode);
-  renderSidebar();
-  if (line && cm) {
-    const ln = cm.state.doc.line(Math.min(line, cm.state.doc.lines));
-    cm.dispatch({
-      selection: { anchor: ln.from },
-      effects: EditorView.scrollIntoView(ln.from, { y: "center" }),
-    });
-    cm.focus();
+  if (saving) return;
+  captureTab();
+  const existing = tabs.find((t) => t.path === target);
+  if (existing) {
+    await activateTab(existing.id);
+    if (line) {
+      if (mode !== "source") await mountEditor("source");
+      if (cm) {
+        const ln = cm.state.doc.line(Math.min(line, cm.state.doc.lines));
+        cm.dispatch({
+          selection: { anchor: ln.from },
+          effects: EditorView.scrollIntoView(ln.from, { y: "center" }),
+        });
+      }
+    }
+    return;
+  }
+  openingDocument = true;
+  try {
+    const doc = await api<Document>(
+      `document?path=${encodeURIComponent(target)}`,
+    );
+    if (!existing && (!welcome || dirty || path)) await newTab(false);
+    welcome = false;
+    path = doc.path;
+    content = doc.content;
+    lastSaved = content;
+    revision = doc.revision;
+    dirty = false;
+    draftId = crypto.randomUUID();
+    remember(path);
+    await mountEditor(line ? "source" : mode);
+    renderSidebar();
+    if (line && cm) {
+      const ln = cm.state.doc.line(Math.min(line, cm.state.doc.lines));
+      cm.dispatch({
+        selection: { anchor: ln.from },
+        effects: EditorView.scrollIntoView(ln.from, { y: "center" }),
+      });
+      cm.focus();
+    }
+  } finally {
+    openingDocument = false;
   }
 }
 function remember(p: string) {
@@ -1005,11 +1209,11 @@ async function showDrafts() {
       fire(
         (async () => {
           d.close();
-          if (!(await canLeave())) return;
+          await newTab(false);
           path = null;
           revision = null;
           lastSaved = "";
-          draftId = draft.id;
+          draftId = crypto.randomUUID();
           await setContent(draft.content);
         })(),
       );
@@ -1040,78 +1244,37 @@ async function showTrash() {
   }
 }
 function showSettings() {
-  const d = dialogShell(
-    "Настройки",
-    `<div class="settings-grid"><label>Тема<select name="theme">${[
-      ["paper", "Бумага"],
-      ["sepia", "Сепия"],
-      ["night", "Ночь"],
-      ["system", "Системная"],
-    ]
-      .map(([id, name]) => `<option value="${id}">${name}</option>`)
-      .join(
-        "",
-      )}</select></label><label>Шрифт<select name="font"><option value="serif">С засечками</option><option value="sans">Системный</option><option value="mono">Моноширинный</option></select></label><label>Размер текста<input type="number" name="fontSize" min="12" max="36" value="${settings.fontSize}"></label><label>Ширина страницы<input type="number" name="width" min="480" max="1400" step="20" value="${settings.width}"></label><label>Межстрочный интервал<input type="number" name="lineHeight" min="1.2" max="2.5" step="0.1" value="${settings.lineHeight}"></label><label>Сортировка<select name="sort"><option value="name">По имени</option><option value="modified">По изменению</option></select></label></div><div class="settings-checks">${[
-      ["autosave", "Автосохранение файлов"],
-      ["spellcheck", "Проверка орфографии браузером"],
-      ["focus", "Режим фокусировки"],
-      ["typewriter", "Режим печатной машинки"],
-      ["hidden", "Показывать скрытые файлы"],
-      ["allFiles", "Показывать все типы файлов"],
-    ]
-      .map(
-        ([id, label]) =>
-          `<label><input type="checkbox" name="${id}" ${(settings as any)[id] ? "checked" : ""}>${label}</label>`,
-      )
-      .join(
-        "",
-      )}</div><label class="field">Пользовательский CSS<textarea name="customCss" rows="5" spellcheck="false" placeholder=".milkdown h1 { color: #276b62; }">${esc(settings.customCss)}</textarea></label><p class="dialog-hint">CSS применяется локально. Сетевые ресурсы блокируются. Настройки сохраняются в открытой папке и доступны после перезапуска.</p><div class="dialog-actions"><button value="cancel">Отмена</button><button value="ok" class="primary">Применить</button></div>`,
-  );
-  for (const name of ["theme", "font", "sort"])
-    d.querySelector<HTMLSelectElement>(`[name=${name}]`)!.value = (
-      settings as any
-    )[name];
-  d.addEventListener(
-    "close",
-    () => {
-      if (d.returnValue !== "ok") return;
-      const form = d.querySelector("form")!;
-      const data = new FormData(form);
-      for (const key of ["theme", "font", "sort", "customCss"])
-        (settings as any)[key] = data.get(key);
-      for (const key of [
-        "autosave",
-        "spellcheck",
-        "focus",
-        "typewriter",
-        "hidden",
-        "allFiles",
-      ])
-        (settings as any)[key] = data.has(key);
-      settings.fontSize = Math.max(
-        12,
-        Math.min(36, Number(data.get("fontSize")) || 18),
-      );
-      settings.width = Math.max(
-        480,
-        Math.min(1400, Number(data.get("width")) || 820),
-      );
-      settings.lineHeight = Math.max(
-        1.2,
-        Math.min(2.5, Number(data.get("lineHeight")) || 1.8),
-      );
-      clearTimeout(saveTimer);
-      setSettings();
-      fire(refreshFiles());
-      if (cm) fire(mountEditor());
+  const initial = { ...settings };
+  const d = dialogShell("Настройки", "");
+  settingsPanel(
+    d,
+    initial,
+    (next) => {
+      settings = { ...next };
+      applySettings();
     },
-    { once: true },
+    (next) => {
+      settings = { ...next };
+      setSettings();
+      clearTimeout(saveTimer);
+      fire(
+        (async () => {
+          await refreshFiles();
+          await mountEditor();
+        })(),
+      );
+    },
   );
 }
 async function run(
   id: string,
   targetPath: string | null = null,
 ): Promise<void> {
+  if (
+    openingDocument &&
+    ["new", "new-tab", "write", "workspace", "open", "close-tab"].includes(id)
+  )
+    return;
   const target = targetPath || path;
   if (id.startsWith("extension:")) {
     const [, extensionId, commandId] = id.split(":");
@@ -1133,28 +1296,31 @@ async function run(
     return;
   }
   switch (id) {
+    case "new-tab":
+      await newTab();
+      break;
+    case "close-tab":
+      await closeTab(activeTab);
+      break;
+    case "write":
+      welcome = false;
+      await mountEditor();
+      break;
     case "new":
-      if (await canLeave()) {
-        path = null;
-        revision = null;
-        content = "";
-        lastSaved = "";
-        dirty = false;
-        draftId = crypto.randomUUID();
-        await mountEditor();
-        renderSidebar();
-        cm?.focus();
-        crepe?.editor.ctx.get(editorViewCtx).focus();
-      }
+      await newTab(false);
       break;
     case "workspace":
       {
-        if (!(await canLeave())) return;
         const destination = window.typohaDesktop
           ? await window.typohaDesktop.chooseFolder()
           : await input("Открыть папку", "Полный путь к папке", root);
         if (destination) {
+          if (!(await leaveWorkspace())) return;
           await api("workspace", { root: destination });
+          tabs = [];
+          activeTab = crypto.randomUUID();
+          welcome = false;
+          document.body.classList.remove("hide-sidebar");
           root = (await api("workspace")).root;
           settings = {
             ...defaults,
@@ -1170,19 +1336,53 @@ async function run(
           revision = null;
           dirty = false;
           draftId = crypto.randomUUID();
+          tabs.push(snapshotTab());
           await refreshFiles();
           await mountEditor();
         }
       }
       break;
     case "open":
+      if (window.typohaDesktop) {
+        const file = await window.typohaDesktop.chooseFile();
+        if (!file) return;
+        if (file.root !== root) {
+          if (!(await leaveWorkspace())) return;
+          await api("workspace", { root: file.root });
+          root = (await api("workspace")).root;
+          settings = {
+            ...defaults,
+            ...(await api<Partial<Settings>>("preferences")),
+          };
+          applySettings();
+          $("#workspace-name").title = root;
+          collapsed.clear();
+          tabs = [];
+          activeTab = "";
+          dirty = false;
+          await newTab();
+          $("#workspace-name").textContent = root.split("/").pop() || root;
+          await refreshFiles();
+        }
+        await openDocument(file.path);
+      } else palette();
+      break;
+    case "quick-open":
       palette();
       break;
     case "palette":
       palette(true);
       break;
     case "reload":
-      if (path) await openDocument(path);
+      if (path && (await canLeave())) {
+        const doc = await api<Document>(
+          `document?path=${encodeURIComponent(path)}`,
+        );
+        revision = doc.revision;
+        lastSaved = doc.content;
+        dirty = false;
+        await setContent(doc.content, false);
+      }
       break;
     case "save":
       await save(false);
@@ -1226,6 +1426,17 @@ async function run(
       break;
     case "rename":
       if (target) {
+        captureTab();
+        if (
+          tabs.some(
+            (t) =>
+              t.id !== activeTab &&
+              (t.path === target || t.path?.startsWith(target + "/")),
+          )
+        ) {
+          toast("Сначала закройте другие вкладки этого файла или папки", true);
+          return;
+        }
         if (dirty && (target === path || path?.startsWith(target + "/"))) {
           toast("Перед переименованием сохраните документ");
           return;
@@ -1250,6 +1461,17 @@ async function run(
       break;
     case "delete":
       if (target) {
+        captureTab();
+        if (
+          tabs.some(
+            (t) =>
+              t.id !== activeTab &&
+              (t.path === target || t.path?.startsWith(target + "/")),
+          )
+        ) {
+          toast("Сначала закройте другие вкладки этого файла или папки", true);
+          return;
+        }
         if (
           (target === path || path?.startsWith(target + "/")) &&
           !(await canLeave())
@@ -1535,39 +1757,62 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if ($<HTMLDialogElement>("#dialog").open) return;
   const mod = e.ctrlKey || e.metaKey;
+  if (
+    (e.ctrlKey && e.key === "Tab") ||
+    ((e.key === "ArrowLeft" || e.key === "ArrowRight") &&
+      (e.target as HTMLElement).matches("#document-tabs [role=tab]"))
+  ) {
+    e.preventDefault();
+    const direction = e.shiftKey || e.key === "ArrowLeft" ? -1 : 1;
+    const index = tabs.findIndex((t) => t.id === activeTab);
+    const next = tabs[(index + direction + tabs.length) % tabs.length];
+    if (next)
+      fire(
+        activateTab(next.id).then(() => {
+          $("#document-tabs [aria-selected=true]").focus();
+        }),
+      );
+    return;
+  }
   let action: string | undefined;
   if (mod) {
     const key = e.key.toLowerCase();
     action =
-      key === "s"
-        ? e.shiftKey
-          ? "save-as"
-          : "save"
-        : key === "p"
-          ? e.shiftKey
-            ? "palette"
-            : "open"
-          : key === "n"
-            ? "new"
-            : key === "/"
-              ? "source"
-              : key === "f"
+      key === "t"
+        ? "new-tab"
+        : key === "w"
+          ? "close-tab"
+          : key === "o"
+            ? "open"
+            : key === "s"
+              ? e.shiftKey
+                ? "save-as"
+                : "save"
+              : key === "p"
                 ? e.shiftKey
-                  ? "global-search"
-                  : "find"
-                : key === "h"
-                  ? "find"
-                  : key === ","
-                    ? "settings"
-                    : key === "l" && e.shiftKey
-                      ? "sidebar"
-                      : key === "k"
-                        ? "link"
-                        : key === "b" && mode !== "rich"
-                          ? "bold"
-                          : key === "i" && mode !== "rich"
-                            ? "italic"
-                            : undefined;
+                  ? "palette"
+                  : "quick-open"
+                : key === "n"
+                  ? "new"
+                  : key === "/"
+                    ? "source"
+                    : key === "f"
+                      ? e.shiftKey
+                        ? "global-search"
+                        : "find"
+                      : key === "h"
+                        ? "find"
+                        : key === ","
+                          ? "settings"
+                          : key === "l" && e.shiftKey
+                            ? "sidebar"
+                            : key === "k"
+                              ? "link"
+                              : key === "b" && mode !== "rich"
+                                ? "bold"
+                                : key === "i" && mode !== "rich"
+                                  ? "italic"
+                                  : undefined;
   } else if (e.key === "F8") action = "focus";
   else if (e.key === "F9") action = "typewriter";
   if (action) {
@@ -1576,7 +1821,8 @@ document.addEventListener("keydown", (e) => {
   }
 });
 window.addEventListener("beforeunload", (e) => {
-  if (dirty) {
+  captureTab();
+  if (tabs.some((t) => t.dirty)) {
     fire(persistDraft());
     e.preventDefault();
     e.returnValue = "";
@@ -1605,7 +1851,7 @@ $<HTMLInputElement>("#import-input").onchange = (event) =>
       const input = event.target as HTMLInputElement;
       const f = input.files?.[0];
       input.value = "";
-      if (!f || !(await canLeave())) return;
+      if (!f || loading || saving) return;
       const ext = f.name.split(".").pop()?.toLowerCase() || "";
       let text: string;
       if (["md", "markdown", "txt"].includes(ext)) text = await f.text();
@@ -1616,6 +1862,7 @@ $<HTMLInputElement>("#import-input").onchange = (event) =>
         });
         text = res.content;
       }
+      await newTab(false);
       path = null;
       revision = null;
       lastSaved = "";
@@ -1692,7 +1939,15 @@ $("#resize-handle").addEventListener("pointerdown", (e) => {
       "--sidebar-width",
       `${Math.max(180, Math.min(480, event.clientX))}px`,
     );
-  handle.onpointerup = () => (handle.onpointermove = null);
+  handle.onpointerup = () => {
+    handle.onpointermove = null;
+    settings.sidebarWidth = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue(
+        "--sidebar-width",
+      ),
+    );
+    setSettings();
+  };
 });
 document.addEventListener("selectionchange", () => {
   if (!settings.focus && !settings.typewriter) return;
@@ -1735,6 +1990,9 @@ async function boot() {
         ? workspace.name
         : root.split("/").pop() || root;
     $("#workspace-name").title = root;
+    activeTab = crypto.randomUUID();
+    tabs.push(snapshotTab());
+    document.body.classList.add("hide-sidebar");
     await refreshFiles();
     await mountEditor();
     const drafts = await api<Draft[]>("drafts");
@@ -1745,6 +2003,8 @@ async function boot() {
       );
   } catch (e) {
     ready = true;
+    welcome = false;
+    renderTabs();
     report(e);
     $("#editor").innerHTML =
       '<div class="connection-error"><h1>Откройте ссылку из Typoha</h1><p>Запустите приложение и используйте адрес из терминала. Он содержит локальный ключ доступа.</p></div>';

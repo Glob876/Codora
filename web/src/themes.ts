@@ -1,0 +1,103 @@
+// Original palettes, independently selected for Typoha. No theme assets are imported.
+export const themes = [
+  {
+    id: "paper",
+    name: "Бумага",
+    bg: "#ffffff",
+    panel: "#f6f7f7",
+    text: "#2d3439",
+    accent: "#34756a",
+    dark: false,
+  },
+  {
+    id: "sepia",
+    name: "Сепия",
+    bg: "#faf5e9",
+    panel: "#eee8d9",
+    text: "#514a3e",
+    accent: "#7b6b37",
+    dark: false,
+  },
+  {
+    id: "night",
+    name: "Ночь",
+    bg: "#202326",
+    panel: "#1b1e20",
+    text: "#d2d7da",
+    accent: "#93c5b3",
+    dark: true,
+  },
+  {
+    id: "catppuccin",
+    name: "Catppuccin · Typoha",
+    bg: "#242335",
+    panel: "#1d1c2c",
+    text: "#ddd8f0",
+    accent: "#c7a5ed",
+    dark: true,
+  },
+  {
+    id: "gruvbox",
+    name: "Gruvbox · Typoha",
+    bg: "#2c2926",
+    panel: "#24221f",
+    text: "#e6d7ac",
+    accent: "#c1bd70",
+    dark: true,
+  },
+  {
+    id: "matrix",
+    name: "Matrix",
+    bg: "#0c1510",
+    panel: "#08100b",
+    text: "#a4ddb1",
+    accent: "#55d987",
+    dark: true,
+  },
+  {
+    id: "ayu",
+    name: "Ayu · Typoha",
+    bg: "#111a24",
+    panel: "#0c141e",
+    text: "#c9d0da",
+    accent: "#edb76a",
+    dark: true,
+  },
+  {
+    id: "nord",
+    name: "Nord · Typoha",
+    bg: "#2c3545",
+    panel: "#252e3d",
+    text: "#dbe4ee",
+    accent: "#94c8d5",
+    dark: true,
+  },
+  {
+    id: "rose",
+    name: "Розовый кварц",
+    bg: "#fcf5f6",
+    panel: "#f3e8ec",
+    text: "#513d4c",
+    accent: "#a6547a",
+    dark: false,
+  },
+];
+export function themeVariables(id: string, darkSystem = false) {
+  const t =
+    themes.find(
+      (t) => t.id === (id === "system" ? (darkSystem ? "night" : "paper") : id),
+    ) || themes[0];
+  return {
+    "--bg": t.bg,
+    "--panel": t.panel,
+    "--bar": t.bg,
+    "--text": t.text,
+    "--accent": t.accent,
+    "--muted": `color-mix(in srgb, ${t.text} 60%, ${t.bg})`,
+    "--border": `color-mix(in srgb, ${t.text} 15%, ${t.bg})`,
+    "--hover": `color-mix(in srgb, ${t.accent} 12%, ${t.bg})`,
+    "--selected": `color-mix(in srgb, ${t.accent} 18%, ${t.bg})`,
+    "--code": t.panel,
+    "color-scheme": t.dark ? "dark" : "light",
+  };
+}

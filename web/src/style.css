@@ -1165,12 +1165,388 @@ dialog p {
 .hljs-number {
   color: #996a31;
 }
-[data-theme="night"] .hljs-keyword {
+[data-appearance="dark"] .hljs-keyword {
   color: #d397c0;
 }
-[data-theme="night"] .hljs-string {
+[data-appearance="dark"] .hljs-string {
   color: #a8c69a;
 }
-[data-theme="night"] .hljs-title {
+[data-appearance="dark"] .hljs-title {
   color: #9bc5e6;
+}
+
+/* Original Typoha motion and preferences surfaces. */
+button,
+input,
+select,
+textarea {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+#sidebar {
+  transition:
+    width 260ms cubic-bezier(0.22, 0.7, 0.25, 1),
+    opacity 200ms ease,
+    visibility 0s;
+}
+#sidebar > * {
+  min-width: 180px;
+}
+#resize-handle {
+  transition:
+    width 260ms ease,
+    opacity 180ms ease;
+}
+.hide-sidebar #sidebar {
+  display: flex;
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition-delay: 0s, 0s, 260ms;
+}
+.hide-sidebar #resize-handle {
+  display: block;
+  width: 0;
+  opacity: 0;
+}
+.welcome-active #sidebar,
+.welcome-active #resize-handle {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.tabstrip {
+  display: flex;
+  align-items: center;
+  min-height: 43px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 4px 10px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+#document-tabs {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  min-width: 0;
+  scrollbar-width: thin;
+}
+.document-tab {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  animation: tab-enter 200ms ease both;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+.document-tab.active {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
+  box-shadow: 0 2px 5px #00000006;
+}
+.document-tab > button:first-child {
+  max-width: 220px;
+  min-width: 115px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  padding: 6px 12px;
+}
+.document-tab > button:last-child {
+  margin-right: 3px;
+  opacity: 0.6;
+}
+.document-tab:hover > button:last-child {
+  opacity: 1;
+}
+#welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  animation: surface-enter 360ms ease both;
+}
+.welcome-mark {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 22px;
+  color: var(--accent);
+  background: var(--selected);
+  font:
+    italic 52px Georgia,
+    serif;
+  margin-bottom: 18px;
+}
+#welcome h1 {
+  font:
+    500 clamp(22px, 3vw, 34px) Georgia,
+    serif;
+  margin: 0 0 8px;
+}
+#welcome p {
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+#welcome > div:not(.welcome-mark) {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.welcome-button {
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  background: var(--bar);
+  border-radius: 10px;
+}
+.welcome-button:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 18px #00000008;
+}
+.welcome-button kbd {
+  margin-left: 18px;
+}
+.welcome-active .document-bar,
+.welcome-active .format-bar,
+.welcome-active #editor-scroll,
+.welcome-active .statusbar,
+.welcome-active #compatibility {
+  display: none !important;
+}
+.hide-toolbar .format-bar,
+.hide-statusbar .statusbar {
+  display: none;
+}
+.editor-enter {
+  animation: surface-enter 180ms ease both;
+}
+#dropdown:not([hidden]),
+#toast:not([hidden]),
+dialog[open] {
+  animation: surface-enter 160ms ease both;
+}
+dialog[open]::backdrop {
+  animation: backdrop-enter 180ms ease both;
+}
+.preferences-dialog {
+  width: min(960px, 94vw);
+  max-width: 960px;
+  padding: 0;
+  overflow: hidden;
+}
+.preferences-dialog form {
+  display: flex;
+  flex-direction: column;
+  height: min(720px, 88dvh);
+}
+.preferences-dialog form > header {
+  margin: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.preferences-layout {
+  display: grid;
+  grid-template-columns: 195px minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+.preferences-layout nav {
+  padding: 18px 12px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.preferences-layout nav button {
+  text-align: left;
+  padding: 10px 12px;
+}
+.preferences-layout nav button[aria-current="true"] {
+  color: var(--accent);
+  background: var(--selected);
+}
+.preferences-layout nav span {
+  margin-left: 8px;
+}
+.preferences-content {
+  overflow-y: auto;
+  padding: 24px 30px;
+}
+.preferences-content section:not([hidden]) {
+  animation: surface-enter 180ms ease both;
+}
+.preferences-content h2 {
+  margin: 0 0 12px;
+  font-size: 21px;
+}
+.preferences-content p {
+  color: var(--muted);
+}
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  min-height: 62px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.setting-row small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+.setting-row input[type="number"] {
+  width: 100px;
+}
+.setting-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.setting-row input[type="color"] {
+  width: 54px;
+  height: 36px;
+  padding: 3px;
+  cursor: pointer;
+}
+.theme-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.theme-gallery button {
+  border: 1px solid var(--border);
+  padding: 7px;
+  font-size: 11px;
+  text-align: left;
+}
+.theme-gallery button[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.theme-preview {
+  display: block;
+  height: 65px;
+  background: var(--swatch-bg);
+  color: var(--swatch-text);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font:
+    20px Georgia,
+    serif;
+}
+.theme-preview i {
+  display: block;
+  height: 3px;
+  width: 80%;
+  margin-top: 5px;
+  background: var(--swatch-text);
+  opacity: 0.35;
+  border-radius: 4px;
+}
+.theme-preview i:last-child {
+  width: 50%;
+  background: var(--swatch-accent);
+  opacity: 1;
+}
+.preferences-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+}
+.preferences-footer span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+.preferences-footer .primary {
+  color: var(--bg);
+  background: var(--accent);
+}
+@keyframes surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tab-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (max-width: 800px) {
+  .preferences-layout {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+  .preferences-content {
+    padding: 20px;
+  }
+  .theme-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media print {
+  .tabstrip,
+  #welcome {
+    display: none !important;
+  }
 }
