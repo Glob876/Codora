@@ -12,6 +12,10 @@ describe("lossless editor guard", () => {
     for (const text of [
       "---\ntitle: X\n---\n# H",
       "[^note]: content",
+      "[картинка]: images/cat.png\n\n![Кот][картинка]",
+      "   [ref]: <https://example.org/path>\n\n[ref]",
+      "[ref]:\n  https://example.org\n\n[ref]",
+      '[reference]: https://example.org "Title"\n\n[link][reference]',
       "<details>hello</details>",
       "==marked==",
       "[TOC]",

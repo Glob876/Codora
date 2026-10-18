@@ -21,7 +21,9 @@ The compare-and-replace protocol protects ordinary editor/external modification 
 - `web/src/render.ts`: Markdown/KaTeX/Mermaid/footnotes/alerts rendering and sanitation.
 - `web/src/api.ts`: authenticated transport, per-run token and workspace identity.
 - `web/src/commands.ts`: menu/command metadata.
-- `web/src/main.ts`: active-document coordinator and UI.
+- `web/src/main.ts`: active-document coordinator and UI events.
+- `web/src/settings.ts` and `web/src/shell.ts`: settings and application shell.
+- `web/src/escape.ts`: HTML escaping shared by UI and renderer. The renderer is loaded on demand.
 - `web/src/extensions.ts`: compile-time extension contract.
 
 ## Adding a feature

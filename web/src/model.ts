@@ -71,6 +71,8 @@ export function richCompatibility(text: string): string | null {
   // Unsupported constructs stay in the lossless source editor. They are never parsed then silently discarded.
   if (/^---\r?\n/.test(text)) return "YAML-метаданные";
   if (/^\s*\[\^[^\]]+\]:/m.test(text)) return "сноски";
+  if (/^ {0,3}\[[^\]\n]+\]:[ \t]*(?:\r?\n[ \t]*)?\S/m.test(text))
+    return "ссылочные определения";
   if (/<\/?[a-z][\s\S]*?>/i.test(text)) return "HTML";
   if (/^\s*\[(?:toc)\]\s*$/im.test(text)) return "встроенное оглавление";
   if (/==\S[^\n]*?==|(?<!\$)\^[^\s^]+\^|(?<!~)~[^\s~]+~(?!~)/.test(text))

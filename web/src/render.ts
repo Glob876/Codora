@@ -1,3 +1,4 @@
+import { escapeHtml } from "./escape";
 import { marked } from "marked";
 import markedFootnote from "marked-footnote";
 import markedAlert from "marked-alert";
@@ -81,15 +82,6 @@ marked.use({
     })),
   ],
 });
-export function escapeHtml(s: string) {
-  return s.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ]!,
-  );
-}
 let diagramId = 0;
 export async function diagram(source: string): Promise<HTMLElement> {
   const element = document.createElement("div");
