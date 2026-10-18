@@ -1,4 +1,9 @@
-# Codora
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/branding/codora-dark.svg">
+    <img src="docs/branding/codora-light.svg" alt="codora" width="640">
+  </picture>
+</p>
 
 В файле Python нажмите **«Запустить»** или **F5**. Codora сначала сохранит скрипт, затем покажет вывод, ошибки, код выхода, поле ввода для `input()` и кнопку остановки. Нужен установленный Python 3 либо `.venv` в рабочей папке; Python не входит в поставку. Скрипт выполняется локально с правами пользователя.
 

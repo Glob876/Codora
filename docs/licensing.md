@@ -51,6 +51,11 @@ Third-party materials retain their own licenses. Preserve
 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and [license texts](licenses/).
 The project license does not replace dependency licenses.
 
+README logo lettering uses Manrope SemiBold, exported from Figma as outlined
+SVG paths. The [SIL Open Font License 1.1 notice](licenses/Manrope-OFL.txt) is
+retained; no Manrope font binary is bundled. The folded-ribbon mark is original
+Codora artwork, with provenance recorded in [clean-room.md](clean-room.md).
+
 `./scripts/package.sh` packages a committed source snapshot, build instructions,
 lockfiles, npm dependencies and vendored Rust crates alongside the executable.
 The source archive contains `SOURCE-BUILD.md` with rebuild instructions. Publish

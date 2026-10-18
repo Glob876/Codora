@@ -1,4 +1,9 @@
-# Codora
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/branding/codora-dark.svg">
+    <img src="docs/branding/codora-light.svg" alt="codora" width="640">
+  </picture>
+</p>
 
 For Python files, click **Run** or press **F5**. Codora saves the script first, then shows output/errors, exit status, an input field for `input()` and a Stop button. Install Python 3 or create a `.venv` in the workspace; Python is not bundled. Scripts run locally with your user permissions.
 

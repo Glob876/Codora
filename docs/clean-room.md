@@ -125,3 +125,21 @@ Custom scrollbar rules use local palette variables and browser CSS pseudo-elemen
 with standard scrollbar-color/width fallback. Shared appearance persistence is
 original Rust code. The README screenshot is captured from our rebuilt Electron
 application with a disposable, original sample document.
+
+## Folded-ribbon identity (2026-10-18)
+
+The owner selected the original “Лента мысли” concept created in this session:
+https://www.figma.com/design/JyOLKqfWBwr8EMhrMNgNQa?node-id=6-2.
+Our own SVG geometry was drawn with the Figma Plugin API; no other editor assets
+or reference images were consulted. The approved icon (node 6:20) and monochrome
+mark (node 6:72) were exported as SVG. The desktop PNG is rasterized from that
+SVG at 512 × 512. Existing interface surfaces use the monochrome mark through
+currentColor in both appearance modes.
+
+Transparent README lockups (nodes 8:2 and 8:8) contain only the color mark and
+the word “codora”; the word is outlined, with no font downloads at runtime.
+The lettering uses Manrope SemiBold from Figma. Its SIL Open Font License 1.1
+notice is retained at docs/licenses/Manrope-OFL.txt, obtained from
+https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt.
+No font binaries or new application dependencies are distributed. The original
+mark geometry remains under the repository license.
