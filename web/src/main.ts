@@ -133,6 +133,7 @@ let draftId: string = crypto.randomUUID(),
   saveTimer: ReturnType<typeof setTimeout>,
   draftTimer: ReturnType<typeof setTimeout>,
   outlineTimer: ReturnType<typeof setTimeout>;
+let pendingOpen: { target: string; line?: number } | null = null;
 let lastSaved = sample,
   collapsed = new Set<string>(),
   searchSeq = 0;
@@ -418,6 +419,11 @@ async function mountEditor(nextMode = mode) {
   } finally {
     loading = false;
     ready = true;
+    if (pendingOpen) {
+      const queued = pendingOpen;
+      pendingOpen = null;
+      setTimeout(() => fire(openDocument(queued.target, queued.line)), 0);
+    }
     if (dirty && settings.autosave && path)
       saveTimer = setTimeout(() => {
         if (dirty && path && settings.autosave) fire(save(false));
@@ -538,7 +544,11 @@ async function canLeave() {
   return answer === "draft";
 }
 async function openDocument(target: string, line?: number) {
-  if (loading || !(await canLeave())) return;
+  if (loading) {
+    pendingOpen = { target, line };
+    return;
+  }
+  if (!(await canLeave())) return;
   const doc = await api<Document>(
     `document?path=${encodeURIComponent(target)}`,
   );
