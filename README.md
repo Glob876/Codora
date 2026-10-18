@@ -1,63 +1,67 @@
 # Typoha
 
-Самостоятельный локальный Markdown-редактор: файловое ядро на **Rust**, интерфейс на **TypeScript** с Milkdown и CodeMirror. Собственные стили, тексты и примеры; код и ресурсы Typora не используются.
+**English** | [Русский](README.ru.md)
 
-**Версия 0.1.0 — рабочая начальная реализация, не полный клон 1:1.** Подробная [таблица покрытия и отличий](docs/parity.md) перечисляет готовые функции и оставшуюся работу. Метод независимой реализации описан в [clean-room.md](docs/clean-room.md); это не юридическая гарантия отсутствия любых рисков.
+An independent local Markdown editor with a **Rust** filesystem core and a **TypeScript** interface built with Milkdown and CodeMirror. Styles, copy, and sample documents are original; no Typora code or assets are used.
 
-![Typoha — собственный интерфейс](docs/screenshots/typoha.jpg)
+**Version 0.1.0 is a working initial implementation, not a complete 1:1 clone.** The [feature coverage table](docs/parity.md) lists implemented features, differences, and remaining work. The independent implementation process is documented in [clean-room.md](docs/clean-room.md); it does not guarantee the absence of all legal risks. These detailed documents are currently available in Russian and English respectively.
 
-## Запуск
+![Typoha editor interface](docs/screenshots/typoha.jpg)
 
-Из папки проекта:
+## Getting started
+
+From the project directory:
 
 ```bash
 ./run.sh
 ```
 
-При наличии готовой сборки откроется редактор с примерами. Если сборки ещё нет, скрипт соберёт её; нужны Node.js 24+, npm, rustup и C/C++ linker. Версия Rust закреплена в `rust-toolchain.toml`. Первая сборка загружает открытые зависимости из npm/crates.io.
+If a release build is available, the editor opens with sample documents. Otherwise, the script builds it first; you need Node.js 24+, npm, rustup, and a C/C++ linker. The Rust toolchain is pinned in `rust-toolchain.toml`. The first build downloads open-source dependencies from npm and crates.io.
 
-Открыть свою папку:
+To open your own folder:
 
 ```bash
-./run.sh /полный/путь/к/заметкам
+./run.sh /absolute/path/to/notes
 ```
 
-Если браузер не открылся автоматически, используйте ссылку из терминала. В Codex её можно открыть во встроенном браузере. Для отдельного окна используется установленный Chromium/Chrome/Edge, иначе — системный браузер. Сервер привязан только к `127.0.0.1`. Ссылка содержит временный ключ доступа к открытой папке; не публикуйте её.
+If a browser does not open automatically, use the URL printed in the terminal. In Codex, you can open it in the in-app browser. An installed Chromium, Chrome, or Edge is used for a separate app window; otherwise, the system browser is used. The server listens only on `127.0.0.1`. The URL contains a temporary access key for the open folder; do not share it.
 
 ```bash
 ./target/release/typoha ./examples --no-open --port 43217
 ```
 
-Ctrl+C в терминале останавливает сервер. Закрытие вкладки само по себе сервер не останавливает. В готовом архиве можно запускать бинарник `./typoha ./examples` без Node и Rust.
+Press Ctrl+C in the terminal to stop the server. Closing the browser tab does not stop it. With a packaged build, run `./typoha ./examples` without installing Node or Rust.
 
-## Уже работает
+The application interface is currently in Russian. This README describes the current version.
 
-- Живое Markdown-редактирование, исходник, предпросмотр; таблицы и списки задач.
-- Формулы KaTeX, Mermaid, подсветка кода; сноски, alerts, emoji, индексы и выделение в предпросмотре.
-- Дерево файлов, структура документа, поиск/замена, regex-поиск по папке и быстрое открытие.
-- Сохранение с проверкой ревизии, автосохранение, история, черновики и восстанавливаемая корзина.
-- Светлая/тёмная/сепия/системная темы, собственный CSS, настройки ширины и шрифтов, фокусировка.
-- HTML и PNG; PDF через печать браузера. Для остальных форматов предусмотрен **внешний Pandoc** в PATH, который в приложение не включён.
-- Палитра команд и [API для своих расширений](docs/architecture.md).
+## Implemented features
 
-Markdown с неподдерживаемыми визуальным движком конструкциями открывается в исходнике с пояснением. Это сохраняет текст; редактирование в визуальном режиме может нормализовать синтаксис. Активные HTML-вставки и автоматические сетевые загрузки отключены.
+- Live Markdown editing, source mode, and preview; tables and task lists.
+- KaTeX formulas, Mermaid diagrams, and syntax highlighting; footnotes, alerts, emoji, subscripts, superscripts, and highlights in preview.
+- A file tree, document outline, find and replace, regex search across a folder, and quick open.
+- Revision-checked saves, autosave, version history, drafts, and recoverable trash.
+- Light, dark, sepia, and system themes; custom CSS, writing width and font settings, and focus mode.
+- HTML and PNG export; PDF through browser printing. Other formats use an **external Pandoc** installation in PATH, which is not bundled with the app.
+- A command palette and an [API for custom extensions](docs/architecture.md).
 
-## Клавиши
+Documents containing constructs unsupported by the visual editor open in source mode with an explanation. This preserves their text; visual editing may normalize Markdown syntax. Active HTML embeds and automatic network downloads are disabled.
 
-| Действие | Клавиши |
+## Keyboard shortcuts
+
+| Action | Shortcut |
 | --- | --- |
-| Сохранить / сохранить как | Ctrl+S / Ctrl+Shift+S |
-| Новый документ | Ctrl+N |
-| Быстро открыть / команды | Ctrl+P / Ctrl+Shift+P |
-| Исходный код | Ctrl+/ |
-| Поиск/замена / поиск по папке | Ctrl+F / Ctrl+Shift+F |
-| Боковая панель | Ctrl+Shift+L |
-| Фокус / печатная машинка | F8 / F9 |
-| Настройки | Ctrl+, |
+| Save / save as | Ctrl+S / Ctrl+Shift+S |
+| New document | Ctrl+N |
+| Quick open / commands | Ctrl+P / Ctrl+Shift+P |
+| Source mode | Ctrl+/ |
+| Find and replace / search folder | Ctrl+F / Ctrl+Shift+F |
+| Toggle sidebar | Ctrl+Shift+L |
+| Focus / typewriter mode | F8 / F9 |
+| Settings | Ctrl+, |
 
-На macOS основной модификатор — Command. Нативные платформенные сочетания могут отличаться.
+On macOS, Command is the primary modifier. Native platform shortcuts may differ.
 
-## Разработка и проверки
+## Development and checks
 
 ```bash
 npm ci --prefix web
@@ -66,12 +70,12 @@ npm ci --prefix web
 ./scripts/package.sh
 ```
 
-`check.sh` проверяет TypeScript, форматирование, клиентские тесты, сборку интерфейса, Rust-тесты, Clippy, npm audit и наличие лицензий. `package.sh` создаёт архив Linux в `artifacts/` с исполняемым файлом, примерами, документацией и полными уведомлениями о лицензиях. Сборки Windows/macOS пока не проверены.
+`check.sh` runs TypeScript checks, formatting checks, client tests, the frontend build, Rust tests, Clippy, npm audit, and license checks. `package.sh` creates a Linux archive in `artifacts/` with the executable, sample documents, both READMEs, documentation, and complete third-party license notices. Windows and macOS builds have not been verified yet.
 
-Служебные данные находятся в `.typoha` внутри открытой папки. Историю, черновики и корзину не удаляйте без необходимости. Символические ссылки за пределы workspace не поддерживаются. Текущий максимум документа — 16 МБ; поиск по папке пропускает файлы больше 2 МБ и ограничивает результаты 500 строками.
+Workspace data is stored in `.typoha` inside the open folder. Avoid deleting history, drafts, or trash unless intended. Symbolic links outside the workspace are not supported. Documents are currently limited to 16 MB; folder search skips files larger than 2 MB and returns at most 500 matching lines.
 
-## Лицензии и происхождение
+## Licensing and provenance
 
-Оригинальный код проекта — [MIT](LICENSE). У зависимостей собственные лицензии: [полные уведомления](THIRD_PARTY_NOTICES.md) и [машиночитаемый список](docs/dependencies.json). Выбранные варианты лицензий и граница независимой реализации записаны явно. Публичные описания функций используются как требования, а не как исходный код или материалы для включения в продукт.
+Original project code is licensed under [MIT](LICENSE). Dependencies retain their own licenses: see the [complete notices](THIRD_PARTY_NOTICES.md) and [machine-readable inventory](docs/dependencies.json). License choices and the independent implementation boundary are documented explicitly. Public feature descriptions serve as requirements, not as source code or assets to include in the product.
 
-Репозиторий содержит правила [AGENTS.md](AGENTS.md), исходники, тесты и локальную историю Git. Публикация во внешний Git-хостинг не выполняется автоматически.
+Source code and commit history are available in the [GitHub repository](https://github.com/Glob876/Typoha). Development rules are in [AGENTS.md](AGENTS.md).
