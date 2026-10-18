@@ -276,3 +276,71 @@ async fn python_execution_requires_authorization_scope_and_explicit_post() {
         .unwrap();
     assert_eq!(stop.status(), StatusCode::OK);
 }
+
+#[tokio::test]
+async fn appearance_follows_folders_and_restarts_but_paths_do_not() {
+    let profile = tempdir().unwrap();
+    let first = tempdir().unwrap();
+    let second = tempdir().unwrap();
+    let session = profile.path().join("session.json");
+    let make_app = |root: &std::path::Path| {
+        router(AppState {
+            workspace: Arc::new(Mutex::new(
+                Workspace::open(root)
+                    .unwrap()
+                    .with_session(session.clone())
+                    .unwrap(),
+            )),
+            token: "t".into(),
+            origin: "http://127.0.0.1:1".into(),
+        })
+    };
+    let req = |uri: &str, value: Option<serde_json::Value>| {
+        Request::builder()
+            .method(if value.is_some() { "POST" } else { "GET" })
+            .uri(uri)
+            .header("host", "127.0.0.1:1")
+            .header("x-codora-token", "t")
+            .header("content-type", "application/json")
+            .body(Body::from(value.map(|v| v.to_string()).unwrap_or_default()))
+            .unwrap()
+    };
+    let app = make_app(first.path());
+    let response = app.clone().oneshot(req("/api/preferences", Some(serde_json::json!({
+        "theme":"matrix", "primaryColor":"#123456", "backgroundOpacity":80,
+        "language":"en", "recent":["private.md"], "pinned":["private.md"], "customCss":"p {}"
+    })))).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let response = app
+        .clone()
+        .oneshot(req(
+            "/api/workspace",
+            Some(serde_json::json!({"root":second.path()})),
+        ))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    for app in [app, make_app(second.path()), make_app(first.path())] {
+        let response = app.oneshot(req("/api/preferences", None)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let value: serde_json::Value =
+            serde_json::from_slice(&response_bytes(response).await).unwrap();
+        assert_eq!(value["theme"], "matrix");
+        assert_eq!(value["primaryColor"], "#123456");
+        assert_eq!(value["backgroundOpacity"], 80);
+        assert_eq!(value["language"], "en");
+    }
+    let saved: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(profile.path().join("appearance.json")).unwrap())
+            .unwrap();
+    for key in ["recent", "pinned", "customCss"] {
+        assert!(saved.get(key).is_none());
+    }
+    let response = make_app(second.path())
+        .oneshot(req("/api/preferences", None))
+        .await
+        .unwrap();
+    let value: serde_json::Value = serde_json::from_slice(&response_bytes(response).await).unwrap();
+    assert!(value.get("recent").is_none());
+    assert!(value.get("customCss").is_none());
+}

@@ -132,7 +132,7 @@ const rows = `Запустить|Run|Запустити|Ausführen
 Только для документов с именем; конфликты остаются под защитой|Named documents only; conflict protection stays enabled|Лише для документів з назвою; захист від конфліктів залишається|Nur benannte Dokumente; Konfliktschutz bleibt aktiv
 Задержка автосохранения, мс|Autosave delay, ms|Затримка автозбереження, мс|Speicherverzögerung, ms
 Пользовательский CSS|Custom CSS|Власний CSS|Eigenes CSS
-CSS применяется локально. Внешние ресурсы блокируются. Настройки сохраняются Rust-ядром в рабочей папке.|CSS is applied locally. External resources are blocked. Settings are saved by the Rust core in the workspace.|CSS застосовується локально. Зовнішні ресурси блокуються. Ядро Rust зберігає налаштування в робочій папці.|CSS wird lokal angewendet. Externe Ressourcen sind blockiert. Der Rust-Kern speichert Einstellungen im Arbeitsordner.
+CSS применяется локально. Внешние ресурсы блокируются. Оформление сохраняется Rust-ядром для всего приложения; остальные настройки — в рабочей папке.|CSS is applied locally. External resources are blocked. The Rust core saves appearance for the application and other settings in the workspace.|CSS застосовується локально. Зовнішні ресурси блокуються. Ядро Rust зберігає оформлення для застосунку, інші налаштування — у робочій папці.|CSS wird lokal angewendet. Externe Ressourcen sind blockiert. Der Rust-Kern speichert das Erscheinungsbild für die Anwendung und andere Einstellungen im Arbeitsordner.
 Восстановить настройки по умолчанию|Restore defaults|Відновити початкові налаштування|Standardeinstellungen wiederherstellen
 Предпросмотр изменений|Live preview|Попередній перегляд змін|Live-Vorschau
 Отмена|Cancel|Скасувати|Abbrechen

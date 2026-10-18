@@ -75,3 +75,19 @@
 - Runner tests verify live UTF-8 stdout/stderr and stdin, a filename containing spaces, script-relative file access, tracebacks/nonzero exit, bounded output and draining, revision/traversal/extension rejection, one-run exclusion, workspace isolation, Stop, and termination of a spawned descendant on Linux.
 - Release build and both Electron smoke scripts passed. The code smoke starts an untitled Python document through the Run button, completes the Save dialog, verifies printed output, edits/runs an input() script and submits Cyrillic stdin, checks that edited source was saved, runs a traceback via F5, and stops a sleeping process. Existing editor/format-picker/session and PDF/clipboard/draft/preferences checks also pass.
 - `/tmp/codora-python.png` was visually inspected: the Python Run button, bounded bottom panel, red traceback, file path, exit code and disabled completed-run controls are readable. No process output enters application logs or persistence. Linux is verified; Windows/macOS interpreter discovery, descendant cleanup and interactive terminal-style programs are unverified. Python itself remains an external runtime.
+
+## Appearance and identity — 2026-10-18
+
+- Passed `cargo fmt`, `cargo test --locked` (25 integration tests), and
+  `cargo clippy --all-targets --locked -- -D warnings`.
+- Passed frontend `npm run check`, `npm test` (28 tests), `npm run build`,
+  and formatting checks; desktop unit tests (5) passed.
+- Electron smoke passed under Xvfb, including saving Matrix appearance before
+  opening a second folder, checking the retained theme, the custom 10px scrollbar,
+  and the inline vector brand mark. Rust HTTP tests cover appearance after folder
+  change and server recreation, keeping recent paths/pins/CSS out of global data.
+- Captured and visually inspected the rebuilt app for the README using
+  `desktop/capture-readme.cjs`, with a disposable original document. Inspected
+  the original monochrome/color Figma geometry and local rasterized color icon.
+- Linux desktop only. Native tray display depends on the host desktop; no claim
+  of tray visual verification on every desktop environment or Windows/macOS.

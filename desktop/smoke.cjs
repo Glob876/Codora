@@ -287,14 +287,34 @@ app.on("browser-window-created", (_event, win) => {
         assert.equal(pdfText.status, 0);
         assert.match(pdfText.stdout, /Desktop test/);
       }
+      // Xvfb may leave the window unfocused after the native print dialog.
+      win.focus();
+      win.webContents.focus();
       await js("navigator.clipboard.writeText('Codora clipboard')");
       for (let i = 0; i < 100 && dictionaries.size < 2; i++) await pause(100);
       assert.ok(dictionaries.has("ru"), "Russian dictionary initialized");
       assert.ok(dictionaries.has("en-US"), "English dictionary initialized");
+      await js("document.querySelector('[data-action=settings]').click()");
+      await until("document.querySelector('.theme-gallery')");
+      await js(
+        "document.querySelector('[data-theme-choice=matrix]').click(); document.querySelector('#dialog button[value=ok]').click()",
+      );
+      await until("!document.querySelector('#dialog').open");
       await js("document.querySelector('[data-action=workspace]').click()");
       await until(
         "document.querySelector('#workspace-name').title === " +
           JSON.stringify(other),
+      );
+      await until("document.documentElement.dataset.theme === 'matrix'");
+      assert.equal(
+        await js(
+          "getComputedStyle(document.querySelector('#editor-scroll'), '::-webkit-scrollbar').width",
+        ),
+        "10px",
+      );
+      assert.equal(
+        await js("document.querySelectorAll('.brand-glyph svg').length"),
+        1,
       );
       await js("document.querySelector('[data-action=new]').click()");
       await until("!!document.querySelector('#document-format')");

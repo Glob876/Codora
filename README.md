@@ -18,7 +18,7 @@ Codora is inspired by Typora’s focus on distraction-free Markdown writing and 
 
 **Vibe-coded:** this project was created with AI coding agents (Codex), guided by the project owner.
 
-![Previous Typoha interface](docs/screenshots/typoha.jpg)
+![Codora — local code and Markdown editor](docs/screenshots/codora.png)
 
 ## Getting started
 

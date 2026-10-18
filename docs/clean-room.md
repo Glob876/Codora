@@ -110,3 +110,18 @@ The TypeScript panel polls authenticated loopback endpoints, renders stdout/stde
 as text, forwards explicitly submitted stdin and offers Stop. A run is never
 triggered by opening a file. Saving uses the existing revision/conflict checks.
 The system/workspace Python interpreter is external and is not redistributed.
+
+## Codora identity and shared appearance (2026-10-18)
+
+Original monochrome and color vector marks were authored with Figma Plugin API
+from our own SVG geometry: https://www.figma.com/design/IK5L6edo3xvnP9zSIzk9Bx
+(monochrome node 1:3; color node 1:6). Exported SVG paths are retained locally;
+the PNG icon is rasterized from the color SVG. These original project assets use
+the repository license. No third-party editor assets, reference screenshots,
+fonts or new dependencies were used. The app uses the monochrome paths in both
+appearance modes; the desktop icon and tray use the color mark.
+
+Custom scrollbar rules use local palette variables and browser CSS pseudo-elements,
+with standard scrollbar-color/width fallback. Shared appearance persistence is
+original Rust code. The README screenshot is captured from our rebuilt Electron
+application with a disposable, original sample document.

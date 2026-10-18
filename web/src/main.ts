@@ -1,3 +1,4 @@
+import { brandMark } from "./brand";
 import { RunPanel, isPython } from "./run-panel";
 import { chooseDocumentFormat, newDocumentName } from "./new-document";
 import { observeUi, setLanguage, tr, translateUi } from "./i18n";
@@ -290,6 +291,7 @@ async function closeTab(id: string) {
 }
 async function leaveWorkspace() {
   if (loading || saving) return false;
+  await preferencesSaved;
   captureTab();
   for (const t of tabs.filter((t) => t.dirty)) {
     await activateTab(t.id);
@@ -359,8 +361,15 @@ function menu(
   box.style.top = `${r.bottom + 5}px`;
   box.hidden = false;
 }
+let preferencesSaved: Promise<unknown> = Promise.resolve();
 function setSettings() {
-  if (preferencesReady) fire(api("preferences", settings));
+  if (preferencesReady) {
+    const snapshot = { ...settings };
+    preferencesSaved = preferencesSaved
+      .catch(() => {})
+      .then(() => api("preferences", snapshot));
+    fire(preferencesSaved);
+  }
   localStorage.setItem("typoha-settings", JSON.stringify(settings));
   applySettings();
 }
@@ -1845,7 +1854,7 @@ async function run(
     case "about":
       dialogShell(
         "Codora",
-        `<div class="about-brand"><span class="brand-glyph">c</span><h3>Место для ваших мыслей</h3></div><p>Независимый редактор кода и Markdown. Версия 0.1.0.</p><p>Rust · Milkdown · CodeMirror<br>Локальные файлы. Открытые стандарты. Собственный интерфейс.</p><p>Реализация не связана с разработчиками других редакторов. Полный функциональный паритет ещё не достигнут; перечень ограничений находится в docs/parity.md.</p><p class="dialog-hint">© 2026 Codora contributors · Glob876. GNU AGPL v3 или более поздняя. Без гарантий. Разрешены изменения и распространение на условиях лицензии. <a href="https://github.com/Glob876/Codora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Лицензия</a> · <a href="https://github.com/Glob876/Codora" target="_blank" rel="noopener noreferrer">Исходный код</a>. Лицензии библиотек: THIRD_PARTY_NOTICES.md.</p>`,
+        `<div class="about-brand"><span class="brand-glyph">${brandMark}</span><h3>Место для ваших мыслей</h3></div><p>Независимый редактор кода и Markdown. Версия 0.1.0.</p><p>Rust · Milkdown · CodeMirror<br>Локальные файлы. Открытые стандарты. Собственный интерфейс.</p><p>Реализация не связана с разработчиками других редакторов. Полный функциональный паритет ещё не достигнут; перечень ограничений находится в docs/parity.md.</p><p class="dialog-hint">© 2026 Codora contributors · Glob876. GNU AGPL v3 или более поздняя. Без гарантий. Разрешены изменения и распространение на условиях лицензии. <a href="https://github.com/Glob876/Codora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Лицензия</a> · <a href="https://github.com/Glob876/Codora" target="_blank" rel="noopener noreferrer">Исходный код</a>. Лицензии библиотек: THIRD_PARTY_NOTICES.md.</p>`,
       );
       break;
     case "help":
@@ -2107,6 +2116,8 @@ async function boot() {
       ...(await api<Partial<Settings>>("preferences")),
     };
     preferencesReady = true;
+    // Migrate existing workspace appearance before the first folder switch.
+    await api("preferences", settings);
     applySettings();
     $("#workspace-name").textContent =
       typeof workspace.name === "string"

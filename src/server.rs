@@ -176,32 +176,17 @@ async fn preferences(
     State(s): State<AppState>,
     Extension(scope): Extension<WorkspaceScope>,
 ) -> core::Result<Json<Value>> {
-    let path = scoped(&s, &scope)?.metadata_file("config", "preferences.json")?;
-    if !path.exists() {
-        return Ok(Json(json!({})));
-    }
-    if std::fs::metadata(&path)?.len() > 256_000 {
-        return Err(core::bad("Файл настроек слишком большой"));
-    }
-    Ok(Json(serde_json::from_slice(&std::fs::read(path)?)?))
+    Ok(Json(crate::preferences::load(&*scoped(&s, &scope)?)?))
 }
 async fn save_preferences(
     State(s): State<AppState>,
     Extension(scope): Extension<WorkspaceScope>,
     Json(q): Json<Value>,
 ) -> core::Result<Json<Value>> {
-    let bytes = serde_json::to_vec_pretty(&q)?;
-    if !q.is_object() || bytes.len() > 256_000 {
-        return Err(core::bad("Некорректные настройки"));
-    }
-    core::atomic_write(
-        &scoped(&s, &scope)?
-            .internal("config")?
-            .join("preferences.json"),
-        &bytes,
-    )?;
+    crate::preferences::save(&*scoped(&s, &scope)?, &q)?;
     Ok(Json(json!({"ok":true})))
 }
+
 #[derive(Deserialize)]
 struct Listing {
     #[serde(default)]

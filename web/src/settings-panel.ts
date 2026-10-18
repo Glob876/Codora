@@ -80,7 +80,7 @@ export function settingsPanel(
       "advanced",
       "sliders",
       "Дополнительно",
-      `<label class="field">Пользовательский CSS<textarea name="customCss" rows="12" spellcheck="false">${esc(draft.customCss)}</textarea></label><p>CSS применяется локально. Внешние ресурсы блокируются. Настройки сохраняются Rust-ядром в рабочей папке.</p><button type="button" id="reset-settings">Восстановить настройки по умолчанию</button>`,
+      `<label class="field">Пользовательский CSS<textarea name="customCss" rows="12" spellcheck="false">${esc(draft.customCss)}</textarea></label><p>CSS применяется локально. Внешние ресурсы блокируются. Оформление сохраняется Rust-ядром для всего приложения; остальные настройки — в рабочей папке.</p><button type="button" id="reset-settings">Восстановить настройки по умолчанию</button>`,
     ],
   ];
   d.innerHTML = `<form method="dialog"><header><h2>Настройки</h2><button value="cancel" class="close-dialog" aria-label="Закрыть">${icon("close")}</button></header><div class="preferences-layout"><nav aria-label="Категории настроек">${groups.map(([id, symbol, name], i) => `<button type="button" data-category="${id}" aria-current="${i === 0}">${icon(symbol)} <span>${name}</span></button>`).join("")}</nav><div class="preferences-content">${groups.map(([id, , name, body], i) => `<section data-settings-section="${id}" ${i ? "hidden" : ""}><h2>${name}</h2>${body}</section>`).join("")}</div></div><footer class="preferences-footer"><span>Предпросмотр изменений</span><button value="cancel">Отмена</button><button class="primary" value="ok">Сохранить</button></footer></form>`;

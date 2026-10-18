@@ -46,7 +46,7 @@ For persistent file features, add a core operation, its failure-path tests, an a
 
 ## Persistence
 
-A workspace contains `.typoha/history`, `.typoha/trash`, `.typoha/drafts`, `.typoha/config`. Keep these out of source control and consider them when backing up a workspace. History is path-based; moving a file does not yet migrate its history. Browser preferences are a cache; workspace configuration is authoritative across restarts. Emergency copies belong to the originating browser tab and are subject to browser storage limits.
+A workspace contains `.typoha/history`, `.typoha/trash`, `.typoha/drafts`, `.typoha/config`. Keep these out of source control and consider them when backing up a workspace. History is path-based; moving a file does not yet migrate its history. Browser preferences are a cache. Rust stores workspace options in `.typoha/config/preferences.json` and application appearance in `appearance.json` beside the session file. Appearance takes precedence across folder changes and restarts; only an explicit allowlist of interface keys is shared, never recent/pinned paths or custom CSS. Startup migrates existing workspace appearance, and folder changes await pending preference writes. Emergency copies belong to the originating browser tab and are subject to browser storage limits.
 
 ## Runtime and packaging
 
@@ -118,3 +118,5 @@ or untitled Python files before launching, and cancels launch if Save is cancell
 conflicted, or further edits remain unsaved. Hiding the panel does not stop the run.
 F5 runs Python or shows the current run. This is a script runner, not a terminal
 emulator, debugger, REPL, environment/package manager or general shell execution API.
+
+`preferences.rs` owns preference validation, atomic persistence and the shared appearance allowlist independently of HTTP. New application-wide appearance keys must be added to that allowlist; workspace-specific paths and custom CSS must remain outside it.

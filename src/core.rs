@@ -146,6 +146,12 @@ impl Workspace {
         self.session_file = Some(path);
         Ok(self)
     }
+    /// Application appearance is stored beside the session, never in a document.
+    pub fn appearance_path(&self) -> Option<PathBuf> {
+        self.session_file
+            .as_ref()
+            .map(|p| p.with_file_name("appearance.json"))
+    }
     pub fn change_root(&mut self, root: impl AsRef<Path>) -> Result<()> {
         let mut next = Self::open(root)?;
         if let Some(path) = &self.session_file {

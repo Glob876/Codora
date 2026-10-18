@@ -2,6 +2,8 @@ const {
   app,
   BrowserWindow,
   Menu,
+  Tray,
+  nativeImage,
   dialog,
   ipcMain,
   shell,
@@ -11,6 +13,7 @@ const path = require("node:path");
 const { startBackend, externalUrl } = require("./backend.cjs");
 let backend;
 let window;
+let tray;
 let origin;
 let stopped = false;
 let language = "ru";
@@ -327,6 +330,24 @@ app
     });
     await window.loadURL(url);
     window.show();
+    tray = new Tray(
+      nativeImage
+        .createFromPath(path.join(__dirname, "icon.png"))
+        .resize({ width: 24, height: 24 }),
+    );
+    tray.setToolTip("Codora");
+    const showWindow = () => {
+      window.show();
+      window.focus();
+    };
+    tray.on("click", showWindow);
+    tray.setContextMenu(
+      Menu.buildFromTemplate([
+        { label: "Codora", click: showWindow },
+        { type: "separator" },
+        { label: "Quit Codora", click: () => app.quit() },
+      ]),
+    );
   })
   .catch(async () => {
     dialog.showErrorBox(

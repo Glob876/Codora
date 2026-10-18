@@ -140,15 +140,20 @@ a {
 .brand-glyph {
   display: inline-grid;
   place-items: center;
-  color: var(--bg);
-  background: var(--accent);
-  font:
-    italic 700 23px Georgia,
-    serif;
+  color: #171b22;
   width: 26px;
   height: 27px;
-  border-radius: 7px 7px 7px 2px;
 }
+:root[data-appearance="dark"] .brand-glyph,
+:root[data-appearance="dark"] .welcome-mark {
+  color: #fff;
+}
+.brand-glyph svg,
+.welcome-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
 .menubar nav {
   display: flex;
   gap: 0;
@@ -1289,11 +1294,7 @@ button:active:not(:disabled) {
   width: 66px;
   height: 66px;
   border-radius: 22px;
-  color: var(--accent);
-  background: var(--selected);
-  font:
-    italic 52px Georgia,
-    serif;
+  color: #171b22;
   margin-bottom: 18px;
 }
 #welcome h1 {
@@ -1790,4 +1791,41 @@ dialog {
 #run-input {
   flex: 1;
   min-width: 0;
+}
+
+/* All scroll surfaces, including nested editor widgets, follow the palette. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) var(--panel);
+}
+@supports selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: var(--panel);
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border: 3px solid var(--panel);
+    border-radius: 10px;
+    min-height: 28px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+  *::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+@supports selector(::-webkit-scrollbar) {
+  #document-tabs {
+    scrollbar-width: auto;
+  }
 }
