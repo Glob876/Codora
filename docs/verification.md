@@ -91,3 +91,28 @@
   the original monochrome/color Figma geometry and local rasterized color icon.
 - Linux desktop only. Native tray display depends on the host desktop; no claim
   of tray visual verification on every desktop environment or Windows/macOS.
+
+## Per-user installation (2026-10-18)
+
+- Nine installer tests passed using disposable package fixtures and prefixes:
+  independent launch after removing the original package, update with the prior
+  payload retained, rollback after a simulated desktop-entry write failure,
+  refusal to replace unrelated files/symlinked installations, incomplete-payload
+  cleanup, XDG menu paths retained across environment changes, removal preserving
+  documents, and the actual desktop packager including a working installer.
+  Desktop-entry validation passed, including paths with spaces and shell syntax.
+- Ran the real `./install.sh --prefix /tmp/...` source route successfully:
+  dependency setup, frontend build, release Rust build, notices/license audit,
+  runtime copy and menu/launcher creation. No installation was made into the
+  developer's actual user profile.
+- Launched the installed real Electron executable under Xvfb with a temporary
+  main-process probe: packaged mode, bundled Rust core and embedded UI loaded.
+  The installed uninstaller then removed the test installation and its launchers
+  while preserving a separate document in the temporary prefix.
+- `cargo fmt --all`, `cargo test --locked` (25 integration tests),
+  `cargo clippy --all-targets --locked -- -D warnings`, frontend check/test/build
+  (28 tests), frontend formatting, five desktop unit tests, shell syntax and
+  `git diff --check` passed. Installer tests are part of `scripts/check.sh`.
+- Windows/macOS installers, automatic release downloads and global/root installs
+  are not implemented. Desktop environments outside the Linux test environment
+  and distribution-specific graphical-library setup were not verified.

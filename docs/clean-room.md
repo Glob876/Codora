@@ -143,3 +143,20 @@ notice is retained at docs/licenses/Manrope-OFL.txt, obtained from
 https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt.
 No font binaries or new application dependencies are distributed. The original
 mark geometry remains under the repository license.
+
+## Per-user Linux installer (2026-10-18)
+
+Implemented from the owner's request for one installation command and a README
+guide. Original Bash/Python code copies the local pinned Electron runtime, Rust
+core, frontend, artwork and notices to a user-owned versioned installation. No
+proprietary editor implementation or assets were consulted; no dependencies were
+added. Desktop Exec quoting follows the public freedesktop.org specification:
+https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html.
+
+Source installation explicitly runs the existing build workflow; ready desktop
+packages install offline. The installer does not upload content, grant root
+permissions, disable the Chromium sandbox, install OS packages or fetch releases.
+It preserves earlier runtime payloads for running windows and switches the current
+version with an atomic symlink replacement. Failed copies/integration writes
+restore the prior launcher/menu/icon state. Removal uses an ownership marker and
+preserves workspace documents, drafts and application settings.

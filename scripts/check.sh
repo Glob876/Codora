@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+python3 -m unittest discover -s scripts -p '*_test.py'
 npm test --prefix desktop
 web/node_modules/.bin/prettier --check "desktop/*.cjs" desktop/package.json
 npm run check --prefix web

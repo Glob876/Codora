@@ -25,7 +25,63 @@ Codora is inspired by Typora’s focus on distraction-free Markdown writing and 
 
 ![Codora — local code and Markdown editor](docs/screenshots/codora.png)
 
-## Getting started
+## Install on Linux
+
+From the source checkout, run one command **without `sudo`**:
+
+```bash
+./install.sh
+```
+
+The installer builds Codora, copies it to `~/.local/lib/codora`, adds its color
+icon and **Codora** application menu entry, and creates `~/.local/bin/codora`
+and `~/.local/bin/codora-uninstall`. Building from source requires Python 3,
+Node.js 24+, npm, rustup and a C/C++ linker. The Rust version is pinned in
+`rust-toolchain.toml`; the first build downloads open-source dependencies.
+
+Launch **Codora** from your application menu or run:
+
+```bash
+~/.local/bin/codora
+```
+
+If `~/.local/bin` is on `PATH`, just use `codora`. Otherwise add
+`export PATH="$HOME/.local/bin:$PATH"` to `~/.profile` and log in again.
+The installed app is independent of the original source or extracted folder.
+
+**Install a ready desktop archive without building.** If you have
+`codora-0.1.0-linux-x86_64-desktop.tar.gz`, extract it and run the same installer:
+
+```bash
+tar -xzf codora-0.1.0-linux-x86_64-desktop.tar.gz
+cd codora-0.1.0-linux-x86_64-desktop
+./install.sh
+```
+
+This route needs Bash and Python 3, with no Node.js, Rust or separate browser.
+Use an archive matching your system architecture. Normal Linux graphical libraries
+and a working Chromium sandbox are required. Automatic release downloads are not
+implemented; `./scripts/package.sh` creates the desktop archive locally.
+
+**Update:** close Codora and rerun `./install.sh` from the new source checkout
+or desktop archive. Settings, documents and drafts are preserved. Previous app
+payloads are retained until uninstalling.
+
+**Uninstall:**
+
+```bash
+~/.local/bin/codora-uninstall
+```
+
+Alternatively run `./install.sh --uninstall` from the checkout or archive.
+Only the installed program, launchers, icon and menu entry are removed; documents
+and settings remain. Use `./install.sh --prefix /absolute/path` for another
+installation directory, and pass that same `--prefix` when uninstalling with
+`install.sh`. Desktop menus automatically discover the standard
+`~/.local/share/applications` directory (or `XDG_DATA_HOME` when set); custom prefixes need desktop environment
+search-path configuration. The installer does not yet support Windows or macOS.
+
+## Run from source without installing
 
 From the project directory:
 
@@ -51,7 +107,7 @@ For an explicit browser session, use `./run.sh --browser /path/to/notes`. For de
 
 The server listens only on `127.0.0.1`. Its terminal URL contains a temporary access key; do not share it. Ctrl+C stops server mode; closing a browser tab does not.
 
-The Linux desktop distribution is built under `artifacts/codora-0.1.0-linux-x86_64-desktop/`. Run `./codora`, then use Open File or Open Folder on the new tab. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Codora to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
+The Linux desktop distribution is built under `artifacts/codora-0.1.0-linux-x86_64-desktop/`. Run `./codora` for portable use, or `./install.sh` to install an independent copy for the current user. The legacy `./install-menu.sh` name invokes the same installer. The Chromium sandbox is never automatically disabled.
 
 Choose Russian, English, Ukrainian or German in Settings → Interface. Core error messages and some help/dynamic text may still appear in Russian. The bundled spelling dictionaries remain Russian/English. This README describes the current version.
 

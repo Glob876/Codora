@@ -19,6 +19,9 @@ cp desktop/package.json desktop/main.cjs desktop/backend.cjs desktop/preload.cjs
 cp target/release/codora "$app_dir/bin/codora-core"
 cp LICENSE COPYRIGHT README.md README.ru.md THIRD_PARTY_NOTICES.md "$destination/"
 cp -a docs "$destination/docs"
+cp install.sh "$destination/"
+mkdir -p "$destination/scripts"
+cp scripts/install.py "$destination/scripts/"
 cp "$source_archive" "$destination/source.tar.gz"
 # Source files/notes are never taken from an uncommitted working directory.
 git archive HEAD examples | tar -x -C "$destination"
@@ -35,16 +38,7 @@ cat > "$destination/install-menu.sh" <<'INSTALL'
 #!/usr/bin/env bash
 set -euo pipefail
 app_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# Quote a desktop Exec argument without shell evaluation.
-python3 - "$app_root" <<'PY'
-import os, pathlib, sys
-root = pathlib.Path(sys.argv[1])
-target = pathlib.Path(os.environ.get('XDG_DATA_HOME', pathlib.Path.home() / '.local/share')) / 'applications/codora.desktop'
-target.parent.mkdir(parents=True, exist_ok=True)
-exe = str(root / 'codora').replace('\\', '\\\\').replace('"', '\\"').replace('`', '\\`').replace('$', '\\$').replace('%', '%%')
-target.write_text('[Desktop Entry]\nType=Application\nName=Codora\nComment=Local Markdown editor\nExec="' + exe + '"\nIcon=' + str(root / 'resources/app/icon.svg') + '\nTerminal=false\nCategories=Office;TextEditor;\n')
-print('Codora added to the application menu.')
-PY
+exec "$app_root/install.sh" "$@"
 INSTALL
 chmod +x "$destination/install-menu.sh"
 tar -czf "artifacts/$desktop_name.tar.gz" -C artifacts "$desktop_name"
