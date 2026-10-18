@@ -1,4 +1,6 @@
 export interface Settings {
+  language: string;
+  backgroundOpacity: number;
   theme: string;
   primaryColor: string;
   secondaryColor: string;
@@ -27,6 +29,8 @@ export interface Settings {
   pinned: string[];
 }
 export const defaults: Settings = {
+  language: "ru",
+  backgroundOpacity: 100,
   theme: "paper",
   primaryColor: "",
   secondaryColor: "",

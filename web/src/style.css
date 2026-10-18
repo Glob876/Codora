@@ -1550,3 +1550,145 @@ dialog[open]::backdrop {
     display: none !important;
   }
 }
+
+/* Local SVG controls share one optical size; text and icons remain fully opaque. */
+.ui-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  vertical-align: middle;
+  pointer-events: none;
+}
+button:has(> .ui-icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.icon-button,
+.format-bar button {
+  min-width: 32px;
+  min-height: 32px;
+}
+.file-symbol {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: 42px;
+  flex: 0 0 42px;
+}
+.file-entry:not(.folder) .file-symbol {
+  padding-left: 25px;
+}
+.file-symbol .ui-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+}
+.document-tab > button:last-child .ui-icon {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+.preferences-layout nav button:has(.ui-icon) {
+  justify-content: flex-start;
+}
+.preferences-layout nav span {
+  margin-left: 0;
+}
+:root {
+  background: transparent;
+  --surface-bg: var(--bg);
+  --surface-panel: var(--panel);
+  --surface-bar: var(--bar);
+  --surface-menu: var(--bg);
+}
+body,
+.window,
+#main {
+  background: transparent;
+}
+#editor-scroll,
+#welcome,
+.document-bar,
+.format-bar,
+.statusbar {
+  background: var(--surface-bg);
+}
+#sidebar,
+.tabstrip {
+  background: var(--surface-panel);
+}
+.menubar {
+  background: var(--surface-bar);
+}
+#dropdown,
+#toast,
+dialog {
+  background: var(--surface-menu);
+  backdrop-filter: blur(18px);
+}
+.preferences-layout nav,
+.preferences-content,
+.preferences-dialog header,
+.preferences-footer {
+  background: transparent;
+}
+.document-tab.active {
+  background: var(--surface-menu);
+}
+.milkdown {
+  --crepe-color-background: transparent;
+  --crepe-color-surface: var(--surface-panel);
+}
+#window-controls {
+  display: flex;
+  align-self: stretch;
+  margin-right: -12px;
+  margin-left: 6px;
+}
+#window-controls button {
+  width: 42px;
+  border-radius: 0;
+}
+#window-controls button[data-window="close"]:hover {
+  color: white;
+  background: #b43c43;
+}
+.desktop-window .menubar {
+  app-region: drag;
+}
+.desktop-window .menubar button,
+.desktop-window .menubar nav,
+#window-controls {
+  app-region: no-drag;
+}
+@media print {
+  :root,
+  body,
+  #main,
+  #editor-scroll,
+  .milkdown {
+    background: white !important;
+  }
+  #window-controls {
+    display: none !important;
+  }
+}
+.opacity-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.opacity-control input {
+  padding: 0;
+  width: 150px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.opacity-control output {
+  min-width: 42px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}

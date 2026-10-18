@@ -13,6 +13,44 @@ let backend;
 let window;
 let origin;
 let stopped = false;
+let language = "ru";
+const nativeTranslations = {
+  "Открыть файл": ["Open file", "Відкрити файл", "Datei öffnen"],
+  "Открыть папку": ["Open folder", "Відкрити папку", "Ordner öffnen"],
+  "Markdown и текст": [
+    "Markdown and text",
+    "Markdown і текст",
+    "Markdown und Text",
+  ],
+  "Сохранить экспорт": ["Save export", "Зберегти експорт", "Export speichern"],
+  "Несохранённые изменения": [
+    "Unsaved changes",
+    "Незбережені зміни",
+    "Ungespeicherte Änderungen",
+  ],
+  "Закрыть редактор без сохранения изменений?": [
+    "Close the editor without saving changes?",
+    "Закрити редактор без збереження змін?",
+    "Editor ohne Speichern schließen?",
+  ],
+  "Нажмите «Вернуться», чтобы сохранить документ. Восстановление черновика зависит от успешной записи на диск.":
+    [
+      "Choose Return to save your document. Draft recovery depends on a successful disk write.",
+      "Натисніть «Повернутися», щоб зберегти документ. Відновлення чернетки залежить від успішного запису на диск.",
+      "Wähle Zurück, um das Dokument zu speichern. Die Wiederherstellung hängt vom erfolgreichen Schreiben auf den Datenträger ab.",
+    ],
+  Вернуться: ["Return", "Повернутися", "Zurück"],
+  "Закрыть без сохранения": [
+    "Close without saving",
+    "Закрити без збереження",
+    "Ohne Speichern schließen",
+  ],
+};
+const nt = (source) =>
+  language === "ru"
+    ? source
+    : nativeTranslations[source]?.[["en", "uk", "de"].indexOf(language)] ||
+      source;
 app.setName("Typoha");
 if (process.platform === "linux") app.setDesktopName("typoha.desktop");
 // Avoid Chromium background services; document network policy remains in Rust CSP.
@@ -109,7 +147,7 @@ app
     );
     localSession.on("will-download", (_event, item) => {
       item.setSaveDialogOptions({
-        title: "Сохранить экспорт",
+        title: nt("Сохранить экспорт"),
         defaultPath: item.getFilename(),
       });
       item.once("done", (_e, state) => {
@@ -128,7 +166,9 @@ app
       minWidth: 760,
       minHeight: 540,
       show: false,
-      backgroundColor: "#f8f7f4",
+      backgroundColor: "#00000000",
+      transparent: true,
+      frame: false,
       autoHideMenuBar: true,
       webPreferences: {
         preload: path.join(__dirname, "preload.cjs"),
@@ -184,11 +224,12 @@ app
     window.webContents.on("will-prevent-unload", (event) => {
       const choice = dialog.showMessageBoxSync(window, {
         type: "warning",
-        title: "Несохранённые изменения",
-        message: "Закрыть редактор без сохранения изменений?",
-        detail:
+        title: nt("Несохранённые изменения"),
+        message: nt("Закрыть редактор без сохранения изменений?"),
+        detail: nt(
           "Нажмите «Вернуться», чтобы сохранить документ. Восстановление черновика зависит от успешной записи на диск.",
-        buttons: ["Вернуться", "Закрыть без сохранения"],
+        ),
+        buttons: [nt("Вернуться"), nt("Закрыть без сохранения")],
         defaultId: 0,
         cancelId: 0,
       });
@@ -211,18 +252,35 @@ app
     ipcMain.handle("typoha:folder", async (event) => {
       if (!trusted(event)) throw new Error("Недоступно");
       const result = await dialog.showOpenDialog(window, {
-        title: "Открыть папку",
+        title: nt("Открыть папку"),
         properties: ["openDirectory", "createDirectory"],
       });
       return result.canceled ? null : result.filePaths[0];
     });
+    ipcMain.handle("typoha:language", (event, value) => {
+      if (!trusted(event) || !["ru", "en", "uk", "de"].includes(value))
+        throw new Error("Недоступно");
+      language = value;
+    });
+    ipcMain.handle("typoha:window", (event, action) => {
+      if (!trusted(event)) throw new Error("Недоступно");
+      if (action === "minimize") window.minimize();
+      else if (action === "maximize") {
+        if (window.isMaximized()) window.unmaximize();
+        else window.maximize();
+      } else if (action === "close") window.close();
+      else throw new Error("Неизвестная команда окна");
+    });
     ipcMain.handle("typoha:file", async (event) => {
       if (!trusted(event)) throw new Error("Недоступно");
       const result = await dialog.showOpenDialog(window, {
-        title: "Открыть файл",
+        title: nt("Открыть файл"),
         properties: ["openFile"],
         filters: [
-          { name: "Markdown и текст", extensions: ["md", "markdown", "txt"] },
+          {
+            name: nt("Markdown и текст"),
+            extensions: ["md", "markdown", "txt"],
+          },
         ],
       });
       if (result.canceled) return null;

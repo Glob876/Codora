@@ -1,3 +1,7 @@
+import { observeUi, setLanguage, tr, translateUi } from "./i18n";
+import { surfaceOpacity } from "./appearance";
+import { treeRows } from "./file-tree";
+import { icon } from "./icons";
 import { themeVariables } from "./themes";
 import { settingsPanel } from "./settings-panel";
 import { appMarkup } from "./shell";
@@ -108,6 +112,19 @@ const app = $("#app");
 app.innerHTML = appMarkup;
 document.body.classList.add("welcome-active", "hide-sidebar");
 $("#welcome").hidden = false;
+setLanguage(settings.language);
+observeUi(app);
+if (window.typohaDesktop) {
+  document.body.classList.add("desktop-window");
+  $("#window-controls").hidden = false;
+  $("#window-controls").addEventListener("click", (event) => {
+    const control = (event.target as Element).closest<HTMLElement>(
+      "[data-window]",
+    )?.dataset.window;
+    if (control === "minimize" || control === "maximize" || control === "close")
+      fire(window.typohaDesktop!.windowControl(control));
+  });
+}
 
 interface TabState {
   id: string;
@@ -166,8 +183,8 @@ function renderTabs() {
       button.setAttribute("role", "tab");
       button.onclick = () => fire(activateTab(tab.id));
       const close = document.createElement("button");
-      close.textContent = "×";
-      close.setAttribute("aria-label", "Закрыть вкладку");
+      close.innerHTML = icon("close");
+      close.setAttribute("aria-label", tr("Закрыть вкладку"));
       close.onclick = () => fire(closeTab(tab.id));
       item.append(button, close);
       box.append(item);
@@ -176,7 +193,8 @@ function renderTabs() {
   tabs.forEach((t, i) => {
     const item = box.children[i];
     const b = item.firstElementChild!;
-    b.textContent = `${t.dirty ? "● " : ""}${t.path?.split("/").pop() || (t.welcome ? "Новая вкладка" : "Без названия")}`;
+    item.lastElementChild!.setAttribute("aria-label", tr("Закрыть вкладку"));
+    b.textContent = `${t.dirty ? "● " : ""}${t.path?.split("/").pop() || tr(t.welcome ? "Новая вкладка" : "Без названия")}`;
     b.setAttribute("aria-selected", String(t.id === activeTab));
     item.classList.toggle("active", t.id === activeTab);
   });
@@ -276,12 +294,12 @@ for (const group of [...new Set(actions.map((a) => a.group))]) {
 }
 function toast(message: string, error = false) {
   const el = $("#toast");
-  el.textContent = message;
+  el.textContent = tr(message);
   el.classList.toggle("error", error);
   el.hidden = false;
   setTimeout(
     () => {
-      if (el.textContent === message) el.hidden = true;
+      if (el.textContent === tr(message)) el.hidden = true;
     },
     error ? 12000 : 3500,
   );
@@ -320,7 +338,25 @@ function setSettings() {
   localStorage.setItem("typoha-settings", JSON.stringify(settings));
   applySettings();
 }
+let nativeLanguage = "";
 function applySettings() {
+  if (window.typohaDesktop && nativeLanguage !== settings.language) {
+    nativeLanguage = settings.language;
+    fire(window.typohaDesktop.setLanguage(settings.language));
+  }
+  setLanguage(settings.language);
+  translateUi(app);
+  const opacity = surfaceOpacity(settings.backgroundOpacity);
+  for (const [name, base, amount] of [
+    ["bg", "bg", opacity.background],
+    ["panel", "panel", opacity.panel],
+    ["bar", "bar", opacity.panel],
+    ["menu", "bg", opacity.panel],
+  ] as const)
+    document.documentElement.style.setProperty(
+      `--surface-${name}`,
+      `color-mix(in srgb, var(--${base}) ${amount}%, transparent)`,
+    );
   document.documentElement.dataset.theme = settings.theme;
   document.documentElement.dataset.appearance = themeVariables(
     settings.theme,
@@ -375,10 +411,11 @@ function applySettings() {
   $("#editor")
     .querySelectorAll<HTMLElement>("[contenteditable]")
     .forEach((e) => (e.spellcheck = settings.spellcheck));
+  updateStatus();
 }
 function updateStatus() {
   renderTabs();
-  const name = path?.split("/").pop() || "Без названия";
+  const name = path?.split("/").pop() || tr("Без названия");
   $("#document-name").textContent = name;
   $("#document-name").title = path || name;
   $("#window-title").textContent = `${dirty ? "● " : ""}${name} — Typoha`;
@@ -392,9 +429,10 @@ function updateStatus() {
         : "Новый документ";
   $("#save-indicator").classList.toggle("unsaved", dirty);
   const st = statistics(content);
-  $("#statistics").textContent = `${st.words.toLocaleString("ru")} слов`;
+  $("#statistics").textContent =
+    `${st.words.toLocaleString(settings.language)} ${tr("слов")}`;
   $("#statistics").title =
-    `${st.characters} символов · ${st.lines} строк · ${st.minutes} мин чтения`;
+    `${st.characters} ${tr("символов")} · ${st.lines} ${tr("строк")} · ${st.minutes} ${tr("мин чтения")}`;
   document
     .querySelectorAll<HTMLElement>("[data-mode]")
     .forEach((b) => b.classList.toggle("active", b.dataset.mode === mode));
@@ -483,7 +521,7 @@ async function mountEditor(nextMode = mode) {
             highlightActiveLine(),
             EditorView.contentAttributes.of({
               spellcheck: String(settings.spellcheck),
-              "aria-label": "Исходный Markdown",
+              "aria-label": tr("Исходный Markdown"),
             }),
             EditorView.updateListener.of((update) => {
               if (update.docChanged) changed(update.state.doc.toString());
@@ -506,7 +544,7 @@ async function mountEditor(nextMode = mode) {
         defaultValue: content,
         features: { [Crepe.Feature.AI]: false, [Crepe.Feature.TopBar]: false },
         featureConfigs: {
-          [Crepe.Feature.Placeholder]: { text: "Начните писать…" },
+          [Crepe.Feature.Placeholder]: { text: tr("Начните писать…") },
           [Crepe.Feature.ImageBlock]: {
             onUpload: uploadImage,
             proxyDomURL: (url) => {
@@ -774,36 +812,22 @@ function renderSidebar() {
   }
   const tools = document.createElement("div");
   tools.className = "file-tools";
-  tools.innerHTML = `<input id="file-filter" placeholder="Фильтр файлов…" aria-label="Фильтр файлов"><button data-action="sort" title="Порядок сортировки">⇅</button><button data-action="refresh" title="Обновить файлы">⟳</button>`;
+  tools.innerHTML = `<input id="file-filter" placeholder="Фильтр файлов…" aria-label="Фильтр файлов"><button data-action="sort" title="Порядок сортировки">${icon("sort")}</button><button data-action="refresh" title="Обновить файлы">${icon("refresh")}</button>`;
   box.append(tools);
   const list = document.createElement("div");
   list.id = "file-list";
   box.append(list);
   const renderList = (filter: string) => {
     list.replaceChildren();
-    let items = [...files];
-    if (settings.sort === "modified")
-      items.sort(
-        (a, b) =>
-          Number(b.directory) - Number(a.directory) || b.modified - a.modified,
-      );
-    items = items.filter((e) =>
-      e.path.toLowerCase().includes(filter.toLowerCase()),
-    );
+    const items = treeRows(files, collapsed, settings.sort, filter);
     for (const entry of items) {
-      if (
-        !filter &&
-        entry.path
-          .split("/")
-          .slice(0, -1)
-          .some((_, i, parts) => collapsed.has(parts.slice(0, i + 1).join("/")))
-      )
-        continue;
       const b = document.createElement("button");
       b.className = `file-entry ${entry.directory ? "folder" : ""} ${entry.path === path ? "selected" : ""}`;
       b.style.paddingLeft = `${14 + (entry.path.split("/").length - 1) * 16}px`;
       b.title = entry.path;
-      b.innerHTML = `<span class="file-symbol">${entry.directory ? (collapsed.has(entry.path) ? "▸" : "▾") : "▤"}</span><span class="file-label">${esc(entry.name)}</span>`;
+      if (entry.directory)
+        b.setAttribute("aria-expanded", String(!collapsed.has(entry.path)));
+      b.innerHTML = `<span class="file-symbol">${entry.directory ? icon(collapsed.has(entry.path) ? "right" : "down") + icon(collapsed.has(entry.path) ? "folder" : "folder-open") : icon("file")}</span><span class="file-label">${esc(entry.name)}</span>`;
       b.onclick = () => {
         if (entry.directory) {
           if (collapsed.has(entry.path)) collapsed.delete(entry.path);
@@ -878,7 +902,7 @@ async function doSearch() {
   box.replaceChildren();
   const summary = document.createElement("p");
   summary.className = "search-summary";
-  summary.textContent = `Совпадений: ${result.length}${result.length === 500 ? "+" : ""}`;
+  summary.textContent = `${tr("Совпадений")}: ${result.length}${result.length === 500 ? "+" : ""}`;
   box.append(summary);
   for (const hit of result) {
     const b = document.createElement("button");
@@ -891,7 +915,7 @@ async function doSearch() {
 function dialogShell(title: string, body: string) {
   const d = $<HTMLDialogElement>("#dialog");
   if (d.open) d.close();
-  d.innerHTML = `<form method="dialog"><header><h2>${esc(title)}</h2><button value="cancel" class="close-dialog" aria-label="Закрыть">×</button></header>${body}</form>`;
+  d.innerHTML = `<form method="dialog"><header><h2>${esc(title)}</h2><button value="cancel" class="close-dialog" aria-label="Закрыть">${icon("close")}</button></header>${body}</form>`;
   d.returnValue = "";
   d.querySelectorAll<HTMLButtonElement>('button[value="cancel"]').forEach(
     (b) => (b.formNoValidate = true),
@@ -949,7 +973,7 @@ function palette(commands = false) {
   const render = () => {
     const choices = commands
       ? actions.map((a) => ({
-          label: `${a.group} › ${a.label}`,
+          label: `${tr(a.group)} › ${tr(a.label)}`,
           key: a.key,
           run: () => run(a.id),
         }))
@@ -976,6 +1000,7 @@ function palette(commands = false) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = i === index ? "selected" : "";
+      if (!commands) b.dataset.noTranslate = "";
       b.innerHTML = `<span>${esc(a.label)}</span><kbd>${esc(a.key || "")}</kbd>`;
       b.onclick = () => {
         d.close();

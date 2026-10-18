@@ -40,13 +40,15 @@ The server listens only on `127.0.0.1`. Its terminal URL contains a temporary ac
 
 The Linux desktop distribution is built under `artifacts/typoha-0.1.0-linux-x86_64-desktop/`. Run `./typoha`, then use Open File or Open Folder on the new tab. Users do not need Node, Rust or an installed browser. `./install-menu.sh` adds Typoha to the current user's application menu; keep the extracted folder in place afterwards. Electron requires standard Linux graphical libraries and a working Chromium sandbox; the sandbox is never automatically disabled.
 
-The application interface is currently in Russian. This README describes the current version.
+Choose Russian, English, Ukrainian or German in Settings → Interface. Core error messages and some help/dynamic text may still appear in Russian. The bundled spelling dictionaries remain Russian/English. This README describes the current version.
 
 ## Implemented features
 
 - Document tabs with unsaved markers, draft protection, and Ctrl+T / Ctrl+W shortcuts.
 - Categorized preferences, live theme preview, custom accent/panel/text colors, and nine original palettes including Catppuccin-, Gruvbox-, Ayu-, and Nord-inspired variants.
 - Subtle interface animations with an accessibility-aware motion switch.
+- Locally bundled Lucide SVG icons and a true folder tree with sibling sorting.
+- Background opacity from 0–100%; panels, tabs and menus use a four-percentage-point denser surface. Desktop transparency depends on OS composition; export/print stay opaque.
 
 - Live Markdown editing, source mode, and preview; tables and task lists.
 - KaTeX formulas, Mermaid diagrams, and syntax highlighting; footnotes, alerts, emoji, subscripts, superscripts, and highlights in preview.

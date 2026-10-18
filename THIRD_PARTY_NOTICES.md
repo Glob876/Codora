@@ -386,6 +386,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | npm | lodash-es 4.18.1 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-lodash-es-4.18.1-LICENSE) |
 | npm | longest-streak 3.1.0 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-longest-streak-3.1.0-license) |
 | npm | lru-cache 11.5.3 | BlueOak-1.0.0 | build/test | [LICENSE.md](docs/licenses/npm-lru-cache-11.5.3-LICENSE.md) |
+| npm | lucide 1.59.0 | ISC | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-lucide-1.59.0-LICENSE) |
 | npm | magic-string 0.30.21 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-magic-string-0.30.21-LICENSE) |
 | npm | magic-string 1.4.3 | MIT | build/test | [LICENSE](docs/licenses/npm-magic-string-1.4.3-LICENSE) |
 | npm | markdown-table 3.0.4 | MIT | runtime/platform or Rust test dependency | [license](docs/licenses/npm-markdown-table-3.0.4-license) |

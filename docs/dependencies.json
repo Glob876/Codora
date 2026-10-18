@@ -4162,6 +4162,17 @@
   },
   {
     "ecosystem": "npm",
+    "name": "lucide",
+    "version": "1.59.0",
+    "license": "ISC",
+    "development_only": false,
+    "source": "https://registry.npmjs.org/lucide/-/lucide-1.59.0.tgz",
+    "notices": [
+      "docs/licenses/npm-lucide-1.59.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "npm",
     "name": "magic-string",
     "version": "0.30.21",
     "license": "MIT",

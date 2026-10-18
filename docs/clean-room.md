@@ -55,3 +55,11 @@ docs/dictionary-notices. License inventory exceptions are recorded in licensing.
 Implemented from the owner's written requirements in this chat and existing Typoha code. The README now explicitly acknowledges Typora as inspiration while stating Typoha's independent direction and lack of affiliation. No Typora source, application, screenshots, theme files, fonts or assets were fetched or inspected.
 
 The new welcome screen, tab strip, five-category preferences dialog, transitions and theme swatches are original TypeScript/CSS. Catppuccin, Gruvbox, Ayu and Nord names describe independently selected mood palettes, not imported upstream theme packages or exact color compatibility. Matrix and Rose palettes are also original. No new dependencies or external resources were added. Filesystem writes, preferences and recoverable drafts continue through the existing authenticated Rust API. Electron only returns explicitly selected paths.
+
+## File tree, icons, locale and transparency (2026-10-18)
+
+Source requirements: the owner's follow-up in this chat. The file tree is now an original depth-first sibling-sorted view of the Rust listing, with collapse hiding all descendants, including during filtering. Interface translations for English, Ukrainian and German are authored locally; Russian remains the default. Document contents, filenames, search excerpts and text input values are excluded from interface translation.
+
+Lucide 1.59.0 is pinned from npm, under ISC, with its complete notice retained in `docs/licenses/npm-lucide-1.59.0-LICENSE` and the dependency inventory. Selected SVG nodes are bundled locally; no icon fonts or external assets are loaded. References consulted: https://lucide.dev/ and https://github.com/lucide-icons/lucide/blob/main/LICENSE . No Typora resources were consulted.
+
+Transparency uses original CSS surface colors and Electron's public transparent-window API: https://www.electronjs.org/docs/latest/tutorial/custom-window-styles . The default is fully opaque; user-selected background opacity affects color surfaces, not text/icons. Panels, tabs and popups use a four-percentage-point denser color, capped at 100%. Actual desktop compositing and resize behavior are platform-dependent, as documented by Electron. The frameless shell has original window controls and sender/origin-checked allowlisted IPC.

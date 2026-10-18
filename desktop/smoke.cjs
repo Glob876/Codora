@@ -9,6 +9,11 @@ fs.writeFileSync(
   path.join(root, "test.md"),
   "# Desktop test\n\nOriginal text.\n",
 );
+fs.mkdirSync(path.join(root, "a/inner"), { recursive: true });
+fs.mkdirSync(path.join(root, "b"));
+fs.writeFileSync(path.join(root, "a/own.md"), "# Own file");
+fs.writeFileSync(path.join(root, "a/inner/deep.md"), "# Deep file");
+fs.writeFileSync(path.join(root, "b/sibling.md"), "# Sibling file");
 app.setPath("userData", path.join(root, ".profile"));
 const other = path.join(root, "other");
 fs.mkdirSync(other);
@@ -136,6 +141,84 @@ app.on("browser-window-created", (_event, win) => {
       );
       await until(
         "document.querySelector('#document-name').textContent === 'test.md'",
+      );
+      // A folder owns both its files and subfolders in the visible tree.
+      await js(
+        "document.querySelector('.document-bar [data-action=sidebar]').click()",
+      );
+      await until(
+        "parseFloat(getComputedStyle(document.querySelector('#sidebar')).width) > 200",
+      );
+      assert.equal(
+        await js(
+          "[...document.querySelectorAll('.file-entry')].map(e => e.title).join('|')",
+        ),
+        "a|a/inner|a/inner/deep.md|a/own.md|b|b/sibling.md|other|other/other.md|test.md",
+      );
+      await js("document.querySelector('.file-entry[title=a]').click()");
+      assert.equal(
+        await js(
+          "[...document.querySelectorAll('.file-entry')].some(e => e.title.startsWith('a/'))",
+        ),
+        false,
+      );
+      assert.equal(
+        await js(
+          "!!document.querySelector('.file-entry[title=\"b/sibling.md\"]')",
+        ),
+        true,
+      );
+      await js("document.querySelector('.file-entry[title=a]').click()");
+      assert.equal(
+        await js("!!document.querySelector('.file-entry[title=\"a/own.md\"]')"),
+        true,
+      );
+      assert.equal(
+        await js(
+          "document.querySelectorAll('.format-bar .ui-icon').length >= 14",
+        ),
+        true,
+      );
+      // Language and opacity preview roll back together, without changing document text.
+      await js("document.querySelector('[data-action=settings]').click()");
+      await until("document.querySelector('.theme-gallery')");
+      await js(
+        "document.querySelector('[data-category=workspace]').click(); const lang = document.querySelector('[name=language]'); lang.value='en'; lang.dispatchEvent(new Event('input', {bubbles:true}));",
+      );
+      await until(
+        "document.querySelector('#dialog h2').textContent === 'Settings'",
+      );
+      await js(
+        "document.querySelector('[data-category=appearance]').click(); const opacity = document.querySelector('[name=backgroundOpacity]'); opacity.value='80'; opacity.dispatchEvent(new Event('input', {bubbles:true}));",
+      );
+      assert.match(
+        await js(
+          "getComputedStyle(document.querySelector('#editor-scroll')).backgroundColor",
+        ),
+        /0\.8\)/,
+      );
+      assert.match(
+        await js(
+          "getComputedStyle(document.querySelector('#sidebar')).backgroundColor",
+        ),
+        /0\.84\)/,
+      );
+      await pause(250);
+      fs.writeFileSync(
+        "/tmp/typoha-refinement-settings.png",
+        (await win.webContents.capturePage()).toPNG(),
+      );
+      await js(
+        "document.querySelector('#dialog button[value=cancel]').click()",
+      );
+      await until(
+        "!document.querySelector('#dialog').open && document.documentElement.lang === 'ru'",
+      );
+      assert.match(
+        await js(
+          "getComputedStyle(document.querySelector('#editor-scroll')).backgroundColor",
+        ),
+        /rgb\(255, 255, 255\)|color\(srgb 1 1 1\)/,
       );
       // Saving preferences writes through Rust and survives reopening the panel.
       await js("document.querySelector('[data-action=settings]').click()");
