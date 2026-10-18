@@ -942,7 +942,11 @@ async function exportFile(format: string) {
   }
   const response = await fetch("/api/export", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-typoha-token": token },
+    headers: {
+      "content-type": "application/json",
+      "x-typoha-token": token,
+      "x-typoha-workspace": workspaceScope,
+    },
     body: JSON.stringify({ content, format }),
   });
   if (!response.ok) throw new Error((await response.json()).error);

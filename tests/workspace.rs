@@ -158,3 +158,22 @@ fn drafts_preserve_unsupported_syntax_exactly() {
         .is_err()
     );
 }
+
+#[cfg(unix)]
+#[test]
+fn nested_history_symlink_cannot_redirect_snapshot_writes() {
+    use std::os::unix::fs::symlink;
+    let directory = tempdir().unwrap();
+    let outside = tempdir().unwrap();
+    let w = Workspace::open(directory.path()).unwrap();
+    let d = save(&w, "a.md", "original", None).unwrap();
+    let hash = typoha::core::revision(b"a.md");
+    symlink(
+        outside.path(),
+        directory.path().join(".typoha/history").join(hash),
+    )
+    .unwrap();
+    assert!(save(&w, "a.md", "changed", Some(d.revision)).is_err());
+    assert_eq!(w.read("a.md").unwrap().content, "original");
+    assert!(fs::read_dir(outside.path()).unwrap().next().is_none());
+}

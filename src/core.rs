@@ -169,17 +169,34 @@ impl Workspace {
         Ok(full)
     }
     pub fn internal(&self, sub: &str) -> Result<PathBuf> {
-        let metadata = self.root.join(".typoha");
-        for p in [&metadata, &metadata.join(sub)] {
-            if fs::symlink_metadata(p).is_ok_and(|m| m.file_type().is_symlink()) {
-                return Err(Error(
-                    403,
-                    "Каталог данных не может быть символической ссылкой".into(),
-                ));
-            }
-            fs::create_dir_all(p)?;
+        Self::relative(sub)?;
+        let mut current = self.root.join(".typoha");
+        Self::reject_symlink(&current)?;
+        fs::create_dir_all(&current)?;
+        for component in Path::new(sub).components() {
+            current.push(component);
+            Self::reject_symlink(&current)?;
+            fs::create_dir_all(&current)?;
         }
-        Ok(metadata.join(sub))
+        Ok(current)
+    }
+    fn reject_symlink(path: &Path) -> Result<()> {
+        if fs::symlink_metadata(path).is_ok_and(|m| m.file_type().is_symlink()) {
+            return Err(Error(
+                403,
+                "Служебные данные не могут быть символической ссылкой".into(),
+            ));
+        }
+        Ok(())
+    }
+    pub fn metadata_file(&self, sub: &str, file: &str) -> Result<PathBuf> {
+        Self::relative(file)?;
+        if Path::new(file).components().count() != 1 {
+            return Err(bad("Недопустимое имя служебного файла"));
+        }
+        let path = self.internal(sub)?.join(file);
+        Self::reject_symlink(&path)?;
+        Ok(path)
     }
     pub fn list(&self, hidden: bool, all: bool) -> Result<Vec<Entry>> {
         let mut entries = Vec::new();
@@ -259,9 +276,7 @@ impl Workspace {
                 return Err(Error(409, "Файл изменён на диске. Сохраните копию или перечитайте его; ваши правки сохранены в черновике.".into()));
             }
             if previous != save.content.as_bytes() {
-                let dir = self
-                    .internal("history")?
-                    .join(revision(save.path.as_bytes()));
+                let dir = self.internal(&format!("history/{}", revision(save.path.as_bytes())))?;
                 fs::create_dir_all(&dir)?;
                 atomic_write(&dir.join(format!("{}.md", stamp())), &previous)?;
             }
@@ -309,8 +324,12 @@ impl Workspace {
         let mut entries: Vec<TrashEntry> = Vec::new();
         for e in fs::read_dir(self.internal("trash")?)? {
             let dir = e?.path();
+            Self::reject_symlink(&dir)?;
             if dir.join("payload").exists() {
-                entries.push(serde_json::from_slice(&fs::read(dir.join("meta.json"))?)?);
+                entries.push(serde_json::from_slice(&fs::read(self.metadata_file(
+                    &format!("trash/{}", dir.file_name().unwrap().to_string_lossy()),
+                    "meta.json",
+                )?)?)?);
             }
         }
         entries.sort_by(|a, b| b.id.cmp(&a.id));
@@ -318,8 +337,11 @@ impl Workspace {
     }
     pub fn restore(&self, id: &str) -> Result<String> {
         valid_id(id)?;
-        let dir = self.internal("trash")?.join(id);
-        let entry: TrashEntry = serde_json::from_slice(&fs::read(dir.join("meta.json"))?)?;
+        let dir = self.internal(&format!("trash/{id}"))?;
+        let entry: TrashEntry = serde_json::from_slice(&fs::read(self.metadata_file(
+            &format!("trash/{}", dir.file_name().unwrap().to_string_lossy()),
+            "meta.json",
+        )?)?)?;
         let to = self.resolve(&entry.path)?;
         if to.exists() {
             return Err(Error(
@@ -327,18 +349,20 @@ impl Workspace {
                 "Восстановление заменило бы существующий файл".into(),
             ));
         }
+        Self::reject_symlink(&dir.join("payload"))?;
         fs::rename(dir.join("payload"), to)?;
         Ok(entry.path)
     }
     pub fn history(&self, path: &str) -> Result<Vec<Snapshot>> {
         self.resolve(path)?;
-        let dir = self.internal("history")?.join(revision(path.as_bytes()));
+        let dir = self.internal(&format!("history/{}", revision(path.as_bytes())))?;
         if !dir.exists() {
             return Ok(Vec::new());
         }
         let mut snapshots = Vec::new();
         for e in fs::read_dir(dir)? {
             let e = e?;
+            Self::reject_symlink(&e.path())?;
             snapshots.push(Snapshot {
                 id: e.file_name().to_string_lossy().into(),
                 bytes: e.metadata()?.len(),
@@ -350,11 +374,10 @@ impl Workspace {
     pub fn snapshot(&self, path: &str, id: &str) -> Result<String> {
         self.resolve(path)?;
         valid_id(id)?;
-        Ok(fs::read_to_string(
-            self.internal("history")?
-                .join(revision(path.as_bytes()))
-                .join(id),
-        )?)
+        Ok(fs::read_to_string(self.metadata_file(
+            &format!("history/{}", revision(path.as_bytes())),
+            id,
+        )?)?)
     }
     pub fn save_draft(&self, draft: &Draft) -> Result<()> {
         valid_id(&draft.id)?;
@@ -362,14 +385,16 @@ impl Workspace {
             return Err(bad("Черновик больше 16 МБ"));
         }
         atomic_write(
-            &self.internal("drafts")?.join(format!("{}.json", draft.id)),
+            &self.metadata_file("drafts", &format!("{}.json", draft.id))?,
             &serde_json::to_vec(draft)?,
         )
     }
     pub fn drafts(&self) -> Result<Vec<Draft>> {
         let mut result = Vec::new();
         for e in fs::read_dir(self.internal("drafts")?)? {
-            if let Ok(d) = serde_json::from_slice::<Draft>(&fs::read(e?.path())?) {
+            let entry = e?;
+            Self::reject_symlink(&entry.path())?;
+            if let Ok(d) = serde_json::from_slice::<Draft>(&fs::read(entry.path())?) {
                 result.push(d);
             }
         }
@@ -377,7 +402,7 @@ impl Workspace {
     }
     pub fn clear_draft(&self, id: &str) -> Result<()> {
         valid_id(id)?;
-        match fs::remove_file(self.internal("drafts")?.join(format!("{id}.json"))) {
+        match fs::remove_file(self.metadata_file("drafts", &format!("{id}.json"))?) {
             Ok(()) => Ok(()),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
             Err(e) => Err(e.into()),

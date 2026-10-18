@@ -168,9 +168,7 @@ async fn preferences(
     State(s): State<AppState>,
     Extension(scope): Extension<WorkspaceScope>,
 ) -> core::Result<Json<Value>> {
-    let path = scoped(&s, &scope)?
-        .internal("config")?
-        .join("preferences.json");
+    let path = scoped(&s, &scope)?.metadata_file("config", "preferences.json")?;
     if !path.exists() {
         return Ok(Json(json!({})));
     }
