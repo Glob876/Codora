@@ -2,7 +2,7 @@ use crate::core::{self, Draft, Error, Save, Search, Workspace};
 use axum::{
     Json, Router,
     body::{Body, to_bytes},
-    extract::{DefaultBodyLimit, Query, Request, State},
+    extract::{DefaultBodyLimit, Extension, Query, Request, State},
     http::{HeaderValue, StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
@@ -40,7 +40,23 @@ fn lock(s: &AppState) -> core::Result<std::sync::MutexGuard<'_, Workspace>> {
         .lock()
         .map_err(|_| Error(500, "Не удалось получить доступ к рабочей папке".into()))
 }
-async fn guard(State(state): State<AppState>, req: Request, next: Next) -> Response {
+#[derive(Clone)]
+struct WorkspaceScope(String);
+fn scoped<'a>(
+    s: &'a AppState,
+    scope: &WorkspaceScope,
+) -> core::Result<std::sync::MutexGuard<'a, Workspace>> {
+    let workspace = lock(s)?;
+    if core::revision(workspace.root.to_string_lossy().as_bytes()) != scope.0 {
+        return Err(Error(
+            409,
+            "Рабочая папка изменена в другом окне. Сохранение остановлено; откройте папку заново."
+                .into(),
+        ));
+    }
+    Ok(workspace)
+}
+async fn guard(State(state): State<AppState>, mut req: Request, next: Next) -> Response {
     let h = req.headers();
     let expected_host = state.origin.trim_start_matches("http://");
     if h.get(header::HOST).and_then(|h| h.to_str().ok()) != Some(expected_host) {
@@ -68,6 +84,30 @@ async fn guard(State(state): State<AppState>, req: Request, next: Next) -> Respo
             return Error(401, "Откройте ссылку из запущенного Typoha".into()).into_response();
         }
     }
+    if req.uri().path().starts_with("/api/") && req.uri().path() != "/api/workspace" {
+        let current = match lock(&state) {
+            Ok(w) => core::revision(w.root.to_string_lossy().as_bytes()),
+            Err(e) => return e.into_response(),
+        };
+        let asset_scope = if req.uri().path() == "/api/asset" {
+            req.uri().query().and_then(|q| {
+                q.split('&')
+                    .find_map(|part| part.strip_prefix("workspace="))
+            })
+        } else {
+            None
+        };
+        let supplied = h
+            .get("x-typoha-workspace")
+            .and_then(|v| v.to_str().ok())
+            .or(asset_scope)
+            .unwrap_or(&current);
+        if supplied != current {
+            return Error(409, "Рабочая папка изменена в другом окне. Перезагрузите интерфейс; несохранённый текст доступен в аварийной копии браузера.".into()).into_response();
+        }
+        let scope = WorkspaceScope(supplied.to_string());
+        req.extensions_mut().insert(scope);
+    }
     let mut response = next.run(req).await;
     let headers = response.headers_mut();
     headers.insert(
@@ -82,6 +122,7 @@ async fn guard(State(state): State<AppState>, req: Request, next: Next) -> Respo
 pub fn router(state: AppState) -> Router {
     Router::new()
         .route("/api/workspace", get(workspace).post(change_workspace))
+        .route("/api/preferences", get(preferences).post(save_preferences))
         .route("/api/files", get(files))
         .route("/api/document", get(document).post(save))
         .route("/api/folder", post(folder))
@@ -105,7 +146,7 @@ pub fn router(state: AppState) -> Router {
 async fn workspace(State(s): State<AppState>) -> core::Result<Json<Value>> {
     let w = lock(&s)?;
     Ok(Json(
-        json!({"root":w.root,"name":w.root.file_name().unwrap_or_default(),"version":env!("CARGO_PKG_VERSION")}),
+        json!({"root":w.root,"name":w.root.file_name().unwrap_or_default().to_string_lossy(),"id":core::revision(w.root.to_string_lossy().as_bytes()),"version":env!("CARGO_PKG_VERSION")}),
     ))
 }
 #[derive(Deserialize)]
@@ -119,7 +160,41 @@ async fn change_workspace(
     let workspace = Workspace::open(&q.root)?;
     let root = workspace.root.clone();
     *lock(&s)? = workspace;
-    Ok(Json(json!({"root":root})))
+    Ok(Json(
+        json!({"id":core::revision(root.to_string_lossy().as_bytes()),"root":root}),
+    ))
+}
+async fn preferences(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+) -> core::Result<Json<Value>> {
+    let path = scoped(&s, &scope)?
+        .internal("config")?
+        .join("preferences.json");
+    if !path.exists() {
+        return Ok(Json(json!({})));
+    }
+    if std::fs::metadata(&path)?.len() > 256_000 {
+        return Err(core::bad("Файл настроек слишком большой"));
+    }
+    Ok(Json(serde_json::from_slice(&std::fs::read(path)?)?))
+}
+async fn save_preferences(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Value>,
+) -> core::Result<Json<Value>> {
+    let bytes = serde_json::to_vec_pretty(&q)?;
+    if !q.is_object() || bytes.len() > 256_000 {
+        return Err(core::bad("Некорректные настройки"));
+    }
+    core::atomic_write(
+        &scoped(&s, &scope)?
+            .internal("config")?
+            .join("preferences.json"),
+        &bytes,
+    )?;
+    Ok(Json(json!({"ok":true})))
 }
 #[derive(Deserialize)]
 struct Listing {
@@ -128,8 +203,12 @@ struct Listing {
     #[serde(default)]
     all: bool,
 }
-async fn files(State(s): State<AppState>, Query(q): Query<Listing>) -> core::Result<Json<Value>> {
-    Ok(Json(json!(lock(&s)?.list(q.hidden, q.all)?)))
+async fn files(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Query(q): Query<Listing>,
+) -> core::Result<Json<Value>> {
+    Ok(Json(json!(scoped(&s, &scope)?.list(q.hidden, q.all)?)))
 }
 #[derive(Deserialize)]
 struct PathQuery {
@@ -137,15 +216,24 @@ struct PathQuery {
 }
 async fn document(
     State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
     Query(q): Query<PathQuery>,
 ) -> core::Result<Json<Value>> {
-    Ok(Json(json!(lock(&s)?.read(&q.path)?)))
+    Ok(Json(json!(scoped(&s, &scope)?.read(&q.path)?)))
 }
-async fn save(State(s): State<AppState>, Json(q): Json<Save>) -> core::Result<Json<Value>> {
-    Ok(Json(json!(lock(&s)?.save(q)?)))
+async fn save(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Save>,
+) -> core::Result<Json<Value>> {
+    Ok(Json(json!(scoped(&s, &scope)?.save(q)?)))
 }
-async fn folder(State(s): State<AppState>, Json(q): Json<PathQuery>) -> core::Result<Json<Value>> {
-    lock(&s)?.mkdir(&q.path)?;
+async fn folder(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<PathQuery>,
+) -> core::Result<Json<Value>> {
+    scoped(&s, &scope)?.mkdir(&q.path)?;
     Ok(Json(json!({"ok":true})))
 }
 #[derive(Deserialize)]
@@ -153,28 +241,44 @@ struct Rename {
     from: String,
     to: String,
 }
-async fn rename(State(s): State<AppState>, Json(q): Json<Rename>) -> core::Result<Json<Value>> {
-    lock(&s)?.rename(&q.from, &q.to)?;
+async fn rename(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Rename>,
+) -> core::Result<Json<Value>> {
+    scoped(&s, &scope)?.rename(&q.from, &q.to)?;
     Ok(Json(json!({"ok":true})))
 }
-async fn trash(State(s): State<AppState>, Json(q): Json<PathQuery>) -> core::Result<Json<Value>> {
-    Ok(Json(json!({"id":lock(&s)?.trash(&q.path)?})))
+async fn trash(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<PathQuery>,
+) -> core::Result<Json<Value>> {
+    Ok(Json(json!({"id":scoped(&s, &scope)?.trash(&q.path)?})))
 }
-async fn trash_list(State(s): State<AppState>) -> core::Result<Json<Value>> {
-    Ok(Json(json!(lock(&s)?.trash_list()?)))
+async fn trash_list(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+) -> core::Result<Json<Value>> {
+    Ok(Json(json!(scoped(&s, &scope)?.trash_list()?)))
 }
 #[derive(Deserialize)]
 struct Id {
     id: String,
 }
-async fn restore(State(s): State<AppState>, Json(q): Json<Id>) -> core::Result<Json<Value>> {
-    Ok(Json(json!({"path":lock(&s)?.restore(&q.id)?})))
+async fn restore(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Id>,
+) -> core::Result<Json<Value>> {
+    Ok(Json(json!({"path":scoped(&s, &scope)?.restore(&q.id)?})))
 }
 async fn history(
     State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
     Query(q): Query<PathQuery>,
 ) -> core::Result<Json<Value>> {
-    Ok(Json(json!(lock(&s)?.history(&q.path)?)))
+    Ok(Json(json!(scoped(&s, &scope)?.history(&q.path)?)))
 }
 #[derive(Deserialize)]
 struct SnapshotQuery {
@@ -183,23 +287,41 @@ struct SnapshotQuery {
 }
 async fn snapshot(
     State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
     Query(q): Query<SnapshotQuery>,
 ) -> core::Result<Json<Value>> {
-    Ok(Json(json!({"content":lock(&s)?.snapshot(&q.path,&q.id)?})))
+    Ok(Json(
+        json!({"content":scoped(&s, &scope)?.snapshot(&q.path,&q.id)?}),
+    ))
 }
-async fn draft(State(s): State<AppState>, Json(q): Json<Draft>) -> core::Result<Json<Value>> {
-    lock(&s)?.save_draft(&q)?;
+async fn draft(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Draft>,
+) -> core::Result<Json<Value>> {
+    scoped(&s, &scope)?.save_draft(&q)?;
     Ok(Json(json!({"ok":true})))
 }
-async fn drafts(State(s): State<AppState>) -> core::Result<Json<Value>> {
-    Ok(Json(json!(lock(&s)?.drafts()?)))
+async fn drafts(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+) -> core::Result<Json<Value>> {
+    Ok(Json(json!(scoped(&s, &scope)?.drafts()?)))
 }
-async fn clear_draft(State(s): State<AppState>, Json(q): Json<Id>) -> core::Result<Json<Value>> {
-    lock(&s)?.clear_draft(&q.id)?;
+async fn clear_draft(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Id>,
+) -> core::Result<Json<Value>> {
+    scoped(&s, &scope)?.clear_draft(&q.id)?;
     Ok(Json(json!({"ok":true})))
 }
-async fn search(State(s): State<AppState>, Json(q): Json<Search>) -> core::Result<Json<Value>> {
-    let w = lock(&s)?.clone();
+async fn search(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Search>,
+) -> core::Result<Json<Value>> {
+    let w = scoped(&s, &scope)?.clone();
     tokio::task::spawn_blocking(move || w.search(&q))
         .await
         .map_err(|e| Error(500, e.to_string()))?
@@ -210,14 +332,24 @@ struct Upload {
     name: String,
     data: String,
 }
-async fn upload(State(s): State<AppState>, Json(q): Json<Upload>) -> core::Result<Json<Value>> {
+async fn upload(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Json(q): Json<Upload>,
+) -> core::Result<Json<Value>> {
     let bytes = base64::engine::general_purpose::STANDARD
         .decode(q.data)
         .map_err(|_| core::bad("Неверное изображение"))?;
-    Ok(Json(json!({"path":lock(&s)?.upload(&q.name,&bytes)?})))
+    Ok(Json(
+        json!({"path":scoped(&s, &scope)?.upload(&q.name,&bytes)?}),
+    ))
 }
-async fn asset(State(s): State<AppState>, Query(q): Query<PathQuery>) -> core::Result<Response> {
-    let w = lock(&s)?;
+async fn asset(
+    State(s): State<AppState>,
+    Extension(scope): Extension<WorkspaceScope>,
+    Query(q): Query<PathQuery>,
+) -> core::Result<Response> {
+    let w = scoped(&s, &scope)?;
     let path = w.resolve(&q.path)?;
     let mime = mime_guess::from_path(&path).first_or_octet_stream();
     if ![

@@ -119,3 +119,79 @@ async fn api_saves_raw_markdown_and_surfaces_conflict() {
         StatusCode::CONFLICT
     );
 }
+
+#[tokio::test]
+async fn stale_window_cannot_save_into_another_workspace() {
+    let first = tempdir().unwrap();
+    let second = tempdir().unwrap();
+    let old_scope = typoha::core::revision(first.path().to_string_lossy().as_bytes());
+    let app = router(AppState {
+        workspace: Arc::new(Mutex::new(Workspace::open(first.path()).unwrap())),
+        token: "t".into(),
+        origin: "http://127.0.0.1:1".into(),
+    });
+    let request = |route: &str, data: serde_json::Value| {
+        Request::builder()
+            .method("POST")
+            .uri(route)
+            .header("host", "127.0.0.1:1")
+            .header("x-typoha-token", "t")
+            .header("x-typoha-workspace", &old_scope)
+            .header("content-type", "application/json")
+            .body(Body::from(data.to_string()))
+            .unwrap()
+    };
+    let changed = app
+        .clone()
+        .oneshot(request(
+            "/api/workspace",
+            serde_json::json!({"root":second.path()}),
+        ))
+        .await
+        .unwrap();
+    assert_eq!(changed.status(), StatusCode::OK);
+    let save = app.oneshot(request("/api/document", serde_json::json!({"path":"a.md", "content":"from old window", "expected_revision":null}))).await.unwrap();
+    assert_eq!(save.status(), StatusCode::CONFLICT);
+    assert!(!first.path().join("a.md").exists());
+    assert!(!second.path().join("a.md").exists());
+}
+
+#[tokio::test]
+async fn preferences_survive_server_state_recreation() {
+    let directory = tempdir().unwrap();
+    let make_app = || {
+        router(AppState {
+            workspace: Arc::new(Mutex::new(Workspace::open(directory.path()).unwrap())),
+            token: "t".into(),
+            origin: "http://127.0.0.1:1".into(),
+        })
+    };
+    let response = make_app()
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/api/preferences")
+                .header("host", "127.0.0.1:1")
+                .header("x-typoha-token", "t")
+                .header("content-type", "application/json")
+                .body(Body::from(r#"{"theme":"night","fontSize":20}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let response = make_app()
+        .oneshot(
+            Request::builder()
+                .uri("/api/preferences")
+                .header("host", "127.0.0.1:1")
+                .header("x-typoha-token", "t")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let data: serde_json::Value = serde_json::from_slice(&response_bytes(response).await).unwrap();
+    assert_eq!(data["theme"], "night");
+    assert_eq!(data["fontSize"], 20);
+}

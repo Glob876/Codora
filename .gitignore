@@ -1,6 +1,9 @@
 /target/
 /web/node_modules/
 /web/dist/
-/.typoha/
+**/.typoha/
 /artifacts/
 *.log
+
+__pycache__/
+*.pyc
