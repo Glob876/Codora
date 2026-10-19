@@ -2,7 +2,8 @@ export const languages = ["ru", "en", "uk", "de"] as const;
 export type Language = (typeof languages)[number];
 let language: Language = "ru";
 // Authored interface translations. Document text and user paths never enter this catalog.
-const rows = `Запустить|Run|Запустити|Ausführen
+const rows = `Компактный режим|Compact mode|Компактний режим|Kompaktmodus
+Запустить|Run|Запустити|Ausführen
 Показать вывод|Show output|Показати вивід|Ausgabe anzeigen
 Запустить Python|Run Python|Запустити Python|Python ausführen
 Вывод Python|Python output|Вивід Python|Python-Ausgabe

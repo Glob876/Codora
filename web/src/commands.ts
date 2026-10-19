@@ -58,6 +58,12 @@ export const actions: Action[] = [
   { id: "outline", label: "Структура документа", group: "Вид" },
   { id: "source", label: "Исходный код", key: "Ctrl+/", group: "Вид" },
   { id: "preview", label: "Предпросмотр", group: "Вид" },
+  {
+    id: "compact",
+    label: "Компактный режим",
+    key: "Ctrl+Shift+M",
+    group: "Вид",
+  },
   { id: "focus", label: "Фокусировка", key: "F8", group: "Вид" },
   { id: "typewriter", label: "Печатная машинка", key: "F9", group: "Вид" },
   { id: "fullscreen", label: "Полный экран", key: "F11", group: "Вид" },

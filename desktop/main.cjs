@@ -10,6 +10,7 @@ const {
   session,
 } = require("electron");
 const path = require("node:path");
+const { compactController } = require("./compact.cjs");
 const { startBackend, externalUrl } = require("./backend.cjs");
 let backend;
 let window;
@@ -263,6 +264,11 @@ app
       if (!trusted(event) || !["ru", "en", "uk", "de"].includes(value))
         throw new Error("Недоступно");
       language = value;
+    });
+    const setCompact = compactController(window);
+    ipcMain.handle("codora:compact", (event, active) => {
+      if (!trusted(event)) throw new Error("Недоступно");
+      setCompact(active);
     });
     ipcMain.handle("codora:window", (event, action) => {
       if (!trusted(event)) throw new Error("Недоступно");

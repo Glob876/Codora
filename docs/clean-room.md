@@ -188,3 +188,11 @@ source or assets were consulted. TOML parsing uses pinned toml 0.8.23
 (MIT OR Apache-2.0); transitive versions and notices are retained in the lockfile
 and dependency inventory. Console configuration is independent of desktop JSON
 preferences, with one-time migration of the existing console namespace.
+
+## Compact desktop mode (2026-10-19)
+
+Original implementation from the owner's request: a small text-only window,
+existing Codora monochrome SVG for empty documents, and an Alt-revealed menu.
+Uses the existing Electron window API and local editor instances; no vendor
+source, screenshots, assets, or new dependencies were used. Window state is
+session-only; Markdown and unsaved editor state remain unchanged.

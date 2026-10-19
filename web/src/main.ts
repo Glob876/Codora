@@ -1,3 +1,4 @@
+import { CompactMode } from "./compact";
 import { brandMark } from "./brand";
 import { RunPanel, isPython } from "./run-panel";
 import { chooseDocumentFormat, newDocumentName } from "./new-document";
@@ -122,6 +123,11 @@ const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!;
 const app = $("#app");
 app.innerHTML = appMarkup;
+const compact = new CompactMode(document.body);
+window.addEventListener("blur", () => {
+  compact.showMenu(false);
+  $("#dropdown").hidden = true;
+});
 const runPanel = new RunPanel($("#run-panel"), () => updateStatus());
 document.body.classList.add("welcome-active", "hide-sidebar");
 $("#welcome").hidden = false;
@@ -352,6 +358,7 @@ function menu(
     b.innerHTML = `<span>${esc(a.label)}</span><kbd>${esc(a.key || "")}</kbd>`;
     b.onclick = () => {
       box.hidden = true;
+      compact.showMenu(false);
       fire(run(a.id, targetPath));
     };
     box.append(b);
@@ -451,6 +458,7 @@ function applySettings() {
   updateStatus();
 }
 function updateStatus() {
+  compact.updateEmpty(content);
   renderTabs();
   const name =
     path?.split("/").pop() || `${tr("Без названия")}.${untitledExtension}`;
@@ -1773,6 +1781,17 @@ async function run(
         openSearchPanel(cm);
       }
       break;
+    case "compact": {
+      const active = !compact.active;
+      if (window.codoraDesktop) await window.codoraDesktop.setCompact(active);
+      compact.setActive(active);
+      updateStatus();
+      if (active) {
+        if (cm) cm.focus();
+        else if (crepe) crepe.editor.ctx.get(editorViewCtx).focus();
+      }
+      break;
+    }
     case "focus":
       settings.focus = !settings.focus;
       setSettings();
@@ -1880,9 +1899,26 @@ app.addEventListener("click", (e) => {
 document.addEventListener("click", (e) => {
   if (!(e.target as HTMLElement).closest("#dropdown,#menus,.file-entry"))
     $("#dropdown").hidden = true;
+  if (!(e.target as HTMLElement).closest(".menubar,#dropdown"))
+    compact.showMenu(false);
 });
 document.addEventListener("keydown", (e) => {
   if ($<HTMLDialogElement>("#dialog").open) return;
+  if (compact.handleKey(e)) {
+    if (!document.body.classList.contains("compact-menu-visible"))
+      $("#dropdown").hidden = true;
+    if (e.key === "Escape") {
+      if (cm) cm.focus();
+      else if (crepe) crepe.editor.ctx.get(editorViewCtx).focus();
+    }
+    return;
+  }
+  if (
+    compact.active &&
+    !e.altKey &&
+    !(e.target as HTMLElement).closest(".menubar,#dropdown")
+  )
+    compact.showMenu(false);
   const mod = e.ctrlKey || e.metaKey;
   if (
     (e.ctrlKey && e.key === "Tab") ||
@@ -1905,41 +1941,43 @@ document.addEventListener("keydown", (e) => {
   if (mod) {
     const key = e.key.toLowerCase();
     action =
-      key === "t"
-        ? "new-tab"
-        : key === "w"
-          ? "close-tab"
-          : key === "o"
-            ? "open"
-            : key === "s"
-              ? e.shiftKey
-                ? "save-as"
-                : "save"
-              : key === "p"
+      key === "m" && e.shiftKey
+        ? "compact"
+        : key === "t"
+          ? "new-tab"
+          : key === "w"
+            ? "close-tab"
+            : key === "o"
+              ? "open"
+              : key === "s"
                 ? e.shiftKey
-                  ? "palette"
-                  : "quick-open"
-                : key === "n"
-                  ? "new"
-                  : key === "/"
-                    ? "source"
-                    : key === "f"
-                      ? e.shiftKey
-                        ? "global-search"
-                        : "find"
-                      : key === "h"
-                        ? "find"
-                        : key === ","
-                          ? "settings"
-                          : key === "l" && e.shiftKey
-                            ? "sidebar"
-                            : key === "k"
-                              ? "link"
-                              : key === "b" && mode !== "rich"
-                                ? "bold"
-                                : key === "i" && mode !== "rich"
-                                  ? "italic"
-                                  : undefined;
+                  ? "save-as"
+                  : "save"
+                : key === "p"
+                  ? e.shiftKey
+                    ? "palette"
+                    : "quick-open"
+                  : key === "n"
+                    ? "new"
+                    : key === "/"
+                      ? "source"
+                      : key === "f"
+                        ? e.shiftKey
+                          ? "global-search"
+                          : "find"
+                        : key === "h"
+                          ? "find"
+                          : key === ","
+                            ? "settings"
+                            : key === "l" && e.shiftKey
+                              ? "sidebar"
+                              : key === "k"
+                                ? "link"
+                                : key === "b" && mode !== "rich"
+                                  ? "bold"
+                                  : key === "i" && mode !== "rich"
+                                    ? "italic"
+                                    : undefined;
   } else if (e.key === "F5") action = "run-python";
   else if (e.key === "F8") action = "focus";
   else if (e.key === "F9") action = "typewriter";

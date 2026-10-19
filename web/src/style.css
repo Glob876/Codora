@@ -1829,3 +1829,106 @@ dialog {
     scrollbar-width: auto;
   }
 }
+
+/* Compact writing surface. Menus overlay the page without moving the text. */
+.compact-logo,
+.compact-drag {
+  display: none;
+}
+.compact-mode #main {
+  position: relative;
+  min-width: 0;
+}
+.compact-mode #sidebar,
+.compact-mode #resize-handle,
+.compact-mode #welcome,
+.compact-mode .tabstrip,
+.compact-mode .document-bar,
+.compact-mode .format-bar,
+.compact-mode .statusbar,
+.compact-mode #compatibility,
+.compact-mode #run-panel {
+  display: none !important;
+}
+.compact-mode .menubar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 30;
+  height: auto;
+  min-height: 38px;
+  padding: 4px 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 180ms;
+  pointer-events: none;
+}
+.compact-mode.compact-menu-visible .menubar {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.compact-mode .menubar nav {
+  flex-wrap: wrap;
+}
+.compact-mode .menubar .wordmark,
+.compact-mode .window-title,
+.compact-mode .menubar > [data-action="palette"],
+.compact-mode #window-controls {
+  display: none;
+}
+.compact-mode #editor-scroll {
+  display: block !important;
+  scrollbar-width: thin;
+}
+.compact-mode #editor {
+  padding: 26px 24px 48px;
+}
+.compact-mode #editor .cm-gutters,
+.compact-mode #editor .milkdown-toolbar,
+.compact-mode #editor .milkdown-block-handle,
+.compact-mode #editor .milkdown-slash-menu {
+  display: none !important;
+}
+.compact-mode #editor .cm-activeLine {
+  background: transparent;
+}
+.compact-mode #editor [data-placeholder]::before {
+  content: none !important;
+}
+.compact-mode.compact-empty .compact-logo {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  color: #000;
+  pointer-events: none;
+  z-index: 1;
+}
+:root[data-appearance="dark"] .compact-logo {
+  color: #fff;
+}
+.compact-logo svg {
+  width: 100%;
+  height: 100%;
+}
+.desktop-window.compact-mode .compact-drag {
+  display: block;
+  position: absolute;
+  inset: 0 0 auto;
+  height: 10px;
+  z-index: 2;
+  app-region: drag;
+}
+@media (prefers-reduced-motion: reduce) {
+  .compact-mode .menubar {
+    transition: none;
+  }
+}
