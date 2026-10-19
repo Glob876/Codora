@@ -11,6 +11,10 @@ npm run build --prefix web
 cargo fmt --all --check
 cargo test --locked
 cargo clippy --all-targets --locked -- -D warnings
+cargo test --no-default-features --locked
+cargo clippy --no-default-features --all-targets --locked -- -D warnings
+cargo build --no-default-features --locked
+python3 scripts/smoke-console.py target/debug/codora
 npm audit --prefix web --audit-level=low
 npm audit --prefix desktop --audit-level=low
 python3 scripts/notices.py

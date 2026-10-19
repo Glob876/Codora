@@ -139,7 +139,10 @@ def install(prefix, uninstall=False):
     try:
         copy_payload(release)
         app = base / 'current'
-        run = f'#!/bin/sh\n# {MARKER}\nexec {shlex.quote(str(app / "codora"))} "$@"\n'
+        run = (f'#!/bin/sh\n# {MARKER}\n'
+               f'if [ "${{1:-}}" = console ] || [ "${{1:-}}" = --console ]; then\n'
+               f'  shift\n  exec {shlex.quote(str(app / "resources/app/bin/codora-core"))} console "$@"\nfi\n'
+               f'exec {shlex.quote(str(app / "codora"))} "$@"\n')
         remove = f'#!/bin/sh\n# {MARKER}\nexec python3 {shlex.quote(str(app / "scripts/install.py"))} --uninstall --prefix {shlex.quote(str(prefix))}\n'
         icon_value = str(icon).replace('\\', '\\\\')
         entry = f'[Desktop Entry]\n# {MARKER}\nType=Application\nName=Codora\nComment=Local code and Markdown editor\nExec={desktop_quote(str(launcher))}\nIcon={icon_value}\nTerminal=false\nCategories=Utility;TextEditor;\nStartupWMClass=Codora\n'

@@ -102,3 +102,16 @@ retained under docs/dictionary-notices and included in both distributions. That
 archive aggregates several dictionary licenses; per-language provenance and any
 corresponding-source requirements remain part of the public distribution review.
 No package is uploaded or published by building a local desktop archive.
+
+## Terminal dependencies
+
+Ratatui, Crossterm, tui-textarea and pulldown-cmark are used under MIT.
+The transitive winapi-i686-pc-windows-gnu and winapi-x86_64-pc-windows-gnu
+0.4.0 packages declare MIT/Apache-2.0 but omit license files through their
+Cargo include list. They are part of https://github.com/retep998/winapi-rs;
+notices.py retains the root MIT/Apache grants distributed by winapi 0.3.9
+from that same repository. The MIT choice is used. These import-library
+crates are Windows-only, not linked into the verified Linux build.
+
+The new transitive foldhash 0.1.5 dependency is used under its permissive Zlib
+license; the complete grant is retained in docs/licenses and the audit allowlist.

@@ -1,7 +1,9 @@
+#[cfg(feature = "web")]
 use codora::{
     core::Workspace,
     server::{AppState, router},
 };
+#[cfg(feature = "web")]
 use std::{
     io::{Read, Write},
     path::PathBuf,
@@ -9,6 +11,20 @@ use std::{
 };
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args
+        .first()
+        .is_some_and(|a| a == "console" || a == "--console")
+    {
+        return codora::console::run(&args[1..]).await;
+    }
+    #[cfg(feature = "web")]
+    return web_main().await;
+    #[cfg(not(feature = "web"))]
+    Err("This build supports: codora console [folder] [file ...]".into())
+}
+#[cfg(feature = "web")]
+async fn web_main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     let mut root = None;
     let mut session_file = codora::session::default_path();
@@ -36,7 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             "--help" | "-h" => {
                 println!(
-                    "Codora {}\nИспользование: codora [папка] [--port 4321] [--no-open]\nСервер доступен только через 127.0.0.1, файлы остаются на компьютере.",
+                    "Codora {}\nТерминал: codora console [папка] [файл ...]\nИспользование: codora [папка] [--port 4321] [--no-open]\nСервер доступен только через 127.0.0.1, файлы остаются на компьютере.",
                     env!("CARGO_PKG_VERSION")
                 );
                 return Ok(());
@@ -115,6 +131,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     Ok(())
 }
+#[cfg(feature = "web")]
 fn open_window(url: &str) {
     // Existing browsers only. The application does not install or download a runtime.
     for browser in [

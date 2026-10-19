@@ -37,6 +37,12 @@ def collect(ecosystem, name, version, license_expression, folder, source, dev=Fa
         fallback = []
         if ecosystem == 'cargo' and name == 'r-efi':
             fallback = [folder / 'AUTHORS']
+        elif ecosystem == 'cargo' and name in ('winapi-i686-pc-windows-gnu', 'winapi-x86_64-pc-windows-gnu'):
+            # The 0.4.0 import-library crates omit root licenses via their include
+            # list. They belong to winapi-rs; retain that repository's MIT grant
+            # distributed in the parent winapi 0.3.9 crate.
+            fallback = [folder.parent / 'winapi-0.3.9/LICENSE-MIT',
+                        folder.parent / 'winapi-0.3.9/LICENSE-APACHE']
         elif ecosystem == 'npm' and name == '@electron-internal/extract-zip':
             # Upstream 1.0.5 declares BSD-2-Clause but omits the grant text even
             # from its release commit. Retain its README; exception in licensing.md.

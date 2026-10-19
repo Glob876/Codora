@@ -1,3 +1,5 @@
+#![cfg(feature = "web")]
+
 use std::{
     io::{BufRead, BufReader},
     process::{Command, Stdio},

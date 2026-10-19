@@ -116,3 +116,33 @@
 - Windows/macOS installers, automatic release downloads and global/root installs
   are not implemented. Desktop environments outside the Linux test environment
   and distribution-specific graphical-library setup were not verified.
+
+## Terminal frontend — 2026-10-19 (Linux)
+
+- The full `scripts/check.sh` passed: 37 Rust tests (12 new terminal unit tests
+  plus 25 existing integration tests), rustfmt, Clippy with warnings denied,
+  frontend TypeScript/Prettier, 28 Vitest tests, production web build, five desktop
+  Node tests, ten installer tests, npm audits (zero vulnerabilities), and license
+  inventory/policy (564 records). The existing large web chunk warning remains.
+- Console-only tests and Clippy also passed with `--no-default-features`.
+  A separate CI job builds/tests the terminal without installing Node/Electron or
+  creating web/dist. Web-only integration suites are gated by the web feature;
+  core/session/runner/console tests remain enabled in terminal builds.
+- Built the optimized standalone terminal executable in target/console/release.
+  `scripts/smoke-console.py` passed both against the real console-only binary and
+  through `run.sh` from outside the checkout. A Unix PTY exercised the ASCII
+  welcome screen, new tab, bracketed UTF-8 paste, Save as, exact disk text,
+  Python output/exit status, external save conflict with recovery draft,
+  cancelled quit, explicit discard, and restoring the alternate screen.
+- Unit coverage includes atomic/conflict behavior through the shared core,
+  uniform CRLF/final newline preservation, history, dirty tab decisions,
+  traversal/overwrite rejection, literal search and undoable replacement,
+  cross-tab clipboard, draft recovery copies, settings isolation, tree sorting
+  and collapse, very small terminals, preview source retention and Python output.
+- The installed console dispatch was tested using an Electron fixture that fails
+  if launched, including paths with spaces and literal shell syntax.
+- Pandoc conversion, actual system clipboard integration, Windows/macOS consoles
+  and graphical terminal variation are unverified. Terminal feature differences
+  and omissions are listed explicitly in console.md and parity.md. No graphical
+  desktop smoke was run for this change; existing desktop tests and frontend
+  checks passed. No user-profile installation or GitHub push was performed.

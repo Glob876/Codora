@@ -13,6 +13,18 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "allocator-api2",
+    "version": "0.2.21",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/zakarumych/allocator-api2",
+    "notices": [
+      "docs/licenses/cargo-allocator-api2-0.2.21-LICENSE-APACHE",
+      "docs/licenses/cargo-allocator-api2-0.2.21-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "atomic-waker",
     "version": "1.1.2",
     "license": "Apache-2.0 OR MIT",
@@ -119,6 +131,29 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "cassowary",
+    "version": "0.3.0",
+    "license": "MIT / Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/dylanede/cassowary-rs",
+    "notices": [
+      "docs/licenses/cargo-cassowary-0.3.0-LICENSE-APACHE",
+      "docs/licenses/cargo-cassowary-0.3.0-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "castaway",
+    "version": "0.2.4",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/sagebind/castaway",
+    "notices": [
+      "docs/licenses/cargo-castaway-0.2.4-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "cfg-if",
     "version": "1.0.5",
     "license": "MIT OR Apache-2.0",
@@ -127,6 +162,17 @@
     "notices": [
       "docs/licenses/cargo-cfg-if-1.0.5-LICENSE-APACHE",
       "docs/licenses/cargo-cfg-if-1.0.5-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "compact_str",
+    "version": "0.8.2",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/ParkMyCar/compact_str",
+    "notices": [
+      "docs/licenses/cargo-compact_str-0.8.2-LICENSE"
     ]
   },
   {
@@ -167,6 +213,28 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "crossterm",
+    "version": "0.28.1",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/crossterm-rs/crossterm",
+    "notices": [
+      "docs/licenses/cargo-crossterm-0.28.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "crossterm_winapi",
+    "version": "0.9.1",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/crossterm-rs/crossterm-winapi",
+    "notices": [
+      "docs/licenses/cargo-crossterm_winapi-0.9.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "crypto-common",
     "version": "0.1.7",
     "license": "MIT OR Apache-2.0",
@@ -187,6 +255,39 @@
     "notices": [
       "docs/licenses/cargo-crypto-common-0.2.2-LICENSE-APACHE",
       "docs/licenses/cargo-crypto-common-0.2.2-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "darling",
+    "version": "0.24.1",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/TedDriggs/darling",
+    "notices": [
+      "docs/licenses/cargo-darling-0.24.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "darling_core",
+    "version": "0.24.1",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/TedDriggs/darling",
+    "notices": [
+      "docs/licenses/cargo-darling_core-0.24.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "darling_macro",
+    "version": "0.24.1",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/TedDriggs/darling",
+    "notices": [
+      "docs/licenses/cargo-darling_macro-0.24.1-LICENSE"
     ]
   },
   {
@@ -215,6 +316,30 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "either",
+    "version": "1.19.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/rayon-rs/either",
+    "notices": [
+      "docs/licenses/cargo-either-1.19.0-LICENSE-APACHE",
+      "docs/licenses/cargo-either-1.19.0-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "equivalent",
+    "version": "1.0.3",
+    "license": "Apache-2.0 OR MIT",
+    "development_only": false,
+    "source": "https://github.com/indexmap-rs/equivalent",
+    "notices": [
+      "docs/licenses/cargo-equivalent-1.0.3-LICENSE-APACHE",
+      "docs/licenses/cargo-equivalent-1.0.3-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "errno",
     "version": "0.3.14",
     "license": "MIT OR Apache-2.0",
@@ -235,6 +360,17 @@
     "notices": [
       "docs/licenses/cargo-fastrand-2.5.0-LICENSE-APACHE",
       "docs/licenses/cargo-fastrand-2.5.0-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "foldhash",
+    "version": "0.1.5",
+    "license": "Zlib",
+    "development_only": false,
+    "source": "https://github.com/orlp/foldhash",
+    "notices": [
+      "docs/licenses/cargo-foldhash-0.1.5-LICENSE"
     ]
   },
   {
@@ -298,6 +434,18 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "getopts",
+    "version": "0.2.24",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/rust-lang/getopts",
+    "notices": [
+      "docs/licenses/cargo-getopts-0.2.24-LICENSE-APACHE",
+      "docs/licenses/cargo-getopts-0.2.24-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "getrandom",
     "version": "0.4.3",
     "license": "MIT OR Apache-2.0",
@@ -306,6 +454,30 @@
     "notices": [
       "docs/licenses/cargo-getrandom-0.4.3-LICENSE-APACHE",
       "docs/licenses/cargo-getrandom-0.4.3-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "hashbrown",
+    "version": "0.15.5",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/rust-lang/hashbrown",
+    "notices": [
+      "docs/licenses/cargo-hashbrown-0.15.5-LICENSE-APACHE",
+      "docs/licenses/cargo-hashbrown-0.15.5-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "heck",
+    "version": "0.5.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/withoutboats/heck",
+    "notices": [
+      "docs/licenses/cargo-heck-0.5.0-LICENSE-APACHE",
+      "docs/licenses/cargo-heck-0.5.0-LICENSE-MIT"
     ]
   },
   {
@@ -414,6 +586,52 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "ident_case",
+    "version": "1.0.1",
+    "license": "MIT/Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/TedDriggs/ident_case",
+    "notices": [
+      "docs/licenses/cargo-ident_case-1.0.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "indoc",
+    "version": "2.0.8",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/dtolnay/indoc",
+    "notices": [
+      "docs/licenses/cargo-indoc-2.0.8-LICENSE-APACHE",
+      "docs/licenses/cargo-indoc-2.0.8-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "instability",
+    "version": "0.3.14",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/ratatui/instability",
+    "notices": [
+      "docs/licenses/cargo-instability-0.3.14-LICENSE.md"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "itertools",
+    "version": "0.13.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/rust-itertools/itertools",
+    "notices": [
+      "docs/licenses/cargo-itertools-0.13.0-LICENSE-APACHE",
+      "docs/licenses/cargo-itertools-0.13.0-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "itoa",
     "version": "1.0.18",
     "license": "MIT OR Apache-2.0",
@@ -464,6 +682,20 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "linux-raw-sys",
+    "version": "0.4.15",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "development_only": false,
+    "source": "https://github.com/sunfishcode/linux-raw-sys",
+    "notices": [
+      "docs/licenses/cargo-linux-raw-sys-0.4.15-COPYRIGHT",
+      "docs/licenses/cargo-linux-raw-sys-0.4.15-LICENSE-APACHE",
+      "docs/licenses/cargo-linux-raw-sys-0.4.15-LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "docs/licenses/cargo-linux-raw-sys-0.4.15-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "lock_api",
     "version": "0.4.14",
     "license": "MIT OR Apache-2.0",
@@ -484,6 +716,17 @@
     "notices": [
       "docs/licenses/cargo-log-0.4.34-LICENSE-APACHE",
       "docs/licenses/cargo-log-0.4.34-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "lru",
+    "version": "0.12.5",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/jeromefroe/lru-rs.git",
+    "notices": [
+      "docs/licenses/cargo-lru-0.12.5-LICENSE"
     ]
   },
   {
@@ -582,6 +825,18 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "paste",
+    "version": "1.0.15",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/dtolnay/paste",
+    "notices": [
+      "docs/licenses/cargo-paste-1.0.15-LICENSE-APACHE",
+      "docs/licenses/cargo-paste-1.0.15-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "percent-encoding",
     "version": "2.3.2",
     "license": "MIT OR Apache-2.0",
@@ -618,6 +873,28 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "pulldown-cmark",
+    "version": "0.13.0",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/raphlinus/pulldown-cmark",
+    "notices": [
+      "docs/licenses/cargo-pulldown-cmark-0.13.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "pulldown-cmark-escape",
+    "version": "0.11.0",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/raphlinus/pulldown-cmark",
+    "notices": [
+      "docs/licenses/cargo-pulldown-cmark-escape-0.11.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "quote",
     "version": "1.0.47",
     "license": "MIT OR Apache-2.0",
@@ -637,6 +914,17 @@
     "source": "https://github.com/r-efi/r-efi",
     "notices": [
       "docs/licenses/cargo-r-efi-6.0.0-AUTHORS"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "ratatui",
+    "version": "0.29.0",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/ratatui/ratatui",
+    "notices": [
+      "docs/licenses/cargo-ratatui-0.29.0-LICENSE"
     ]
   },
   {
@@ -717,6 +1005,20 @@
     "source": "https://pyrossh.dev/repos/rust-embed",
     "notices": [
       "docs/licenses/cargo-rust-embed-utils-8.13.0-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "rustix",
+    "version": "0.38.44",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "development_only": false,
+    "source": "https://github.com/bytecodealliance/rustix",
+    "notices": [
+      "docs/licenses/cargo-rustix-0.38.44-COPYRIGHT",
+      "docs/licenses/cargo-rustix-0.38.44-LICENSE-APACHE",
+      "docs/licenses/cargo-rustix-0.38.44-LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "docs/licenses/cargo-rustix-0.38.44-LICENSE-MIT"
     ]
   },
   {
@@ -879,6 +1181,30 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "signal-hook",
+    "version": "0.3.18",
+    "license": "Apache-2.0/MIT",
+    "development_only": false,
+    "source": "https://github.com/vorner/signal-hook",
+    "notices": [
+      "docs/licenses/cargo-signal-hook-0.3.18-LICENSE-APACHE",
+      "docs/licenses/cargo-signal-hook-0.3.18-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "signal-hook-mio",
+    "version": "0.2.5",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/vorner/signal-hook",
+    "notices": [
+      "docs/licenses/cargo-signal-hook-mio-0.2.5-LICENSE-APACHE",
+      "docs/licenses/cargo-signal-hook-mio-0.2.5-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "signal-hook-registry",
     "version": "1.4.8",
     "license": "MIT OR Apache-2.0",
@@ -922,6 +1248,51 @@
     "notices": [
       "docs/licenses/cargo-socket2-0.6.5-LICENSE-APACHE",
       "docs/licenses/cargo-socket2-0.6.5-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "static_assertions",
+    "version": "1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/nvzqz/static-assertions-rs",
+    "notices": [
+      "docs/licenses/cargo-static_assertions-1.1.0-LICENSE-APACHE",
+      "docs/licenses/cargo-static_assertions-1.1.0-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "strsim",
+    "version": "0.11.1",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/rapidfuzz/strsim-rs",
+    "notices": [
+      "docs/licenses/cargo-strsim-0.11.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "strum",
+    "version": "0.26.3",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/Peternator7/strum",
+    "notices": [
+      "docs/licenses/cargo-strum-0.26.3-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "strum_macros",
+    "version": "0.26.4",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/Peternator7/strum",
+    "notices": [
+      "docs/licenses/cargo-strum_macros-0.26.4-LICENSE"
     ]
   },
   {
@@ -1050,6 +1421,17 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "tui-textarea",
+    "version": "0.7.0",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/rhysd/tui-textarea",
+    "notices": [
+      "docs/licenses/cargo-tui-textarea-0.7.0-LICENSE.txt"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "typenum",
     "version": "1.20.1",
     "license": "MIT OR Apache-2.0",
@@ -1084,6 +1466,58 @@
       "docs/licenses/cargo-unicode-ident-1.0.27-LICENSE-APACHE",
       "docs/licenses/cargo-unicode-ident-1.0.27-LICENSE-MIT",
       "docs/licenses/cargo-unicode-ident-1.0.27-LICENSE-UNICODE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "unicode-segmentation",
+    "version": "1.13.3",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/unicode-rs/unicode-segmentation",
+    "notices": [
+      "docs/licenses/cargo-unicode-segmentation-1.13.3-COPYRIGHT",
+      "docs/licenses/cargo-unicode-segmentation-1.13.3-LICENSE-APACHE",
+      "docs/licenses/cargo-unicode-segmentation-1.13.3-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "unicode-truncate",
+    "version": "1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/Aetf/unicode-truncate",
+    "notices": [
+      "docs/licenses/cargo-unicode-truncate-1.1.0-COPYRIGHT",
+      "docs/licenses/cargo-unicode-truncate-1.1.0-LICENSE-APACHE",
+      "docs/licenses/cargo-unicode-truncate-1.1.0-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "unicode-width",
+    "version": "0.1.14",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/unicode-rs/unicode-width",
+    "notices": [
+      "docs/licenses/cargo-unicode-width-0.1.14-COPYRIGHT",
+      "docs/licenses/cargo-unicode-width-0.1.14-LICENSE-APACHE",
+      "docs/licenses/cargo-unicode-width-0.1.14-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "unicode-width",
+    "version": "0.2.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/unicode-rs/unicode-width",
+    "notices": [
+      "docs/licenses/cargo-unicode-width-0.2.0-COPYRIGHT",
+      "docs/licenses/cargo-unicode-width-0.2.0-LICENSE-APACHE",
+      "docs/licenses/cargo-unicode-width-0.2.0-LICENSE-MIT"
     ]
   },
   {
@@ -1185,6 +1619,30 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "winapi",
+    "version": "0.3.9",
+    "license": "MIT/Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/retep998/winapi-rs",
+    "notices": [
+      "docs/licenses/cargo-winapi-0.3.9-LICENSE-APACHE",
+      "docs/licenses/cargo-winapi-0.3.9-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "winapi-i686-pc-windows-gnu",
+    "version": "0.4.0",
+    "license": "MIT/Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/retep998/winapi-rs",
+    "notices": [
+      "docs/licenses/cargo-winapi-i686-pc-windows-gnu-0.4.0-LICENSE-MIT",
+      "docs/licenses/cargo-winapi-i686-pc-windows-gnu-0.4.0-LICENSE-APACHE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "winapi-util",
     "version": "0.1.11",
     "license": "Unlicense OR MIT",
@@ -1193,6 +1651,18 @@
     "notices": [
       "docs/licenses/cargo-winapi-util-0.1.11-COPYING",
       "docs/licenses/cargo-winapi-util-0.1.11-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "winapi-x86_64-pc-windows-gnu",
+    "version": "0.4.0",
+    "license": "MIT/Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/retep998/winapi-rs",
+    "notices": [
+      "docs/licenses/cargo-winapi-x86_64-pc-windows-gnu-0.4.0-LICENSE-MIT",
+      "docs/licenses/cargo-winapi-x86_64-pc-windows-gnu-0.4.0-LICENSE-APACHE"
     ]
   },
   {
@@ -1210,6 +1680,18 @@
   {
     "ecosystem": "cargo",
     "name": "windows-sys",
+    "version": "0.59.0",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows-sys-0.59.0-license-apache-2.0",
+      "docs/licenses/cargo-windows-sys-0.59.0-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows-sys",
     "version": "0.61.2",
     "license": "MIT OR Apache-2.0",
     "development_only": false,
@@ -1217,6 +1699,114 @@
     "notices": [
       "docs/licenses/cargo-windows-sys-0.61.2-license-apache-2.0",
       "docs/licenses/cargo-windows-sys-0.61.2-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows-targets",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows-targets-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows-targets-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_aarch64_gnullvm",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_aarch64_gnullvm-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_aarch64_gnullvm-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_aarch64_msvc",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_aarch64_msvc-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_aarch64_msvc-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_i686_gnu",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_i686_gnu-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_i686_gnu-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_i686_gnullvm",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_i686_gnullvm-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_i686_gnullvm-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_i686_msvc",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_i686_msvc-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_i686_msvc-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_x86_64_gnu",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_x86_64_gnu-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_x86_64_gnu-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_x86_64_gnullvm",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_x86_64_gnullvm-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_x86_64_gnullvm-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "windows_x86_64_msvc",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "docs/licenses/cargo-windows_x86_64_msvc-0.52.6-license-apache-2.0",
+      "docs/licenses/cargo-windows_x86_64_msvc-0.52.6-license-mit"
     ]
   },
   {

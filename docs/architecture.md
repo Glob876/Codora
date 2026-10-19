@@ -120,3 +120,14 @@ F5 runs Python or shows the current run. This is a script runner, not a terminal
 emulator, debugger, REPL, environment/package manager or general shell execution API.
 
 `preferences.rs` owns preference validation, atomic persistence and the shared appearance allowlist independently of HTTP. New application-wide appearance keys must be added to that allowlist; workspace-specific paths and custom CSS must remain outside it.
+
+## Terminal frontend
+
+`src/console.rs` uses Ratatui, Crossterm and tui-textarea. The `console` CLI branch
+runs before any HTTP listener is created. All document I/O calls Workspace and
+Python execution uses Runner. `src/conversion.rs` contains the Pandoc adapter
+shared with server.rs. The `web` Cargo feature embeds the frontend and is enabled
+by default; `--no-default-features` builds a terminal-only executable without
+web assets or HTTP dependencies. run.sh keeps this build in target/console so
+it cannot replace the desktop backend. Console preferences use a separate nested
+key in existing workspace settings. See console.md for key bindings and limits.

@@ -1,3 +1,5 @@
+#![cfg(feature = "web")]
+
 use axum::{
     body::Body,
     http::{Request, StatusCode},

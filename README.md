@@ -81,6 +81,18 @@ installation directory, and pass that same `--prefix` when uninstalling with
 `~/.local/share/applications` directory (or `XDG_DATA_HOME` when set); custom prefixes need desktop environment
 search-path configuration. The installer does not yet support Windows or macOS.
 
+## Terminal mode
+
+```bash
+./run.sh console
+./run.sh console /path/to/workspace README.md
+```
+
+A keyboard-first terminal editor with an ASCII welcome logo, tabs, file tree,
+command palette, search/replace, history, draft recovery and Python output/input.
+It builds with Rust alone, without Electron or Node. Ctrl+E opens commands; F1
+opens help. See [terminal guide and desktop differences](docs/console.md).
+
 ## Run from source without installing
 
 From the project directory:

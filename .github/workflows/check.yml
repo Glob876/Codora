@@ -21,3 +21,13 @@ jobs:
       - run: ./scripts/check.sh
       - run: cargo build --release --locked
       - run: xvfb-run -a desktop/node_modules/.bin/electron desktop/smoke.cjs
+  console-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain
+        run: rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy
+      - run: cargo test --no-default-features --locked
+      - run: cargo clippy --no-default-features --all-targets --locked -- -D warnings
+      - run: cargo build --no-default-features --locked
+      - run: python3 scripts/smoke-console.py target/debug/codora

@@ -64,6 +64,15 @@ class InstallationTests(unittest.TestCase):
         self.assertFalse((self.prefix / 'bin/codora').exists())
         self.assertFalse((self.prefix / 'share/applications/codora.desktop').exists())
 
+    def test_console_launcher_uses_core_without_electron(self):
+        current = self.install()
+        (current / 'codora').write_text('#!/bin/sh\nexit 99\n')
+        args = ['notes with spaces', '$(touch should-not-exist)']
+        for flag in ['console', '--console']:
+            result = subprocess.run([str(self.prefix / 'bin/codora'), flag, *args],
+                                    text=True, capture_output=True, check=True)
+            self.assertEqual(result.stdout.splitlines(), ['console', *args])
+
     def test_update_switches_payload_and_keeps_previous_running_version(self):
         current = self.install()
         previous = current.resolve()

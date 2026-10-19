@@ -9,7 +9,7 @@ errors = []
 for package in records:
     expression = package['license']
     # All OR choices offering MIT are consumed under MIT; AND clauses remain.
-    allowed = ['MIT', 'ISC', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', 'Unlicense', 'BSL-1.0', 'Unicode-3.0', 'CC0-1.0', 'BlueOak-1.0.0']
+    allowed = ['MIT', 'ISC', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', 'Unlicense', 'BSL-1.0', 'Unicode-3.0', 'CC0-1.0', 'BlueOak-1.0.0', 'Zlib']
     if expression == 'MPL-2.0' and package['development_only']:
         pass  # Unmodified build tools, excluded from shipped application code.
     elif not any(choice in expression for choice in allowed):

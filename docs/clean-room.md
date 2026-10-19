@@ -160,3 +160,13 @@ It preserves earlier runtime payloads for running windows and switches the curre
 version with an atomic symlink replacement. Failed copies/integration writes
 restore the prior launcher/menu/icon state. Removal uses an ownership marker and
 preserves workspace documents, drafts and application settings.
+
+## Terminal interface (2026-10-19)
+
+The terminal frontend and ASCII Codora wordmark are original code and text,
+written from the owner's request for familiar keyboard-first editing. No micro
+or proprietary editor source/assets were fetched or copied. Public crate APIs
+used: Ratatui 0.29.0 (MIT), Crossterm 0.28.1 (MIT), tui-textarea 0.7.0 (MIT),
+pulldown-cmark 0.13.0 (MIT). Exact transitive versions and notices are recorded
+in Cargo.lock and the dependency inventory. All existing file safety remains
+in the shared Rust core. Graphical parity is explicitly limited in console.md.
