@@ -146,3 +146,19 @@
   and omissions are listed explicitly in console.md and parity.md. No graphical
   desktop smoke was run for this change; existing desktop tests and frontend
   checks passed. No user-profile installation or GitHub push was performed.
+
+## Console TOML and brand palette — 2026-10-19
+
+Passed `cargo fmt --all --check`, `cargo test --offline --locked` (44 tests),
+`cargo clippy --offline --locked --all-targets -- -D warnings`, and equivalent
+console-only test/clippy/build checks (36 tests). Passed `npm run check`,
+`npm test` (28 tests) and `npm run build` in web. The build retains its existing
+large-chunk advisory. Console PTY smoke passed, including UTF-8 save, Python,
+conflict recovery and terminal cleanup. The CLI-generated TOML template exactly
+matches the shipped example. License audit passed with the eight additional
+locked TOML dependencies and their original notices.
+
+New coverage includes migration without changing desktop preferences, invalid
+configuration, rejected metadata symlinks, refusal to overwrite external config
+edits, actual rendered palette overrides, command bindings, startup settings and
+configured draft/autosave timing.

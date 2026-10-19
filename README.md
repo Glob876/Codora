@@ -176,3 +176,5 @@ Original project code is licensed under **[GNU AGPL v3 or later](LICENSE)** (`AG
 See [COPYRIGHT](COPYRIGHT) for attribution and [licensing details](docs/licensing.md) for the transition from earlier MIT revisions. Dependencies retain their own licenses: [complete notices](THIRD_PARTY_NOTICES.md) and [machine-readable inventory](docs/dependencies.json).
 
 Source code and commit history are available in the [GitHub repository](https://github.com/Glob876/Codora). Development rules are in [AGENTS.md](AGENTS.md).
+
+Console: [TOML configuration guide (Russian)](docs/console-config.md), [example configuration](console.example.toml).

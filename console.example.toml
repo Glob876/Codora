@@ -1,0 +1,45 @@
+# Codora console — copy to WORKSPACE/.typoha/config/console.toml.
+# Created automatically on first launch. Guide: docs/console-config.md
+# Missing options use defaults. Restart the console after manual changes.
+# Palette actions save this file atomically and reformat it (comments are removed).
+
+# 0 = Codora dark, 1 = Codora light, 2 = terminal ANSI colors.
+theme = 0
+numbers = true
+hidden = false
+indent = 4
+sidebar = true
+focus = false
+sidebar_width = 26
+output_percent = 32
+preview_page_lines = 15
+
+autosave = false
+autosave_delay_ms = 2000
+draft_delay_ms = 600
+poll_interval_ms = 80
+
+# Overrides apply on top of any theme. Uncomment only colors you want to change.
+# Hex colors require quotes. 'reset' uses your terminal's default color.
+[colors]
+# background = '#211B1E'
+# foreground = '#FCF3E8'
+# muted = '#B79C98'
+# accent = '#FFC28A'
+# panel = '#30252A'
+# error = '#F36A52'
+# selection_background = '#C74359'
+# selection_foreground = '#FCF3E8'
+# cursor = '#FFC28A'
+# heading = '#FFC28A'
+# code = '#F36A52'
+# logo_peach = '#FFC28A'
+# logo_raspberry = '#C74359'
+# logo_coral = '#F36A52'
+
+# Additional command shortcuts; override defaults on the same key.
+# Built-in shortcuts remain available. Dialog controls stay fixed.
+[bindings]
+# 'ctrl+j' = 'save'
+# 'f9' = 'palette'
+# 'alt+h' = 'hidden'

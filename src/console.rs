@@ -46,6 +46,10 @@ const SMALL_LOGO: &str = r"           ///////
 
 const HELP: &str = "CODORA • CONSOLE\n\nType immediately — no modes. Ctrl+E opens every command; type to filter.\n\nCtrl+N  New tab          Ctrl+P / Ctrl+O  Open file\nCtrl+S  Save             Alt+S            Save as\nCtrl+W  Close tab        Ctrl+Q           Quit\nAlt+Left / Alt+Right     Previous / next tab\nCtrl+F  Find (literal)   F3 / Shift+F3    Next / previous match\nCtrl+R  Replace all      Ctrl+G           Go to line\nCtrl+Shift+F             Workspace search (or use command palette)\nCtrl+Z / Ctrl+Y          Undo / redo\nCtrl+A                  Select all\nShift+arrows            Select text\nCtrl+C / Ctrl+X / Ctrl+V Copy / cut / paste (editor clipboard)\nCtrl+Left / Ctrl+Right   Move by word\nTab / Shift+Tab          Indent / unindent\nCtrl+Space               Complete word from open document\nF2                      File list / sidebar focus\nF4                      Markdown reading preview\nF5                      Save and run Python\nF6                      Python output panel\nF8                      Focus mode\nF1                      This help\nEsc                     Cancel / close panel\n\nDialogs: type to filter, Up/Down, PageUp/PageDown, Enter to choose.\nTerminal paste uses bracketed paste; use your terminal's paste shortcut.\nCopy/cut/paste share an internal clipboard across tabs.\n\nCommand palette also provides:\nWorkspace switching, hidden files, regex folder search, outline, rename,\nnew folder, duplicate, recoverable trash, history and draft recovery,\nMarkdown formatting, Pandoc import/export, themes, line numbers,\nindent width, autosave, Python stdin and Stop.\n\nSafety:\nSaves check disk revisions and retain previous versions. Conflicts never\noverwrite the disk. Dirty tabs write recoverable .typoha/drafts entries.\nClosing dirty tabs asks Save / Discard / Cancel. Errors appear below.\nPython runs with your user permissions, just as in the desktop editor.\n\nTerminal-specific limits:\nPreview is styled text: TeX, Mermaid, images and HTML remain source.\nPDF/PNG, printing, spellcheck, graphical colors/transparency, project LSP\nand desktop extensions are unavailable here. Pandoc is an external tool.\n";
 
+#[path = "console_config.rs"]
+mod config;
+use config::Settings;
+
 type Result<T> = core::Result<T>;
 fn error(message: impl Into<String>) -> core::Error {
     core::Error(400, message.into())
@@ -136,14 +140,17 @@ impl Buffer {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 enum Command {
+    Palette,
     New,
     Open,
     Save,
     SaveAs,
     Close,
     Quit,
+    #[serde(skip)]
     SaveAllQuit,
     Workspace,
     Find,
@@ -180,6 +187,7 @@ enum Command {
     Code,
 }
 const COMMANDS: &[(Command, &str)] = &[
+    (Command::Palette, "Command palette                  Ctrl+E"),
     (Command::New, "New document                     Ctrl+N"),
     (Command::Open, "Open file / quick open            Ctrl+P"),
     (Command::Save, "Save                             Ctrl+S"),
@@ -303,26 +311,6 @@ struct Reader {
     text: Text<'static>,
     scroll: u16,
 }
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
-#[serde(default)]
-struct Settings {
-    theme: usize,
-    numbers: bool,
-    autosave: bool,
-    indent: u8,
-    hidden: bool,
-}
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            theme: 0,
-            numbers: true,
-            autosave: false,
-            indent: 4,
-            hidden: false,
-        }
-    }
-}
 struct App {
     workspace: Workspace,
     tabs: Vec<Buffer>,
@@ -332,6 +320,7 @@ struct App {
     confirm: Option<Confirm>,
     reader: Option<Reader>,
     settings: Settings,
+    config_source: String,
     message: String,
     failed: bool,
     focus: bool,
@@ -351,14 +340,10 @@ struct App {
 }
 impl App {
     fn new(workspace: Workspace) -> Result<Self> {
-        let prefs = crate::preferences::load(&workspace)?;
-        let tree = workspace.list(false, false)?;
-        let settings = prefs
-            .get("console")
-            .cloned()
-            .map(serde_json::from_value)
-            .transpose()?
-            .unwrap_or_default();
+        let (settings, config_source) = config::load(&workspace)?;
+        let tree = workspace.list(settings.hidden, false)?;
+        let focus = settings.focus;
+        let sidebar = settings.sidebar;
         Ok(Self {
             workspace,
             tabs: vec![],
@@ -372,10 +357,11 @@ impl App {
             tree_index: 0,
             tree_focus: false,
             settings,
+            config_source,
             message: "Welcome — Ctrl+N new · Ctrl+P open · Ctrl+E commands · F1 help".into(),
             failed: false,
-            focus: false,
-            sidebar: true,
+            focus,
+            sidebar,
             clipboard: String::new(),
             runner: Runner::default(),
             report: None,
@@ -576,9 +562,7 @@ impl App {
         Ok(())
     }
     fn settings_changed(&mut self) -> Result<()> {
-        let mut prefs = crate::preferences::load(&self.workspace)?;
-        prefs["console"] = serde_json::to_value(&self.settings)?;
-        crate::preferences::save(&self.workspace, &prefs)?;
+        config::save(&self.workspace, &self.settings, &mut self.config_source)?;
         self.notice(format!(
             "Console settings saved · theme {} · indent {} · autosave {}",
             self.settings.theme + 1,
@@ -589,6 +573,7 @@ impl App {
     }
     fn command(&mut self, command: Command) -> Result<()> {
         match command {
+            Command::Palette => self.palette(),
             Command::New => self.new_tab(String::new()),
             Command::Open => self.files()?,
             Command::Save => {
@@ -771,7 +756,7 @@ impl App {
             }
             Command::Output => self.output = !self.output,
             Command::Preview => {
-                let text = markdown_preview(&self.current()?.text());
+                let text = markdown_preview(&self.current()?.text(), self.settings.palette()?);
                 self.reader = Some(Reader {
                     title: "Markdown · text preview · Esc closes".into(),
                     text,
@@ -813,7 +798,11 @@ impl App {
                 self.refresh_tree()?;
                 self.settings_changed()?;
             }
-            Command::Focus => self.focus = !self.focus,
+            Command::Focus => {
+                self.focus = !self.focus;
+                self.settings.focus = self.focus;
+                self.settings_changed()?;
+            }
             Command::Help => {
                 self.reader = Some(Reader {
                     title: "Help · arrows / PgUp / PgDn · Esc closes".into(),
@@ -938,15 +927,15 @@ impl App {
                 if self.tabs.iter().any(|b| b.dirty) || self.runner.is_running()? {
                     return Err(error("Save documents and stop Python first"));
                 }
-                self.workspace.change_root(PathBuf::from(value))?;
+                let workspace = Workspace::open(PathBuf::from(value))?;
+                let (settings, source) = config::load(&workspace)?;
+                self.workspace = workspace;
                 self.tabs.clear();
                 self.active = 0;
-                self.settings = crate::preferences::load(&self.workspace)?
-                    .get("console")
-                    .cloned()
-                    .map(serde_json::from_value)
-                    .transpose()?
-                    .unwrap_or_default();
+                self.settings = settings;
+                self.config_source = source;
+                self.focus = self.settings.focus;
+                self.sidebar = self.settings.sidebar;
                 self.report = None;
                 self.collapsed.clear();
                 self.refresh_tree()?;
@@ -1249,11 +1238,23 @@ impl App {
                 KeyCode::Esc | KeyCode::F(4) | KeyCode::F(1) => self.reader = None,
                 KeyCode::Down => reader.scroll = reader.scroll.saturating_add(1),
                 KeyCode::Up => reader.scroll = reader.scroll.saturating_sub(1),
-                KeyCode::PageDown => reader.scroll = reader.scroll.saturating_add(15),
-                KeyCode::PageUp => reader.scroll = reader.scroll.saturating_sub(15),
+                KeyCode::PageDown => {
+                    reader.scroll = reader
+                        .scroll
+                        .saturating_add(self.settings.preview_page_lines)
+                }
+                KeyCode::PageUp => {
+                    reader.scroll = reader
+                        .scroll
+                        .saturating_sub(self.settings.preview_page_lines)
+                }
                 KeyCode::Home => reader.scroll = 0,
                 _ => {}
             }
+            return Ok(());
+        }
+        if let Some(command) = self.settings.binding(key) {
+            self.command(command)?;
             return Ok(());
         }
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
@@ -1435,13 +1436,15 @@ impl App {
         if let Some(report) = &self.report {
             self.report = Some(self.runner.report(&self.workspace, &report.id)?);
         }
-        if self.draft_pending && self.edited.elapsed() > Duration::from_millis(600) {
+        if self.draft_pending
+            && self.edited.elapsed() > Duration::from_millis(self.settings.draft_delay_ms)
+        {
             // Do not clear pending until persistence succeeds.
             self.persist_drafts()?;
             self.draft_pending = false;
         }
         if self.settings.autosave
-            && self.edited.elapsed() > Duration::from_secs(2)
+            && self.edited.elapsed() > Duration::from_millis(self.settings.autosave_delay_ms)
             && let Some(tab) = self.tabs.get(self.active)
             && tab.dirty
             && tab.path.is_some()
@@ -1471,31 +1474,74 @@ struct Palette {
     muted: Color,
     accent: Color,
     panel: Color,
+    error: Color,
+    selection_bg: Color,
+    selection_fg: Color,
+    cursor: Color,
+    heading: Color,
+    code: Color,
+    logo_peach: Color,
+    logo_raspberry: Color,
+    logo_coral: Color,
 }
 fn colors(theme: usize) -> Palette {
-    match theme % 3 {
-        1 => Palette {
-            bg: Color::Rgb(245, 241, 229),
-            fg: Color::Rgb(47, 51, 47),
-            muted: Color::Rgb(109, 116, 106),
-            accent: Color::Rgb(0, 116, 101),
-            panel: Color::Rgb(228, 224, 211),
-        },
-        2 => Palette {
-            bg: Color::Reset,
-            fg: Color::Reset,
-            muted: Color::DarkGray,
-            accent: Color::Cyan,
-            panel: Color::Reset,
-        },
-        _ => Palette {
-            bg: Color::Rgb(18, 25, 29),
-            fg: Color::Rgb(220, 228, 227),
-            muted: Color::Rgb(111, 139, 143),
-            accent: Color::Rgb(116, 224, 180),
-            panel: Color::Rgb(29, 40, 45),
-        },
+    let peach = Color::Rgb(255, 194, 138);
+    let raspberry = Color::Rgb(199, 67, 89);
+    let coral = Color::Rgb(243, 106, 82);
+    let cream = Color::Rgb(252, 243, 232);
+    let mut p = Palette {
+        bg: Color::Rgb(33, 27, 30),
+        fg: cream,
+        muted: Color::Rgb(183, 156, 152),
+        accent: peach,
+        panel: Color::Rgb(48, 37, 42),
+        error: coral,
+        selection_bg: raspberry,
+        selection_fg: cream,
+        cursor: peach,
+        heading: peach,
+        code: coral,
+        logo_peach: peach,
+        logo_raspberry: raspberry,
+        logo_coral: coral,
+    };
+    match theme {
+        1 => {
+            p.bg = cream;
+            p.fg = Color::Rgb(53, 35, 42);
+            p.muted = Color::Rgb(120, 91, 96);
+            p.accent = raspberry;
+            p.panel = Color::Rgb(241, 225, 215);
+            p.error = Color::Rgb(164, 43, 63);
+            p.cursor = raspberry;
+            p.heading = raspberry;
+            p.code = Color::Rgb(166, 62, 41);
+        }
+        2 => {
+            p.bg = Color::Reset;
+            p.fg = Color::Reset;
+            p.muted = Color::DarkGray;
+            p.accent = Color::LightYellow;
+            p.panel = Color::Reset;
+            p.error = Color::LightRed;
+            p.selection_bg = Color::Red;
+            p.selection_fg = Color::White;
+            p.cursor = Color::LightYellow;
+            p.heading = Color::LightYellow;
+            p.code = Color::LightRed;
+            p.logo_peach = Color::LightYellow;
+            p.logo_raspberry = Color::Magenta;
+            p.logo_coral = Color::LightRed;
+        }
+        _ => {}
     }
+    p
+}
+fn style_input(input: &mut TextArea<'static>, p: Palette) {
+    input.set_style(Style::default().fg(p.fg).bg(p.panel));
+    input.set_cursor_line_style(Style::default().bg(p.panel));
+    input.set_cursor_style(Style::default().fg(p.bg).bg(p.cursor));
+    input.set_selection_style(Style::default().fg(p.selection_fg).bg(p.selection_bg));
 }
 fn panel(title: impl Into<Line<'static>>, p: Palette) -> Block<'static> {
     Block::default()
@@ -1521,7 +1567,7 @@ fn safe_text(value: &str) -> String {
         .collect()
 }
 fn draw(frame: &mut Frame<'_>, app: &mut App) {
-    let p = colors(app.settings.theme);
+    let p = app.settings.palette().expect("validated console colors");
     let area = frame.area();
     frame.render_widget(
         Block::default().style(Style::default().bg(p.bg).fg(p.fg)),
@@ -1579,7 +1625,11 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
         parts[1],
     );
     let body = if app.output {
-        Layout::vertical([Constraint::Percentage(68), Constraint::Percentage(32)]).split(parts[2])
+        Layout::vertical([
+            Constraint::Percentage(100 - app.settings.output_percent),
+            Constraint::Percentage(app.settings.output_percent),
+        ])
+        .split(parts[2])
     } else {
         Layout::vertical([Constraint::Percentage(100), Constraint::Length(0)]).split(parts[2])
     };
@@ -1588,7 +1638,11 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
         && (!app.tabs.is_empty() || app.tree_focus)
         && area.width >= 70
     {
-        Layout::horizontal([Constraint::Length(26), Constraint::Min(1)]).split(body[0])
+        Layout::horizontal([
+            Constraint::Length(app.settings.sidebar_width.min(area.width / 2)),
+            Constraint::Min(1),
+        ])
+        .split(body[0])
     } else {
         Layout::horizontal([Constraint::Length(0), Constraint::Min(1)]).split(body[0])
     };
@@ -1625,7 +1679,7 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
                     },
                     p,
                 ))
-                .highlight_style(Style::default().fg(p.bg).bg(p.accent)),
+                .highlight_style(Style::default().fg(p.selection_fg).bg(p.selection_bg)),
             columns[0],
             &mut state,
         );
@@ -1635,13 +1689,10 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
         tab.editor
             .set_cursor_line_style(Style::default().bg(p.panel));
         tab.editor
-            .set_cursor_style(Style::default().fg(p.bg).bg(p.accent));
+            .set_cursor_style(Style::default().fg(p.bg).bg(p.cursor));
         tab.editor
-            .set_selection_style(Style::default().fg(p.bg).bg(p.accent));
-        tab.editor.set_tab_length(match app.settings.indent {
-            2 | 4 | 8 => app.settings.indent,
-            _ => 4,
-        });
+            .set_selection_style(Style::default().fg(p.selection_fg).bg(p.selection_bg));
+        tab.editor.set_tab_length(app.settings.indent);
         if app.settings.numbers {
             tab.editor
                 .set_line_number_style(Style::default().fg(p.muted));
@@ -1692,9 +1743,9 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
                 .chars()
                 .map(|ch| {
                     let color = match ch {
-                        '/' => Color::Rgb(255, 194, 138),
-                        '+' => Color::Rgb(199, 67, 89),
-                        '#' => Color::Rgb(243, 106, 82),
+                        '/' => p.logo_peach,
+                        '+' => p.logo_raspberry,
+                        '#' => p.logo_coral,
                         _ => p.fg,
                     };
                     Span::styled(ch.to_string(), Style::default().fg(color).bold())
@@ -1765,7 +1816,7 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
     frame.render_widget(
         Paragraph::new(format!(" {}", safe_text(&app.message))).style(
             Style::default()
-                .fg(if app.failed { Color::LightRed } else { p.fg })
+                .fg(if app.failed { p.error } else { p.fg })
                 .bg(p.panel),
         ),
         parts[4],
@@ -1785,7 +1836,8 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
             rect,
         );
     }
-    if let Some(picker) = &app.picker {
+    if let Some(picker) = &mut app.picker {
+        style_input(&mut picker.query, p);
         let rect = popup(area, 86, 22);
         frame.render_widget(Clear, rect);
         frame.render_widget(panel(format!(" {} ", picker.title), p), rect);
@@ -1813,13 +1865,14 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
         let mut state = ListState::default().with_selected(Some(picker.selected));
         frame.render_stateful_widget(
             List::new(items)
-                .highlight_style(Style::default().bg(p.accent).fg(p.bg))
+                .highlight_style(Style::default().bg(p.selection_bg).fg(p.selection_fg))
                 .highlight_symbol("› "),
             rows[2],
             &mut state,
         );
     }
-    if let Some(prompt) = &app.prompt {
+    if let Some(prompt) = &mut app.prompt {
+        style_input(&mut prompt.input, p);
         let rect = popup(area, 90, 5);
         frame.render_widget(Clear, rect);
         frame.render_widget(panel(format!(" {} ", prompt.title), p), rect);
@@ -1851,7 +1904,7 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
     }
 }
 
-fn markdown_preview(source: &str) -> Text<'static> {
+fn markdown_preview(source: &str, p: Palette) -> Text<'static> {
     use pulldown_cmark::{Event as Md, Options, Parser, Tag, TagEnd};
     let mut lines = Vec::new();
     let mut spans = Vec::new();
@@ -1878,7 +1931,7 @@ fn markdown_preview(source: &str) -> Text<'static> {
                 Tag::BlockQuote(_) => spans.push(Span::raw(" │ ")),
                 Tag::Link { dest_url, .. } => spans.push(Span::styled(
                     format!("[{dest_url}] "),
-                    Style::default().fg(Color::Cyan),
+                    Style::default().fg(p.heading),
                 )),
                 Tag::Image { dest_url, .. } => {
                     spans.push(Span::raw(format!("[image: {dest_url}] ")))
@@ -1914,10 +1967,10 @@ fn markdown_preview(source: &str) -> Text<'static> {
                     style = style.italic();
                 }
                 if heading {
-                    style = style.fg(Color::Cyan);
+                    style = style.fg(p.heading);
                 }
                 if code {
-                    style = style.fg(Color::Green);
+                    style = style.fg(p.code);
                 }
                 for (i, part) in safe_text(&text).split('\n').enumerate() {
                     if i > 0 {
@@ -1956,8 +2009,17 @@ impl Drop for TerminalGuard {
 /// Entry point used by both full and console-only builds. No HTTP server is started.
 pub async fn run(args: &[String]) -> std::result::Result<(), Box<dyn std::error::Error>> {
     if args.iter().any(|a| a == "--help" || a == "-h") {
-        println!("{LOGO}\n\nUsage: codora console [folder] [file ...]\n\n{HELP}");
+        println!(
+            "{LOGO}\n\nUsage: codora console [folder] [file ...]\nConfig: WORKSPACE/.typoha/config/console.toml\nTemplate: codora console --print-config\nGuide: docs/console-config.md\n\n{HELP}"
+        );
         return Ok(());
+    }
+    if args == ["--print-config"] {
+        print!("{}", config::EXAMPLE);
+        return Ok(());
+    }
+    if let Some(arg) = args.iter().find(|arg| arg.starts_with('-')) {
+        return Err(format!("Unknown console option: {arg}").into());
     }
     if !io::stdin().is_terminal() || !io::stdout().is_terminal() {
         return Err("Console mode requires an interactive terminal (TTY). Use console --help for shortcuts.".into());
@@ -2003,7 +2065,7 @@ pub async fn run(args: &[String]) -> std::result::Result<(), Box<dyn std::error:
     let result: io::Result<()> = async {
         while !app.quit {
             terminal.draw(|f| draw(f, &mut app))?;
-            if event::poll(Duration::from_millis(80))? {
+            if event::poll(Duration::from_millis(app.settings.poll_interval_ms))? {
                 let result = match event::read()? {
                     Event::Key(key) if key.kind != KeyEventKind::Release => app.key(key).await,
                     Event::Paste(text) => {
@@ -2219,7 +2281,72 @@ mod tests {
         let prefs = crate::preferences::load(&app.workspace).unwrap();
         assert_eq!(prefs["theme"], "matrix");
         assert_eq!(prefs["fontSize"], 19);
-        assert_eq!(prefs["console"]["theme"], 2);
+        assert_eq!(config::load(&app.workspace).unwrap().0.theme, 2);
+        assert!(prefs.get("console").is_none());
+    }
+    #[test]
+    fn configured_draft_and_autosave_delays_control_persistence() {
+        let (dir, mut app) = app();
+        std::fs::write(dir.path().join("timing.md"), "old").unwrap();
+        app.open("timing.md", 0).unwrap();
+        app.current_mut().unwrap().editor.insert_str("new");
+        app.changed();
+        app.settings.autosave = true;
+        app.settings.draft_delay_ms = 2000;
+        app.settings.autosave_delay_ms = 4000;
+        app.edited = Instant::now() - Duration::from_millis(1000);
+        app.tick().unwrap();
+        assert!(app.workspace.drafts().unwrap().is_empty());
+        app.edited = Instant::now() - Duration::from_millis(3000);
+        app.tick().unwrap();
+        assert_eq!(app.workspace.drafts().unwrap().len(), 1);
+        assert_eq!(app.workspace.read("timing.md").unwrap().content, "old");
+        app.edited = Instant::now() - Duration::from_millis(5000);
+        app.tick().unwrap();
+        assert_eq!(app.workspace.read("timing.md").unwrap().content, "newold");
+        assert!(app.workspace.drafts().unwrap().is_empty());
+    }
+    #[test]
+    fn logo_palette_and_custom_colors_reach_rendered_widgets() {
+        let (_dir, mut app) = app();
+        let p = colors(0);
+        assert_eq!(p.accent, p.logo_peach);
+        assert_eq!(p.selection_bg, p.logo_raspberry);
+        assert_eq!(p.code, p.logo_coral);
+        app.settings
+            .colors
+            .insert("accent".into(), "#123456".into());
+        app.settings
+            .colors
+            .insert("logo_peach".into(), "#654321".into());
+        let mut terminal = Terminal::new(TestBackend::new(100, 40)).unwrap();
+        terminal.draw(|frame| draw(frame, &mut app)).unwrap();
+        let buffer = terminal.backend().buffer();
+        assert_eq!(buffer[(3, 0)].fg, Color::Rgb(18, 52, 86));
+        let slash = buffer
+            .content
+            .iter()
+            .skip(300)
+            .find(|cell| cell.symbol() == "/")
+            .unwrap();
+        assert_eq!(slash.fg, Color::Rgb(101, 67, 33));
+    }
+    #[tokio::test]
+    async fn custom_binding_executes_and_toml_options_apply_at_startup() {
+        let (dir, mut app) = app();
+        app.settings.bindings.insert("ctrl+j".into(), Command::New);
+        app.key(ctrl('j')).await.unwrap();
+        assert_eq!(app.tabs.len(), 1);
+        app.settings.sidebar = false;
+        app.settings.focus = true;
+        app.settings.indent = 3;
+        app.settings.hidden = true;
+        app.settings_changed().unwrap();
+        let loaded = App::new(Workspace::open(dir.path()).unwrap()).unwrap();
+        assert!(!loaded.sidebar);
+        assert!(loaded.focus);
+        assert_eq!(loaded.settings.indent, 3);
+        assert!(loaded.settings.hidden);
     }
     #[test]
     fn file_tree_sorts_siblings_and_hides_collapsed_descendants() {
@@ -2265,7 +2392,7 @@ mod tests {
     #[test]
     fn preview_preserves_unsupported_source_and_sanitizes_terminal_controls() {
         let input = "# Heading\n\n- [x] task\n\n```mermaid\ngraph TD; A-->B;\n```\n\n$x$\n";
-        let rendered = markdown_preview(input)
+        let rendered = markdown_preview(input, colors(0))
             .lines
             .iter()
             .flat_map(|l| l.spans.iter().map(|s| s.content.as_ref()))

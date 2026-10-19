@@ -131,3 +131,9 @@ by default; `--no-default-features` builds a terminal-only executable without
 web assets or HTTP dependencies. run.sh keeps this build in target/console so
 it cannot replace the desktop backend. Console preferences use a separate nested
 key in existing workspace settings. See console.md for key bindings and limits.
+
+Console settings are loaded and validated in `src/console_config.rs` from the
+workspace metadata directory. Extend its typed Settings, validation, template
+`console.example.toml` and `docs/console-config.md` together. UI rendering consumes
+validated options; document I/O remains in Workspace. Palette commands atomically
+save TOML after checking that the loaded source has not changed on disk.

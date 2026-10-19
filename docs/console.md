@@ -79,8 +79,12 @@ killed before the debounce expires can lose the latest keystrokes.
 
 The command palette also includes heading navigation, Markdown insertions and
 formatting, hidden files, indentation width, three console palettes (dark, light,
-terminal colors), line numbers and focus mode. Console settings live under the
-`console` key in workspace preferences without replacing desktop settings.
+terminal colors), line numbers and focus mode. Console settings live in `.typoha/config/console.toml` in each workspace. The file
+is created automatically and migrates the old JSON `console` namespace on first use.
+See the [configuration guide (Russian)](console-config.md) and
+[complete example](../console.example.toml) for colors, editor options, layout,
+timing and additional command shortcuts. `console --print-config` prints the template.
+The default palette follows the peach, raspberry and coral ASCII logo.
 
 Python uses the existing `Runner`: F5 saves first, `.venv` is preferred, stdout,
 stderr, status and exit code appear below. **Send input to Python** and **Stop

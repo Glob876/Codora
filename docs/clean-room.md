@@ -178,3 +178,13 @@ SVG mark instead of a lettered wordmark. Original geometry comes from
 web/src/assets/codora-mono.svg; the three face colors match desktop/icon.svg.
 Fixed-width padding preserves its proportions when centering each terminal line.
 A compact version is used in smaller terminals. No outside artwork was used.
+
+## Console palette and TOML configuration (2026-10-19)
+
+Original implementation based on the user request and this repository’s own
+ASCII logo and Codora SVG branding. Peach #FFC28A, raspberry #C74359, coral #F36A52
+and cream #FCF3E8 come from docs/branding/codora-dark.svg. No third-party editor
+source or assets were consulted. TOML parsing uses pinned toml 0.8.23
+(MIT OR Apache-2.0); transitive versions and notices are retained in the lockfile
+and dependency inventory. Console configuration is independent of desktop JSON
+preferences, with one-time migration of the existing console namespace.

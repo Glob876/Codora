@@ -6,6 +6,8 @@ if [[ "${1:-}" == "console" || "${1:-}" == "--console" ]]; then
   shift
   if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
     echo 'Usage: ./run.sh console [folder] [file ...]'
+    echo 'Config: WORKSPACE/.typoha/config/console.toml | Template: ./run.sh console --print-config'
+    echo 'Guide: docs/console-config.md'
     echo 'Ctrl+S save | Ctrl+P files | Ctrl+E commands | Ctrl+Q quit | F1 help'
     exit 0
   fi

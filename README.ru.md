@@ -181,3 +181,5 @@ npm ci --prefix web
 Авторство указано в [COPYRIGHT](COPYRIGHT), переход с MIT описан в [документе о лицензировании](docs/licensing.md). У зависимостей собственные лицензии: [полные уведомления](THIRD_PARTY_NOTICES.md) и [машиночитаемый список](docs/dependencies.json).
 
 Исходники и история коммитов доступны в [репозитории GitHub](https://github.com/Glob876/Codora). Правила разработки находятся в [AGENTS.md](AGENTS.md).
+
+Консоль: [настройка TOML](docs/console-config.md), [пример конфига](console.example.toml).

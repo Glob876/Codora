@@ -470,6 +470,18 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "hashbrown",
+    "version": "0.17.1",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/rust-lang/hashbrown",
+    "notices": [
+      "docs/licenses/cargo-hashbrown-0.17.1-LICENSE-APACHE",
+      "docs/licenses/cargo-hashbrown-0.17.1-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "heck",
     "version": "0.5.0",
     "license": "MIT OR Apache-2.0",
@@ -593,6 +605,18 @@
     "source": "https://github.com/TedDriggs/ident_case",
     "notices": [
       "docs/licenses/cargo-ident_case-1.0.1-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "indexmap",
+    "version": "2.14.0",
+    "license": "Apache-2.0 OR MIT",
+    "development_only": false,
+    "source": "https://github.com/indexmap-rs/indexmap",
+    "notices": [
+      "docs/licenses/cargo-indexmap-2.14.0-LICENSE-APACHE",
+      "docs/licenses/cargo-indexmap-2.14.0-LICENSE-MIT"
     ]
   },
   {
@@ -1145,6 +1169,18 @@
   },
   {
     "ecosystem": "cargo",
+    "name": "serde_spanned",
+    "version": "0.6.9",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/toml-rs/toml",
+    "notices": [
+      "docs/licenses/cargo-serde_spanned-0.6.9-LICENSE-APACHE",
+      "docs/licenses/cargo-serde_spanned-0.6.9-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
     "name": "serde_urlencoded",
     "version": "0.7.1",
     "license": "MIT/Apache-2.0",
@@ -1362,6 +1398,54 @@
     "source": "https://github.com/tokio-rs/tokio",
     "notices": [
       "docs/licenses/cargo-tokio-macros-2.7.2-LICENSE"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "toml",
+    "version": "0.8.23",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/toml-rs/toml",
+    "notices": [
+      "docs/licenses/cargo-toml-0.8.23-LICENSE-APACHE",
+      "docs/licenses/cargo-toml-0.8.23-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "toml_datetime",
+    "version": "0.6.11",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/toml-rs/toml",
+    "notices": [
+      "docs/licenses/cargo-toml_datetime-0.6.11-LICENSE-APACHE",
+      "docs/licenses/cargo-toml_datetime-0.6.11-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "toml_edit",
+    "version": "0.22.27",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/toml-rs/toml",
+    "notices": [
+      "docs/licenses/cargo-toml_edit-0.22.27-LICENSE-APACHE",
+      "docs/licenses/cargo-toml_edit-0.22.27-LICENSE-MIT"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "toml_write",
+    "version": "0.1.2",
+    "license": "MIT OR Apache-2.0",
+    "development_only": false,
+    "source": "https://github.com/toml-rs/toml",
+    "notices": [
+      "docs/licenses/cargo-toml_write-0.1.2-LICENSE-APACHE",
+      "docs/licenses/cargo-toml_write-0.1.2-LICENSE-MIT"
     ]
   },
   {
@@ -1807,6 +1891,17 @@
     "notices": [
       "docs/licenses/cargo-windows_x86_64_msvc-0.52.6-license-apache-2.0",
       "docs/licenses/cargo-windows_x86_64_msvc-0.52.6-license-mit"
+    ]
+  },
+  {
+    "ecosystem": "cargo",
+    "name": "winnow",
+    "version": "0.7.13",
+    "license": "MIT",
+    "development_only": false,
+    "source": "https://github.com/winnow-rs/winnow",
+    "notices": [
+      "docs/licenses/cargo-winnow-0.7.13-LICENSE-MIT"
     ]
   },
   {

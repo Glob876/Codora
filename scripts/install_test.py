@@ -168,7 +168,7 @@ class InstallationTests(unittest.TestCase):
         shutil.copy2(SCRIPT, source / 'scripts/install.py')
         shutil.copy2(SCRIPT.with_name('package-desktop.sh'), source / 'scripts/package-desktop.sh')
         shutil.copy2(self.package / 'install.sh', source / 'install.sh')
-        for name in ['LICENSE', 'COPYRIGHT', 'README.md', 'README.ru.md', 'THIRD_PARTY_NOTICES.md']:
+        for name in ['LICENSE', 'COPYRIGHT', 'README.md', 'README.ru.md', 'THIRD_PARTY_NOTICES.md', 'console.example.toml']:
             (source / name).write_text('fixture')
         (source / 'docs').mkdir()
         (source / 'docs/keep').write_text('notices')
@@ -183,7 +183,7 @@ class InstallationTests(unittest.TestCase):
         subprocess.run(['bash', str(source / 'scripts/package-desktop.sh')], check=True, capture_output=True)
         with tarfile.open(source / 'artifacts' / (name + '-desktop.tar.gz')) as archive:
             names = archive.getnames()
-        for required in ['install.sh', 'scripts/install.py', 'codora', 'resources/app/bin/codora-core', 'source.tar.gz', 'docs/keep']:
+        for required in ['install.sh', 'scripts/install.py', 'codora', 'resources/app/bin/codora-core', 'source.tar.gz', 'docs/keep', 'console.example.toml']:
             self.assertIn(name + '-desktop/' + required, names)
         payload = source / 'artifacts' / (name + '-desktop')
         with patch.object(installer, 'SOURCE', payload):

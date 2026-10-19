@@ -56,6 +56,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | cargo | getopts 0.2.24 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-getopts-0.2.24-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-getopts-0.2.24-LICENSE-MIT) |
 | cargo | getrandom 0.4.3 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-getrandom-0.4.3-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-getrandom-0.4.3-LICENSE-MIT) |
 | cargo | hashbrown 0.15.5 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-hashbrown-0.15.5-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-hashbrown-0.15.5-LICENSE-MIT) |
+| cargo | hashbrown 0.17.1 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-hashbrown-0.17.1-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-hashbrown-0.17.1-LICENSE-MIT) |
 | cargo | heck 0.5.0 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-heck-0.5.0-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-heck-0.5.0-LICENSE-MIT) |
 | cargo | hex 0.4.3 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-hex-0.4.3-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-hex-0.4.3-LICENSE-MIT) |
 | cargo | http 1.5.0 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-http-1.5.0-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-http-1.5.0-LICENSE-MIT) |
@@ -67,6 +68,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | cargo | hyper 1.12.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-hyper-1.12.0-LICENSE) |
 | cargo | hyper-util 0.1.21 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-hyper-util-0.1.21-LICENSE) |
 | cargo | ident_case 1.0.1 | MIT/Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-ident_case-1.0.1-LICENSE) |
+| cargo | indexmap 2.14.0 | Apache-2.0 OR MIT | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-indexmap-2.14.0-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-indexmap-2.14.0-LICENSE-MIT) |
 | cargo | indoc 2.0.8 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-indoc-2.0.8-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-indoc-2.0.8-LICENSE-MIT) |
 | cargo | instability 0.3.14 | MIT | runtime/platform or Rust test dependency | [LICENSE.md](docs/licenses/cargo-instability-0.3.14-LICENSE.md) |
 | cargo | itertools 0.13.0 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-itertools-0.13.0-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-itertools-0.13.0-LICENSE-MIT) |
@@ -113,6 +115,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | cargo | serde_derive 1.0.229 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-serde_derive-1.0.229-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-serde_derive-1.0.229-LICENSE-MIT) |
 | cargo | serde_json 1.0.154 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-serde_json-1.0.154-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-serde_json-1.0.154-LICENSE-MIT) |
 | cargo | serde_path_to_error 0.1.20 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-serde_path_to_error-0.1.20-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-serde_path_to_error-0.1.20-LICENSE-MIT) |
+| cargo | serde_spanned 0.6.9 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-serde_spanned-0.6.9-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-serde_spanned-0.6.9-LICENSE-MIT) |
 | cargo | serde_urlencoded 0.7.1 | MIT/Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-serde_urlencoded-0.7.1-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-serde_urlencoded-0.7.1-LICENSE-MIT) |
 | cargo | sha2 0.10.9 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-sha2-0.10.9-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-sha2-0.10.9-LICENSE-MIT) |
 | cargo | sha2 0.11.1 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-sha2-0.11.1-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-sha2-0.11.1-LICENSE-MIT) |
@@ -132,6 +135,10 @@ License texts are preserved without modification under docs/licenses/. Developme
 | cargo | tempfile 3.27.0 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-tempfile-3.27.0-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-tempfile-3.27.0-LICENSE-MIT) |
 | cargo | tokio 1.53.3 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-tokio-1.53.3-LICENSE) |
 | cargo | tokio-macros 2.7.2 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-tokio-macros-2.7.2-LICENSE) |
+| cargo | toml 0.8.23 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-toml-0.8.23-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-toml-0.8.23-LICENSE-MIT) |
+| cargo | toml_datetime 0.6.11 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-toml_datetime-0.6.11-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-toml_datetime-0.6.11-LICENSE-MIT) |
+| cargo | toml_edit 0.22.27 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-toml_edit-0.22.27-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-toml_edit-0.22.27-LICENSE-MIT) |
+| cargo | toml_write 0.1.2 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [LICENSE-APACHE](docs/licenses/cargo-toml_write-0.1.2-LICENSE-APACHE), [LICENSE-MIT](docs/licenses/cargo-toml_write-0.1.2-LICENSE-MIT) |
 | cargo | tower 0.5.3 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-tower-0.5.3-LICENSE) |
 | cargo | tower-layer 0.3.3 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-tower-layer-0.3.3-LICENSE) |
 | cargo | tower-service 0.3.3 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/cargo-tower-service-0.3.3-LICENSE) |
@@ -169,6 +176,7 @@ License texts are preserved without modification under docs/licenses/. Developme
 | cargo | windows_x86_64_gnu 0.52.6 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [license-apache-2.0](docs/licenses/cargo-windows_x86_64_gnu-0.52.6-license-apache-2.0), [license-mit](docs/licenses/cargo-windows_x86_64_gnu-0.52.6-license-mit) |
 | cargo | windows_x86_64_gnullvm 0.52.6 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [license-apache-2.0](docs/licenses/cargo-windows_x86_64_gnullvm-0.52.6-license-apache-2.0), [license-mit](docs/licenses/cargo-windows_x86_64_gnullvm-0.52.6-license-mit) |
 | cargo | windows_x86_64_msvc 0.52.6 | MIT OR Apache-2.0 | runtime/platform or Rust test dependency | [license-apache-2.0](docs/licenses/cargo-windows_x86_64_msvc-0.52.6-license-apache-2.0), [license-mit](docs/licenses/cargo-windows_x86_64_msvc-0.52.6-license-mit) |
+| cargo | winnow 0.7.13 | MIT | runtime/platform or Rust test dependency | [LICENSE-MIT](docs/licenses/cargo-winnow-0.7.13-LICENSE-MIT) |
 | cargo | zmij 1.0.23 | MIT | runtime/platform or Rust test dependency | [LICENSE-MIT](docs/licenses/cargo-zmij-1.0.23-LICENSE-MIT) |
 | electron-runtime | electron 44.9.0 | MIT AND LicenseRef-Chromium-ThirdParty | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/electron-runtime-electron-44.9.0-LICENSE), [LICENSES.chromium.html](docs/licenses/electron-runtime-electron-44.9.0-LICENSES.chromium.html) |
 | npm | @antfu/install-pkg 2.1.0 | MIT | runtime/platform or Rust test dependency | [LICENSE](docs/licenses/npm-_antfu_install-pkg-2.1.0-LICENSE) |

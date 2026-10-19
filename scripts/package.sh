@@ -14,9 +14,9 @@ fi
 package_name="codora-0.1.0-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
 package_dir="artifacts/$package_name"
 mkdir -p "$package_dir/docs"
-cp target/release/codora LICENSE COPYRIGHT README.md README.ru.md AGENTS.md THIRD_PARTY_NOTICES.md "$package_dir/"
+cp console.example.toml target/release/codora LICENSE COPYRIGHT README.md README.ru.md AGENTS.md THIRD_PARTY_NOTICES.md "$package_dir/"
 cp -R docs/licenses docs/screenshots docs/branding docs/dictionary-notices "$package_dir/docs/"
-cp docs/parity.md docs/clean-room.md docs/architecture.md docs/verification.md docs/dependencies.json docs/licensing.md docs/legacy-MIT.txt "$package_dir/docs/"
+cp docs/console.md docs/console-config.md docs/parity.md docs/clean-room.md docs/architecture.md docs/verification.md docs/dependencies.json docs/licensing.md docs/legacy-MIT.txt "$package_dir/docs/"
 # Ship committed sample documents only, never local drafts or private notes.
 git archive HEAD examples | tar -x -C "$package_dir"
 source_dir="$(mktemp -d "$PWD/artifacts/codora-source.XXXXXX")"
