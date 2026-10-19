@@ -22,11 +22,28 @@ use std::{
 };
 use tui_textarea::{CursorMove, TextArea};
 
-pub const LOGO: &str = r"   ______          __
-  / ____/___  ____/ /___  _________ _
- / /   / __ \/ __  / __ \/ ___/ __ `/
-/ /___/ /_/ / /_/ / /_/ / /  / /_/ /
-\____/\____/\__,_/\____/_/   \__,_/";
+// ASCII projection of the original folded-ribbon mark in web/src/assets/codora-mono.svg.
+pub const LOGO: &str = r"                    //////////
+              //////////////////
+        ///////////////////
+    +////////////////
+    +++++//////
+   ++++++++
+   +++++++               ###
+  +++++++             #########
+  +++++###              #########
+   +##########         ###########
+      ##########################
+          #################
+              #######";
+const SMALL_LOGO: &str = r"           ///////
+     ////////////
+  +++/////
+  ++++          #
+ ++++         #####
+  #######     #######
+      ###########";
+
 const HELP: &str = "CODORA • CONSOLE\n\nType immediately — no modes. Ctrl+E opens every command; type to filter.\n\nCtrl+N  New tab          Ctrl+P / Ctrl+O  Open file\nCtrl+S  Save             Alt+S            Save as\nCtrl+W  Close tab        Ctrl+Q           Quit\nAlt+Left / Alt+Right     Previous / next tab\nCtrl+F  Find (literal)   F3 / Shift+F3    Next / previous match\nCtrl+R  Replace all      Ctrl+G           Go to line\nCtrl+Shift+F             Workspace search (or use command palette)\nCtrl+Z / Ctrl+Y          Undo / redo\nCtrl+A                  Select all\nShift+arrows            Select text\nCtrl+C / Ctrl+X / Ctrl+V Copy / cut / paste (editor clipboard)\nCtrl+Left / Ctrl+Right   Move by word\nTab / Shift+Tab          Indent / unindent\nCtrl+Space               Complete word from open document\nF2                      File list / sidebar focus\nF4                      Markdown reading preview\nF5                      Save and run Python\nF6                      Python output panel\nF8                      Focus mode\nF1                      This help\nEsc                     Cancel / close panel\n\nDialogs: type to filter, Up/Down, PageUp/PageDown, Enter to choose.\nTerminal paste uses bracketed paste; use your terminal's paste shortcut.\nCopy/cut/paste share an internal clipboard across tabs.\n\nCommand palette also provides:\nWorkspace switching, hidden files, regex folder search, outline, rename,\nnew folder, duplicate, recoverable trash, history and draft recovery,\nMarkdown formatting, Pandoc import/export, themes, line numbers,\nindent width, autosave, Python stdin and Stop.\n\nSafety:\nSaves check disk revisions and retain previous versions. Conflicts never\noverwrite the disk. Dirty tabs write recoverable .typoha/drafts entries.\nClosing dirty tabs asks Save / Discard / Cancel. Errors appear below.\nPython runs with your user permissions, just as in the desktop editor.\n\nTerminal-specific limits:\nPreview is styled text: TeX, Mermaid, images and HTML remain source.\nPDF/PNG, printing, spellcheck, graphical colors/transparency, project LSP\nand desktop extensions are unavailable here. Pandoc is an external tool.\n";
 
 type Result<T> = core::Result<T>;
@@ -1662,18 +1679,37 @@ fn draw(frame: &mut Frame<'_>, app: &mut App) {
             parts[3],
         );
     } else {
-        let logo = if columns[1].width >= 44 {
+        let logo = if columns[1].width >= 44 && columns[1].height >= 27 {
             LOGO
         } else {
-            "< CODORA >"
+            SMALL_LOGO
         };
-        let text = format!(
-            "\n{logo}\n\nYour files. Your terminal.\n\nCtrl+N   Create a document\nCtrl+P   Open a file\nCtrl+E   Command palette\nF1       Keyboard guide\n\nMarkdown · Code · Local Python\n\nNo account. No telemetry. Just your workspace."
-        );
+        let width = logo.lines().map(str::len).max().unwrap_or(0);
+        let mut lines = vec![Line::default()];
+        for row in logo.lines() {
+            let padded = format!("{row:width$}");
+            let spans = padded
+                .chars()
+                .map(|ch| {
+                    let color = match ch {
+                        '/' => Color::Rgb(255, 194, 138),
+                        '+' => Color::Rgb(199, 67, 89),
+                        '#' => Color::Rgb(243, 106, 82),
+                        _ => p.fg,
+                    };
+                    Span::styled(ch.to_string(), Style::default().fg(color).bold())
+                })
+                .collect::<Vec<_>>();
+            lines.push(Line::from(spans));
+        }
+        lines.extend(Text::raw("\nYour files. Your terminal.\n\nCtrl+N   Create a document\nCtrl+P   Open a file\nCtrl+E   Command palette\nF1       Keyboard guide\n\nMarkdown · Code · Local Python").lines);
+        if columns[1].height >= 27 {
+            lines.extend(Text::raw("\nNo account. No telemetry. Just your workspace.").lines);
+        }
         frame.render_widget(
-            Paragraph::new(text)
+            Paragraph::new(Text::from(lines))
                 .alignment(Alignment::Center)
-                .style(Style::default().fg(p.accent))
+                .style(Style::default().fg(p.fg))
                 .wrap(Wrap { trim: false }),
             columns[1],
         );
@@ -2216,7 +2252,7 @@ mod tests {
                     .map(|c| c.symbol())
                     .collect::<String>();
                 assert!(contents.contains("Command palette"));
-                assert!(contents.contains("/ ____/"));
+                assert!(contents.contains("////////////////"));
             }
             app.palette();
             terminal.draw(|f| draw(f, &mut app)).unwrap();

@@ -170,3 +170,11 @@ used: Ratatui 0.29.0 (MIT), Crossterm 0.28.1 (MIT), tui-textarea 0.7.0 (MIT),
 pulldown-cmark 0.13.0 (MIT). Exact transitive versions and notices are recorded
 in Cargo.lock and the dependency inventory. All existing file safety remains
 in the shared Rust core. Graphical parity is explicitly limited in console.md.
+
+### ASCII mark refinement (2026-10-19)
+
+The console welcome now shows an ASCII projection of the project's own folded-ribbon
+SVG mark instead of a lettered wordmark. Original geometry comes from
+web/src/assets/codora-mono.svg; the three face colors match desktop/icon.svg.
+Fixed-width padding preserves its proportions when centering each terminal line.
+A compact version is used in smaller terminals. No outside artwork was used.

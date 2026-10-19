@@ -46,7 +46,7 @@ with tempfile.TemporaryDirectory(prefix='codora-console-smoke-') as root:
 
     try:
         wait_for(lambda: b'Command palette' in output, 'welcome screen missing')
-        assert b'/ ____/' in output, 'ASCII logo missing'
+        assert b'////////////////' in output, 'ASCII logo missing'
         send(b'\x0e')  # Ctrl+N
         wait_for(lambda: b'Untitled' in output, 'new tab missing')
         send(b'\x1b[200~' + 'print("Привет")\n'.encode() + b'\x1b[201~')

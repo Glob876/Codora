@@ -20,7 +20,7 @@ the installed launcher accepts `codora console …` and dispatches directly to t
 Rust binary. A graphical terminal with UTF-8 and ANSI color support is recommended;
 SSH and ordinary interactive TTYs work too. Console UI text is currently English.
 
-The original ASCII Codora wordmark appears on the welcome screen. There are no
+The ASCII version of Codora’s folded-ribbon logo appears on the welcome screen. There are no
 editing modes: type immediately, use Shift+arrows to select, and open the command
 palette with Ctrl+E. The palette lists all implemented commands and filters as you
 type. It provides alternatives for shortcuts intercepted by your terminal.
